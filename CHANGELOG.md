@@ -2,6 +2,18 @@
 
 Todos los cambios relevantes del proyecto se documentarán en este archivo.
 
+## [Sin publicar] · Foros y mensajes — 2026-10-06
+
+- Catálogo público de Plaza de Armas, Cementerio, Estación y Alameda.
+- Seeder repetible que conserva cambios y no duplica foros.
+- Lectura pública de mensajes visibles con paginación.
+- Publicación por cuentas autenticadas y activas.
+- Autor asignado por servidor; respuesta sin contactos privados.
+- Retirada lógica por autor y moderación por administrador activo.
+- Middleware reutilizable EnsureActiveUser.
+- Validación completa reportada: 66 pruebas aprobadas, 247 verificaciones.
+- Pendiente: Flutter, mapa y destacados de vigencia limitada.
+
 ## [Sin publicar] - 2026-10-06
 
 ### Documentado

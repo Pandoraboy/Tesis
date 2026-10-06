@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['username', 'email', 'phone', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -32,4 +33,8 @@ class User extends Authenticatable
             'active' => 'boolean',
         ];
     }
+    public function mensajes(): HasMany
+{
+    return $this->hasMany(Mensaje::class, 'user_id');
+}
 }
