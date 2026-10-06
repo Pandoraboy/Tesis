@@ -6,10 +6,13 @@ use App\Http\Controllers\Api\ForoController;
 use App\Http\Controllers\Api\HorarioLugarController;
 use App\Http\Controllers\Api\LugarController;
 use App\Http\Controllers\Api\MensajeController;
+use App\Http\Controllers\Api\DestacadoController;
+use App\Http\Controllers\Api\Admin\DestacadoController as AdminDestacadoController;
 use App\Http\Middleware\EnsureActiveAdmin;
 use App\Http\Middleware\EnsureActiveUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 // Ruta existente de identidad.
 Route::get('/user', function (Request $request) {
@@ -51,11 +54,12 @@ Route::prefix('v1')->group(function () {
         [MensajeController::class, 'index']
     );
 
-    // Participación: requiere una cuenta autenticada y activa.
+        // Participación: requiere una cuenta autenticada y activa.
     Route::middleware([
         'auth:sanctum',
         EnsureActiveUser::class,
     ])->group(function () {
+        // Publicación de mensajes.
         Route::post(
             'foros/{foro}/mensajes',
             [MensajeController::class, 'store']
@@ -66,6 +70,17 @@ Route::prefix('v1')->group(function () {
             'mensajes/{mensaje}',
             [MensajeController::class, 'destroy']
         );
+
+        // Solicitud y consulta de destacados.
+        Route::post(
+            'mensajes/{mensaje}/destacado',
+            [DestacadoController::class, 'store']
+        )->middleware('throttle:5,1');
+
+        Route::get(
+            'mensajes/{mensaje}/destacado',
+            [DestacadoController::class, 'show']
+        );
     });
 
     // Administración: requiere una cuenta administradora activa.
@@ -73,7 +88,17 @@ Route::prefix('v1')->group(function () {
         'auth:sanctum',
         EnsureActiveAdmin::class,
     ])->group(function () {
-        // Categorías.
+        // Revisión administrativa de destacados.
+        Route::get(
+            'admin/destacados',
+            [AdminDestacadoController::class, 'index']
+        );
+
+        Route::patch(
+            'admin/destacados/{destacado}',
+            [AdminDestacadoController::class, 'update']
+        );
+    // Categorías.
         Route::post(
             'categorias',
             [CategoriaLugarController::class, 'store']

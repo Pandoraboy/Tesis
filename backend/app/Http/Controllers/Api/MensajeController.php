@@ -20,9 +20,17 @@ class MensajeController extends Controller
             'per_page' => ['sometimes', 'integer', 'between:1,100'],
         ]);
 
+        $instante = now('UTC');
+
         $resultado = $foro->mensajes()
             ->with('autor:id,username')
             ->where('activo', true)
+            ->withExists([
+                'destacado as es_destacado' => function ($query) use ($instante) {
+                    $query->vigente($instante);
+                },
+            ])
+            ->orderByDesc('es_destacado')
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate($filtros['per_page'] ?? 20);
@@ -84,6 +92,7 @@ class MensajeController extends Controller
             'id' => $mensaje->id,
             'foro_id' => $mensaje->foro_id,
             'contenido' => $mensaje->contenido,
+            'es_destacado' => (bool) ($mensaje->es_destacado ?? false),
             'autor' => [
                 'id' => $mensaje->autor->id,
                 'username' => $mensaje->autor->username,
