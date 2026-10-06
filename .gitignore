@@ -18,3 +18,59 @@ mobile/**/*.jks
 mobile/**/*.keystore
 .DS_Store
 Thumbs.db
+
+# Credenciales y configuración local
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+# Dependencias PHP y JavaScript
+**/vendor/
+**/node_modules/
+
+# Laravel: archivos generados
+/backend/public/build/
+/backend/public/hot
+/backend/public/storage
+/backend/bootstrap/cache/*.php
+/backend/storage/*.key
+/backend/storage/logs/*.log
+/backend/storage/framework/cache/data/**
+/backend/storage/framework/sessions/**
+/backend/storage/framework/views/*.php
+
+# Bases SQLite locales
+**/*.sqlite
+**/*.sqlite-*
+**/*.sqlite3
+**/*.sqlite3-*
+
+# Caché y cobertura de pruebas
+**/.phpunit.cache/
+**/.phpunit.result.cache
+**/coverage/
+
+# Flutter y Dart
+**/.dart_tool/
+**/.pub-cache/
+**/.pub/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/flutter_export_environment.sh
+
+# Configuración Android local y claves de firma
+**/.gradle/
+**/local.properties
+**/key.properties
+**/*.jks
+**/*.keystore
+**/captures/
+
+# Archivos del sistema y del editor
+**/.DS_Store
+**/Thumbs.db
+**/desktop.ini
+**/.idea/
+**/*.iml
