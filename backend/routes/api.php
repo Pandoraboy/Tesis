@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\LugarController;
 use App\Http\Controllers\Api\MensajeController;
 use App\Http\Controllers\Api\DestacadoController;
 use App\Http\Controllers\Api\Admin\DestacadoController as AdminDestacadoController;
+use App\Http\Controllers\Api\Admin\UsuarioController;
 use App\Http\Middleware\EnsureActiveAdmin;
 use App\Http\Middleware\EnsureActiveUser;
 use Illuminate\Http\Request;
@@ -88,6 +89,16 @@ Route::prefix('v1')->group(function () {
         'auth:sanctum',
         EnsureActiveAdmin::class,
     ])->group(function () {
+        // Administración de cuentas.
+        Route::get(
+            'admin/usuarios',
+            [UsuarioController::class, 'index']
+        );
+
+        Route::patch(
+            'admin/usuarios/{usuario}',
+            [UsuarioController::class, 'update']
+        );
         // Revisión administrativa de destacados.
         Route::get(
             'admin/destacados',

@@ -1,6 +1,14 @@
 # Registro de cambios
 
 Todos los cambios relevantes del proyecto se documentarán en este archivo.
+### Administración de usuarios
+- Listado con búsqueda, filtros y paginación.
+- Activación y desactivación de usuarios comunes.
+- Revocación de tokens al desactivar.
+- Cuentas administradoras protegidas de modificación.
+- Cambios de rol, contacto y contraseña rechazados.
+- Respuestas sin contactos privados ni credenciales.
+
 ### Destacados
 - Solicitud por autor activo y consulta por autor o administrador.
 - Aprobación, rechazo y cancelación administrativos.
