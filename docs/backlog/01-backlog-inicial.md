@@ -1,54 +1,39 @@
 # Backlog por entregas verificables
 
-Actualizado 2026-10-06. Un incremento en curso; el calendario antiguo no determina avance. Backend validado no equivale a entrega completa si falta su pantalla.
+Actualizado 2026-10-06, código revisado 09763d2. Un incremento en curso; avance por funcionalidad comprobada, sin calendario antiguo.
 
 | Entrega | Estado real | Restante |
 |---|---|---|
-| E0 · Workspace y alcance | Documentación y decisiones de base disponibles | Mantenerlas alineadas con producto |
-| E1 · Categorías de extremo a extremo | API, permisos admin y pruebas implementados | Pantallas Flutter y evidencia integrada |
-| E2 · Lugares y horarios | API de lugares, búsqueda, filtro, paginación, tramos y estado horario implementados | Lista/detalle Flutter y datos demo |
-| E3 · Mapa Android | Flujo acordado | Proveedor, mapa, GPS y marcadores compartiendo capa de datos |
-| E4 · Cuentas | Registro/login/me/logout Sanctum y pruebas implementados | Flutter, recuperación y gestión de cuentas |
-| E5 · Foros | Nombres confirmados | Coordenadas, API, escritura, moderación y pantallas |
-| E6 · Destacados | Alcance administrativo acordado | Solicitudes, aprobación, vencimiento y pruebas |
-| E7 · Piloto y tesis | Pendiente | Despliegue, seguridad, respaldo, mediciones y evaluación |
+| Workspace | Alcance y convenciones documentados | Mantener continuidad |
+| Categorías | API y pruebas | Selector/gestión Flutter |
+| Lugares y horarios | API, DEMO, lista/detalle Android y estado/horarios | Buscador/filtro visual, pruebas detalle, gestión |
+| Mapa | Coordenadas de negocios y flujo acordado | Proveedor, GPS/proximidad, coordenadas foros, mapa/tarjetas |
+| Cuentas | Sanctum, permisos y administración de estado | Sesión/login/registro Flutter y recuperación |
+| Foros/mensajes | API, lectura, publicación, retirada y moderación | Pantallas Android |
+| Destacados | Solicitud/revisión/prioridad por vigencia | Pantallas de usuario/admin; pagos fuera del MVP |
+| Piloto/tesis | Pendiente | HTTPS, release, respaldo, datos reales y evaluación |
 
-## Incremento en curso: lista pública Flutter de lugares
+## En curso: búsqueda y categoría en Flutter
 
-- [ ] Confirmar corrección de UserFactory, DatabaseSeeder y .env.example.
-- [ ] Confirmar Flutter/Android SDK/dispositivo con flutter doctor.
-- [ ] Inicializar mobile preservando documentación.
-- [ ] Configurar una URL de API adecuada al dispositivo.
-- [ ] Crear capa de datos modular y reutilizable para lista y mapa.
-- [ ] Mostrar cargando/datos/vacío/error y reintento.
-- [ ] Mostrar categoría y estado abierto/cerrado/sin_horarios.
-- [ ] Abrir detalle con horarios.
-- [ ] Integrar búsqueda, filtro por categoría y paginación.
-- [ ] Verificar en Android y registrar evidencia.
+- [ ] Modelo y consulta de categorías activas.
+- [ ] Buscador y selector reutilizando parámetros existentes.
+- [ ] Cambios de filtro vuelven a página 1.
+- [ ] Actualización/paginación conservan filtros.
+- [ ] Vacío, error, reintento y combinación de filtros verificados.
+- [ ] Análisis/tests y comprobación en Android.
 
-## Backend comprobado
+## Cerrado en la sesión
 
-- [x] Migraciones y base PostgreSQL exclusiva de pruebas.
-- [x] Categorías: lectura activa, creación, edición y desactivación admin.
-- [x] Registro con contacto, credenciales, roles protegidos y login de cuenta activa.
-- [x] Token Sanctum, identidad y revocación por logout.
-- [x] Lugares: CRUD administrativo, búsqueda, filtro, paginación y ocultación de inactivos.
-- [x] Horarios: múltiples tramos, validaciones, nocturnos y superposiciones.
-- [x] Estado semanal en America/Santiago, límites de apertura/cierre y domingo→lunes.
-- [x] JSON de listado/detalle con horarios y estado.
+- [x] PostgreSQL, autenticación y CRUD de categorías/lugares/horarios.
+- [x] Estado horario semanal y relaciones en listado/detalle.
+- [x] Foros, mensajes, destacados y administración de usuarios/foros.
+- [x] Flutter/Android/emulador configurados; cliente HTTP y modelos por módulo.
+- [x] Lista con tarjetas, carga/error/vacío/reintento, actualización y paginación.
+- [x] Detalle con descripción, teléfono si existe y horarios por día.
+- [x] Locales DEMO en app Android comprobados por usuario.
 
-Evidencia reportada: php artisan test, 49 pruebas aprobadas y 169 verificaciones, 2026-10-06. Incluye dos ejemplos de Laravel. No se ha probado integración móvil, concurrencia, producción ni piloto.
+Evidencia reportada por usuario: 114 pruebas backend / 516 assertions; Flutter analyze sin incidencias y 2 tests aprobados. Tests móviles de listado/reintento; detalle probado manualmente. No afirmar cobertura automática de detalle, GPS, producción o piloto.
 
-## Criterios de siguientes entregas
+## Criterios siguientes
 
-Mapa: marcadores del API; consulta posible si se deniega GPS; proveedor/licencia documentados. Lista y mapa reutilizan modelos y acceso a datos.
-
-Cuentas: sesión almacenada de forma apropiada, logout, vencimiento y cuenta inactiva; recuperación sin enumeración. No presentar teléfono como recuperable sin un mecanismo real.
-
-Foros: Plaza de Armas, Cementerio, Estación y Alameda; lectura visitante, escritura autenticada activa, rechazo de modificación de autor ajeno y moderación.
-
-Destacados: solicitud no otorga prioridad; aprobación protegida; inicio/fin, mensaje oculto, duplicados y transiciones probados. Al vencer se conserva el mensaje normal.
-
-Piloto: instalación reproducible, HTTPS, restauración en entorno de prueba y evidencia con usuarios reales. No inventar resultados académicos.
-
-Pagos, iOS, ClaveÚnica, eventos, billetera, notificaciones, WebSockets y expansión territorial siguen diferidos. Registrar cualquier cambio de alcance antes de implementarlo.
+Mapa: reutilizar modelos/repositorio/tarjetas; comportamiento útil sin permiso GPS; proveedor/licencia documentados. Cuentas: sesión segura, tokens vencidos/revocados y permisos de servidor. Foros: cuatro nombres fijos, mensajes visibles, participación activa y moderación. Destacados: prioridad dentro de ventana sin duplicar; un registro por mensaje, sin renovación. Release: API HTTPS, Internet en manifiesto principal, firma y despliegue validados.

@@ -11,7 +11,7 @@ Las instrucciones actuales del usuario tienen prioridad. Después siguen las dec
 
 ## Estado que no debe perderse
 
-Backend Laravel con categorías, cuentas Sanctum, lugares, horarios y estado de atención. Última suite reportada por el usuario el 2026-10-06: 49 pruebas, 169 verificaciones. Flutter en instalación; app y mapa no implementados. Próximo incremento: lista pública de lugares en Android con estados de carga/error/vacío y detalle.
+Backend Laravel implementa categorías, cuentas Sanctum, lugares, horarios, foros, mensajes, destacados y administración. Última suite reportada por el usuario el 2026-10-06: 114 pruebas, 516 assertions. Flutter Android ejecuta lista, tarjetas, detalle y horarios; flutter analyze sin incidencias y 2 pruebas aprobadas reportadas. El mapa no está implementado. Próximo incremento: buscador y filtro de categoría en Flutter, conservando paginación. README actualizado con revisión de 09763d2; las cifras anteriores de 49 pruebas describen un hito histórico.
 
 Foros acordados: Plaza de Armas, Cementerio, Estación y Alameda. Leer README para alcance completo. No agregar pagos, delivery, catálogo de productos individuales, iOS ni funcionalidades sociales ajenas al alcance.
 

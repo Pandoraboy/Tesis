@@ -1,5 +1,17 @@
 # Registro de cambios
 
+## [Sin publicar] · Integración Android y documentación — 2026-10-06
+
+- Flutter Android: configuración central, cliente HTTP, modelos y repositorio de lugares.
+- Lista con tarjetas, carga/error/vacío, reintento, actualización y paginación.
+- Detalle con horarios semanales, nocturnos y atención de 24 horas.
+- Datos DEMO: tres negocios ficticios y 28 tramos, preservados al repetir seeder.
+- HTTP local habilitado solo en debug; release/HTTPS pendientes.
+- Evidencia reportada por usuario: backend 114 tests / 516 assertions, Flutter 2 tests y analyze sin incidencias; flujo lista/detalle comprobado en emulador.
+- README, AGENTS, WORKSPACE y backlog actualizados desde revisión de 09763d2. Hitos antiguos conservados como históricos, no estado vigente.
+- Próxima entrega: búsqueda/filtro de categoría Flutter; mapa y pantallas de cuentas/foros/admin pendientes.
+
+
 Todos los cambios relevantes del proyecto se documentarán en este archivo.
 ### Administración de foros
 - Listado administrativo de foros activos e inactivos.

@@ -1,64 +1,36 @@
 # Continuidad operativa
 
-Actualizado: 2026-10-06. Repositorio vigente: https://github.com/Pandoraboy/Tesis
+Actualizado: 2026-10-06. Código revisado: `09763d2`, [Pandoraboy/Tesis](https://github.com/Pandoraboy/Tesis).
 
-## Punto de partida para la siguiente sesión
+## Estado para retomar
 
-Laravel ya está implementado para categorías, autenticación, lugares y horarios. El usuario ejecutó toda la suite: **49 pruebas aprobadas, 169 verificaciones**. Flutter se está instalando; `mobile/` todavía no contiene una aplicación ejecutable. Consultar README y AGENTS antes de trabajar.
+Leer README y AGENTS. Backend: categorías, autenticación, lugares/horarios, foros/mensajes, destacados y administración disponibles. Flutter Android: lista, tarjetas, detalle y horarios conectados a Laravel, comprobados por el usuario en emulador. Mapa, cuentas y foros móviles pendientes.
 
-La siguiente entrega es una **lista pública de lugares en Flutter consumiendo la API**, con detalle y horarios. El mapa sigue siendo la experiencia principal acordada, pero reutilizará la capa de datos validada con esta lista.
+Evidencia del usuario: backend 114 tests / 516 assertions; Flutter analyze sin incidencias y 2 tests aprobados. No son ejecuciones del agente. Las pruebas móviles actuales cubren listado y reintento, no detalle/mapa.
 
-## Entorno observado
+## Siguiente incremento
 
-- Windows 11; VS Code y PowerShell.
-- Proyecto del usuario: `C:\Users\jimen\OneDrive\Desktop\tesi\Ahora_Local_Workspace_Tesis_v0.2\Ahora-San-Carlos`.
-- Backend en la subcarpeta `backend`.
-- PHP 8.4.26 y Composer 2.10.2 mediante Herd; Laravel 13.35.0; PostgreSQL 18.
-- Bases: `ahora_local` y `ahora_local_test`; credenciales privadas en archivos locales.
-- `php artisan serve`: API local en `http://127.0.0.1:8000/api/v1`.
-- Flutter/Dart/Android SDK: confirmar con `flutter --version` y `flutter doctor`; no asumir instalación terminada.
+Buscador y filtro por categoría en Flutter. El repositorio de lugares ya admite buscar/categoriaId; falta modelo/repositorio de categorías y controles visuales. Resetear página al cambiar filtros, preservarlos al actualizar/paginar; verificar combinación y ausencia de resultados. Reutilizar datos/widgets cuando se incorpore mapa.
 
-La máquina del agente no es el computador del usuario. No afirmar que se modificaron sus archivos de Windows o se ejecutaron pruebas allí sin evidencia. No publicar datos ni secretos locales.
+## Entorno
 
-## Secuencia inmediata
+Windows 11, VS Code, PowerShell. Proyecto del usuario: `C:\Users\jimen\OneDrive\Desktop\tesi\Ahora_Local_Workspace_Tesis_v0.2\Ahora-San-Carlos`. Backend y mobile en subcarpetas separadas.
 
-1. Confirmar pendientes de instalación reproducible descritos abajo.
-2. Terminar Flutter y Android; seleccionar emulador o teléfono real.
-3. Inicializar la app Android en `mobile/` conservando archivos útiles existentes.
-4. Definir configuración central de API para el dispositivo elegido. El localhost del teléfono no es el localhost del PC.
-5. Separar cliente HTTP compartido y módulo Lugares: modelos, acceso a datos, estado, vistas y widgets reutilizables.
-6. Consultar listado, mostrar tarjetas y gestionar cargando/datos/vacío/error/reintento.
-7. Mostrar detalle, categoría, horarios y estado calculado por backend; añadir búsqueda, filtro y paginación.
-8. Verificar en dispositivo y documentar el flujo antes de incorporar mapa.
+PHP 8.4.26 / Composer 2.10.2 vía Herd; PostgreSQL 18; Flutter 3.47.6 / Dart 3.13.5; SDK Android 36.0.0 y NDK 28.2.13676358. Emulador Medium_Phone_API_37.0; ID observado emulator-5554 (consultar flutter devices).
 
-## Pendientes detectados en la revisión de f3c04b7
+Bases: ahora_local y ahora_local_test. Laravel serve en 127.0.0.1:8000; Flutter emulador usa 10.0.2.2:8000/api/v1/. Mantener servidor abierto. HTTP local permitido solo en manifiesto debug. Release necesita Internet en main y API HTTPS.
 
-Las correcciones siguientes se indicaron al usuario, pero su aplicación aún debe comprobarse en el siguiente commit:
+## Pendientes confirmados en código
 
-- `database/factories/UserFactory.php` usa `name`; debe generar `username` único, minúsculo y compatible con las reglas actuales.
-- `database/seeders/DatabaseSeeder.php` usa `name`; adaptar a `username`. No ejecutar el seeder heredado antes de corregirlo. Las cuentas demo deben identificarse como demo y nunca convertirse en credenciales productivas.
-- `.env.example` apunta a SQLite; cambiar la plantilla a PostgreSQL, puerto 5432 y base `ahora_local`, manteniendo contraseña vacía. La migración de cuentas contiene SQL específico de PostgreSQL.
-- `.env.testing` es local e ignorado: documentar o agregar una plantilla segura cuando se cierre instalación reproducible.
+- UserFactory y DatabaseSeeder ya usan username; .env.example ya usa PostgreSQL. Eliminar esas antiguas advertencias de pendientes actuales.
+- Seeder general crea cuenta demo; usar ForoSeeder y LugaresDemoSeeder explícitos para cargar catálogos. No crear credenciales productivas desde factory.
+- .env.testing sigue siendo configuración local; seguir instrucciones de README para base exclusiva de pruebas. No usar migrate:fresh en desarrollo.
+- /api/user sigue devolviendo el modelo salvo campos ocultos; revisar antes de publicación y usar auth/me en pantallas nuevas.
+- Sesión Flutter, recuperación de contraseña, GPS/proximidad, coordenadas de foros y proveedor de mapa pendientes.
+- Estado horario se refresca al consultar; sin refresco periódico ni feriados/excepciones. Concurrencia real/DST nocturno y producción sin validar.
+- Dos pruebas Flutter; ampliar detalle/navegación/horarios al cerrar ese módulo.
+- Contrato propuesto y documentos históricos pueden estar desactualizados: confirmar cada endpoint en routes/api.php y Requests/pruebas.
 
-Otros pendientes, sin reabrir todo el backend:
+## Trabajo y cierre
 
-- `/api/user` es una ruta heredada que devuelve el modelo completo salvo campos ocultos. Evaluar eliminarla y usar `/api/v1/auth/me` antes de integrar cuentas en Flutter.
-- Para futuras escrituras de usuarios comunes, centralizar comprobación de cuenta activa; Sanctum autentica pero no impone esa regla por sí solo.
-- Revisar formato con Pint cuando se toque el módulo correspondiente; no mezclar limpieza masiva con una entrega de producto.
-- Horarios excluye feriados/cierres excepcionales; bloqueo concurrente existe, pero no hay prueba de concurrencia ni prueba específica de cambios de reloj durante un tramo nocturno.
-- La documentación de diseño puede contener propuestas anteriores; el código, pruebas y decisiones actuales prevalecen para describir lo implementado.
-
-## Decisiones vigentes
-
-- Laravel REST + PostgreSQL + Flutter Android.
-- Modularidad y DRY: reutilizar conceptos comunes y mantener responsabilidades pequeñas, sin capas genéricas preventivas.
-- Lectura pública; escritura autenticada; gestión de categorías/lugares/horarios para administrador activo.
-- Mapa con negocios y foros, tarjetas y alternativa de lista compartiendo datos.
-- Foros: Plaza de Armas, Cementerio, Estación, Alameda; coordenadas pendientes.
-- Cuenta username/contraseña y correo o teléfono; roles user/admin.
-- Destacados de vigencia limitada con aprobación administrativa; pagos diferidos.
-- API primero; siguiente pantalla después de validar su contrato.
-
-## Cómo cerrar un incremento
-
-Actualizar README cuando cambie el estado general, este archivo para continuidad, backlog y CHANGELOG. Registrar comando, entorno, resultado y limitaciones en evidencia. Ejecutar pruebas proporcionales; ampliar solo si cambios o fallos lo justifican. No hacer push sin autorización ni cambiar dependencias automáticamente. Nunca usar bases reales para pruebas destructivas.
+Un incremento verificable, modularidad y DRY, sin abstracciones preventivas. API primero cuando falte contrato; luego pantalla. No duplicar reglas de horarios en Flutter. Guardar evidencia y actualizar README/backlog/CHANGELOG. Distinguir archivos del agente de Windows del usuario. No hacer push sin autorización.
