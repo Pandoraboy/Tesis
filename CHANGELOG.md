@@ -1,6 +1,13 @@
 # Registro de cambios
 
 Todos los cambios relevantes del proyecto se documentarán en este archivo.
+### Administración de foros
+- Listado administrativo de foros activos e inactivos.
+- Edición de descripción y activación/desactivación.
+- Nombres y slugs protegidos.
+- Desactivar oculta el foro sin borrar mensajes.
+- Reactivar conserva la ocultación individual de mensajes.
+
 ### Administración de usuarios
 - Listado con búsqueda, filtros y paginación.
 - Activación y desactivación de usuarios comunes.
