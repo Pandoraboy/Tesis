@@ -1,0 +1,20 @@
+# Secretos locales
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Dependencias y salidas
+backend/vendor/
+backend/node_modules/
+backend/storage/logs/*
+backend/bootstrap/cache/*.php
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins-dependencies
+mobile/android/local.properties
+mobile/android/key.properties
+mobile/**/*.jks
+mobile/**/*.keystore
+.DS_Store
+Thumbs.db

@@ -1,0 +1,109 @@
+┌──────────────────────┐
+│        USERS         │
+├──────────────────────┤
+│ PK id                │
+│    username          │
+│    password          │
+│    email             │
+│    phone             │
+│    role              │
+│    active            │
+│    created_at        │
+│    updated_at        │
+└──────────┬───────────┘
+           │
+           │ 1
+           │
+           │ N
+┌──────────▼───────────┐
+│      MENSAJES        │
+├──────────────────────┤
+│ PK id                │
+│ FK foro_id           │
+│ FK user_id           │
+│    contenido         │
+│    activo            │
+│    created_at        │
+│    updated_at        │
+└──────────┬───────────┘
+           │
+           │ 1
+           │
+           │ 0..1
+┌──────────▼───────────────┐
+│  MENSAJES_DESTACADOS     │
+├──────────────────────────┤
+│ PK id                    │
+│ FK mensaje_id            │
+│    fecha_inicio          │
+│    fecha_fin             │
+│    estado                │
+│    tipo                  │
+│    created_at            │
+│    updated_at            │
+└──────────────────────────┘
+
+
+┌──────────────────────┐
+│        FOROS         │
+├──────────────────────┤
+│ PK id                │
+│    nombre            │
+│    descripcion       │
+│    activo            │
+│    orden              │
+│    created_at        │
+│    updated_at        │
+└──────────┬───────────┘
+           │
+           │ 1
+           │
+           │ N
+           └─────────────── MENSAJES
+
+
+┌────────────────────────┐
+│   CATEGORIAS_LUGAR     │
+├────────────────────────┤
+│ PK id                  │
+│    nombre              │
+│    descripcion         │
+│    active              │
+│    created_at          │
+│    updated_at          │
+└──────────┬─────────────┘
+           │
+           │ 1
+           │
+           │ N
+┌──────────▼─────────────┐
+│        LUGARES         │
+├────────────────────────┤
+│ PK id                  │
+│ FK categoria_lugar_id  │
+│    nombre              │
+│    descripcion         │
+│    direccion           │
+│    telefono            │
+│    latitud             │
+│    longitud            │
+│    active              │
+│    created_at          │
+│    updated_at          │
+└──────────┬─────────────┘
+           │
+           │ 1
+           │
+           │ N
+┌──────────▼─────────────┐
+│    HORARIOS_LUGAR      │
+├────────────────────────┤
+│ PK id                  │
+│ FK lugar_id            │
+│    dia_semana          │
+│    hora_apertura       │
+│    hora_cierre         │
+│    turno               │
+│    created_at          │
+│    updated_at           │
+└────────────────────────┘

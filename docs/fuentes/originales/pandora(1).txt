@@ -1,0 +1,305 @@
+AHORA LOCAL - ESPECIFICACIÓN ACTUALIZADA DEL PROYECTO
+
+1. DESCRIPCIÓN GENERAL DEL PROYECTO
+
+El proyecto propone el diseño e implementación de Ahora Local, una aplicación móvil para Android orientada a centralizar información local y facilitar la comunicación comunitaria en la comuna de San Carlos, Región de Ñuble. La solución busca entregar información clara y actualizada sobre lugares y servicios disponibles en la comuna, junto con espacios de participación comunitaria mediante foros.
+
+La solución se estructura en dos componentes principales:
+
+Módulo Información Local y Mapa: permite visualizar lugares y servicios de interés de la comuna, tales como farmacias, restaurantes, comercios, cajeros automáticos y otras categorías pertinentes. Para cada lugar se podrá consultar información básica como nombre, dirección, ubicación geográfica, teléfono o medio de contacto y horarios de atención.
+
+Módulo Foro Comunitario: proporciona cuatro foros comunitarios principales, orientados a temas de interés frecuente dentro de la comuna. Los usuarios podrán publicar mensajes en los foros y consultar las publicaciones existentes. Algunos mensajes podrán disponer de una condición de destacado que les otorgará mayor visibilidad y prioridad en la presentación del contenido.
+
+El sistema no contempla funcionalidades de compra, pedidos a domicilio ni delivery. La primera implementación se realizará en la comuna de San Carlos, con el objetivo de validar el funcionamiento de la plataforma antes de evaluar su adaptación a otras comunas del país.
+
+1.5 OBJETIVOS
+
+1.5.1 Objetivo General
+
+Diseñar e implementar una aplicación móvil para Android denominada Ahora Local, orientada a centralizar información local sobre lugares y servicios de la comuna de San Carlos y proporcionar espacios de comunicación comunitaria mediante cuatro foros, incorporando un mecanismo de mensajes destacados como estrategia de monetización y mayor visibilidad del contenido.
+
+1.5.2 Objetivos Específicos
+
+(a) Levantar requisitos funcionales y no funcionales de la plataforma junto a actores locales de la comuna de San Carlos.
+
+(b) Analizar soluciones existentes relacionadas con directorios de información local y plataformas de comunicación comunitaria pertinentes al contexto de la comuna.
+
+(c) Diseñar la arquitectura de software, el modelo de datos y la interfaz de usuario de Ahora Local, considerando su carácter replicable.
+
+(d) Implementar un módulo de información local que permita consultar lugares y servicios de interés mediante categorías, ubicación geográfica, horarios y medios de contacto.
+
+(e) Implementar un módulo de foro comunitario compuesto por cuatro foros principales, permitiendo la publicación y consulta de mensajes por parte de usuarios registrados.
+
+(f) Implementar un mecanismo de mensajes destacados que permita otorgar prioridad de visualización a determinadas publicaciones durante un período de vigencia definido.
+
+(g) Implementar autenticación, gestión de usuarios y mecanismos de seguridad de acuerdo con buenas prácticas de desarrollo de software.
+
+(h) Implementar la comunicación entre la aplicación móvil y el backend mediante servicios REST y conexiones seguras.
+
+(i) Desplegar y evaluar el sistema piloto en San Carlos, recopilando retroalimentación de personas usuarias y actores locales para futuras mejoras.
+
+2. DESARROLLO DEL PROYECTO
+
+2.1 Alcance y módulos
+
+El sistema estará compuesto por los siguientes módulos principales:
+
+(a) Información Local y Mapa.
+(b) Foro Comunitario.
+(c) Gestión de usuarios y autenticación.
+(d) Administración del contenido, cuando corresponda.
+
+El módulo de Información Local permitirá consultar lugares y servicios de interés. La información podrá incluir nombre, categoría, dirección, ubicación geográfica, teléfono o medio de contacto, días y horarios de atención y otra información descriptiva pertinente.
+
+El módulo de Foro Comunitario estará compuesto por cuatro foros configurables mediante datos del sistema. Cada foro contendrá mensajes publicados por usuarios registrados.
+
+Los mensajes destacados serán mensajes del foro que reciban una condición especial de visibilidad. Mientras el destacado se encuentre vigente, el mensaje deberá mostrarse por encima de los mensajes normales del foro. Una vez finalizada su vigencia, el mensaje dejará de tener prioridad y podrá continuar disponible como mensaje normal, de acuerdo con las reglas definidas para el sistema.
+
+2.2 Metodología de Desarrollo
+
+La metodología seleccionada es de tipo Evolutiva e Incremental, la cual permite desarrollar el sistema en entregas sucesivas, verificables y ajustables según la retroalimentación de usuarios y actores locales.
+
+El ciclo de desarrollo se divide en las siguientes etapas:
+
+(a) Levantamiento y análisis de requisitos: recopilación de requerimientos funcionales y no funcionales.
+(b) Diseño de prototipos: elaboración de interfaces y flujos de navegación en Figma.
+(c) Desarrollo incremental: implementación progresiva de los módulos principales.
+(d) Pruebas y validación: ejecución de pruebas funcionales y de usabilidad.
+(e) Despliegue y monitoreo: publicación del sistema y seguimiento inicial de uso.
+
+Cada incremento funcional produce una versión operativa del software, reduciendo riesgos y asegurando compatibilidad con las expectativas del entorno local.
+
+2.3 Estándares de Documentación
+
+El proyecto sigue estándares de documentación y modelado utilizados en ingeniería de software, de acuerdo con las necesidades del desarrollo y la documentación de la solución.
+
+IEEE 830 (1998): Especificación de Requisitos de Software.
+IEEE 829 (1998): Documentación de pruebas.
+IEEE 1016 (2009): Descripción del diseño de software.
+
+2.4 Técnicas y Notaciones
+
+Para la representación y modelado del sistema se emplean las siguientes técnicas y notaciones:
+
+UML 2.0: diagramas de casos de uso, clases y actividades.
+BPMN: modelado de procesos actuales y propuestos, cuando corresponda.
+DER: representación del modelo de datos relacional.
+
+2.5 Tecnologías Utilizadas
+
+2.5.1 Frontend y Plataforma
+
+El desarrollo de la aplicación móvil se realizará utilizando Flutter. La aplicación final de titulación estará orientada a dispositivos Android.
+
+2.5.2 Backend y Servicios
+
+La lógica de negocio y los servicios de la aplicación serán implementados mediante Laravel. El backend expondrá servicios REST para la comunicación con la aplicación Flutter.
+
+2.5.3 Base de Datos
+
+La solución utilizará PostgreSQL como sistema de gestión de base de datos relacional.
+
+El modelo de datos estará orientado principalmente a la gestión de usuarios, foros, mensajes, mensajes destacados, lugares, categorías de lugares y horarios.
+
+2.5.4 Control de Versiones y Entorno
+
+El código fuente se gestionará mediante Git y GitHub. El entorno de desarrollo podrá utilizar Visual Studio Code y las herramientas necesarias para Flutter, Laravel y PostgreSQL. La documentación técnica se generará en LaTeX.
+
+3. LÍMITES DEL SISTEMA
+
+El software se enfoca en la gestión de información local y comunicación comunitaria y no contempla funciones fuera de ese dominio durante la etapa de titulación.
+
+Los límites definidos incluyen:
+
+(a) El sistema no contempla pedidos a domicilio ni funcionalidades de delivery.
+
+(b) El sistema no contempla carrito de compra, catálogo de productos para compra, gestión de pedidos ni estados de entrega.
+
+(c) El sistema no realizará transacciones asociadas a compras de productos o servicios mediante la plataforma.
+
+(d) La aplicación requiere conexión a Internet para acceder a los servicios del sistema.
+
+(e) No se contempla una versión web de usuario final durante la etapa de titulación; la aplicación móvil Android será la versión prioritaria.
+
+(f) La integración de una pasarela de pago para mensajes destacados podrá quedar como una etapa posterior si no se incorpora durante la primera versión. El modelo deberá permitir representar destacados activados mediante pago o mediante validación administrativa.
+
+(g) El sistema no busca convertirse en una red social completa. No se consideran como alcance inicial seguidores, amistades, mensajería privada, perfiles sociales complejos ni otras funcionalidades equivalentes.
+
+4. REQUERIMIENTOS FUNCIONALES
+
+4.1 Módulo Información Local y Mapa
+
+RF_01 El sistema debe permitir visualizar en un mapa la ubicación de los lugares y servicios registrados.
+
+RF_02 El sistema debe permitir consultar la información básica de cada lugar, incluyendo nombre, dirección y categoría.
+
+RF_03 El sistema debe permitir consultar el teléfono o medio de contacto disponible de un lugar.
+
+RF_04 El sistema debe permitir consultar los días y horarios de atención de un lugar.
+
+RF_05 El sistema debe permitir filtrar los lugares por categoría.
+
+RF_06 El sistema debe permitir consultar la ubicación geográfica de un lugar mediante sus coordenadas.
+
+RF_07 El sistema debe permitir mostrar información actualizada de los lugares disponibles en la comuna.
+
+4.2 Módulo Foro Comunitario
+
+RF_08 El sistema debe permitir visualizar los cuatro foros comunitarios definidos para la aplicación.
+
+RF_09 El sistema debe permitir a los usuarios registrados publicar mensajes dentro de un foro.
+
+RF_10 El sistema debe permitir visualizar los mensajes publicados dentro de un foro.
+
+RF_11 El sistema debe mostrar los mensajes de un foro de acuerdo con una ordenación definida por el sistema, considerando la prioridad de los mensajes destacados.
+
+RF_12 El sistema debe permitir mantener los cuatro foros como registros configurables sin requerir una tabla independiente para cada foro.
+
+4.3 Módulo de Mensajes Destacados
+
+RF_13 El sistema debe permitir que un mensaje pueda adquirir la condición de destacado.
+
+RF_14 El sistema debe permitir definir una fecha de inicio y una fecha de término para un mensaje destacado.
+
+RF_15 El sistema debe mostrar los mensajes destacados por encima de los mensajes normales mientras se encuentren vigentes.
+
+RF_16 El sistema debe retirar automáticamente la prioridad de un mensaje cuando finalice su período de destacado.
+
+RF_17 El sistema debe permitir registrar el tipo de activación del destacado, diferenciando entre una activación mediante pago y una validación administrativa cuando corresponda.
+
+RF_18 El sistema debe permitir conservar el mensaje como una publicación normal después de que expire su condición de destacado, de acuerdo con las reglas de moderación definidas.
+
+4.4 Gestión y Seguridad
+
+RF_19 El sistema debe permitir el registro de una cuenta utilizando un nombre de usuario y una contraseña.
+
+RF_20 El sistema debe asociar la cuenta a un correo electrónico o a un número de teléfono, debiendo existir al menos uno de estos medios.
+
+RF_21 El sistema debe permitir la autenticación de usuarios registrados.
+
+RF_22 El sistema debe permitir la recuperación de acceso mediante el medio de contacto asociado, de acuerdo con el mecanismo implementado.
+
+RF_23 El sistema debe almacenar las contraseñas mediante mecanismos de hash seguros y no en texto plano.
+
+RF_24 El sistema debe diferenciar, como mínimo, entre usuarios comunes y usuarios con privilegios administrativos cuando las funciones de administración lo requieran.
+
+4.5 Administración
+
+RF_25 El sistema debe permitir a usuarios autorizados administrar la información de los lugares registrados.
+
+RF_26 El sistema debe permitir a usuarios autorizados administrar categorías y horarios de los lugares.
+
+RF_27 El sistema debe permitir a usuarios autorizados moderar o desactivar mensajes que infrinjan las reglas del sistema.
+
+RF_28 El sistema debe permitir a usuarios autorizados gestionar la activación administrativa de mensajes destacados cuando corresponda.
+
+5. REQUERIMIENTOS NO FUNCIONALES
+
+RNF_01 El sistema debe responder a las solicitudes de usuario en un tiempo inferior a 2 segundos en promedio bajo las condiciones definidas para las pruebas.
+
+RNF_02 La aplicación debe mantener una disponibilidad acorde con el entorno de despliegue utilizado durante las pruebas del sistema.
+
+RNF_03 Los datos personales y credenciales deberán ser protegidos mediante mecanismos de seguridad adecuados y las comunicaciones deberán utilizar HTTPS/TLS.
+
+RNF_04 La interfaz de usuario debe cumplir criterios de usabilidad y accesibilidad visual de acuerdo con las guías de Material Design y las posibilidades ofrecidas por Flutter.
+
+RNF_05 El sistema debe soportar al menos 100 usuarios concurrentes durante la fase de pruebas piloto.
+
+RNF_06 El sistema debe poder ampliarse con nuevos módulos sin afectar las funcionalidades existentes.
+
+RNF_07 Las operaciones de base de datos que requieran consistencia deben ejecutarse de forma atómica cuando corresponda.
+
+RNF_08 La aplicación debe funcionar correctamente en los tamaños de pantalla Android considerados para el proyecto.
+
+RNF_09 El backend debe exponer una API REST segura y estructurada para ser consumida por la aplicación Flutter.
+
+6. DATOS DEL SISTEMA
+
+DE_01 Datos de usuario: nombre de usuario, contraseña almacenada mediante hash, correo electrónico o número de teléfono y rol de acceso cuando corresponda.
+
+DE_02 Datos de lugar: nombre, descripción, categoría, dirección, teléfono o medio de contacto, latitud, longitud y estado de disponibilidad.
+
+DE_03 Datos de horario: lugar asociado, día de la semana, hora de apertura, hora de cierre y turno cuando sea necesario.
+
+DE_04 Datos de foro: nombre, descripción, estado y orden de presentación.
+
+DE_05 Datos de mensaje: usuario autor, foro, contenido, estado y fechas de creación y actualización.
+
+DE_06 Datos de mensaje destacado: mensaje asociado, fecha de inicio, fecha de término, estado y tipo de activación.
+
+7. INTERFACES DEL SISTEMA
+
+IS_01 Mapa interactivo: visualización de lugares y servicios disponibles mediante sus ubicaciones geográficas.
+
+IS_02 Detalle de lugar: muestra información del lugar, categoría, dirección, contacto y horarios de atención.
+
+IS_03 Listado de foros: muestra los cuatro foros comunitarios disponibles.
+
+IS_04 Vista de foro: muestra los mensajes del foro, colocando los mensajes destacados por encima de los mensajes normales mientras estén vigentes.
+
+IS_05 Publicación de mensaje: permite al usuario registrado ingresar y publicar un mensaje en el foro seleccionado.
+
+IS_06 Mensajes de sistema: alertas, errores, confirmaciones y notificaciones relacionadas con las acciones realizadas por el usuario.
+
+8. SEGURIDAD
+
+Las contraseñas de los usuarios se almacenarán utilizando mecanismos de hash seguros proporcionados por el backend.
+
+Todas las comunicaciones entre la aplicación Flutter y el backend Laravel se realizarán mediante HTTPS/TLS.
+
+El acceso a la base de datos estará restringido al backend y controlado mediante mecanismos de autenticación y autorización.
+
+Las operaciones administrativas requerirán privilegios adecuados.
+
+Los mensajes y contenidos podrán ser moderados o desactivados cuando correspondan a las reglas de uso del sistema.
+
+Los registros de actividad que sean necesarios podrán almacenarse para auditoría y seguimiento de errores.
+
+9. MODELO DE DATOS PRELIMINAR
+
+El modelo relacional inicial estará compuesto por las siguientes entidades principales:
+
+USERS
+FOROS
+MENSAJES
+MENSAJES_DESTACADOS
+CATEGORIAS_LUGAR
+LUGARES
+HORARIOS_LUGAR
+
+Relaciones principales:
+
+USERS 1:N MENSAJES
+
+FOROS 1:N MENSAJES
+
+MENSAJES 1:0..1 MENSAJES_DESTACADOS
+
+CATEGORIAS_LUGAR 1:N LUGARES
+
+LUGARES 1:N HORARIOS_LUGAR
+
+El modelo será implementado en PostgreSQL y posteriormente representado mediante un DER definitivo antes de la implementación completa del backend.
+
+10. REGLAS DE NEGOCIO INICIALES
+
+RN_01 Un usuario debe poseer un nombre de usuario único.
+
+RN_02 Una cuenta debe poseer al menos un medio de contacto entre correo electrónico y número de teléfono.
+
+RN_03 Un mensaje pertenece a un único foro y es publicado por un único usuario.
+
+RN_04 Un mensaje destacado corresponde a un mensaje existente y posee un período de vigencia definido.
+
+RN_05 Un mensaje destacado vigente tiene prioridad sobre los mensajes normales del mismo foro.
+
+RN_06 Cuando finaliza la vigencia de un destacado, este deja de tener prioridad.
+
+RN_07 Los cuatro foros se almacenan como registros de una misma entidad y no como cuatro estructuras independientes.
+
+RN_08 Un lugar pertenece a una categoría y puede poseer uno o más registros de horario.
+
+RN_09 La información local no implica la realización de pedidos, compras ni entregas mediante la aplicación.
+
+RN_10 La funcionalidad de monetización se concentra inicialmente en el mecanismo de mensajes destacados.
+

@@ -1,0 +1,366 @@
+Quiero que trabajes como analista de requisitos, arquitecto de software y asesor de tesis para actualizar la especificación de mi proyecto "Ahora Local".
+
+Te voy a adjuntar el documento actual del proyecto, que contiene objetivos, requerimientos, módulos, tecnologías, restricciones y otros elementos. Debes utilizar ese documento como base y NO inventar información que no esté sustentada por lo que te indico o por el propio documento.
+
+IMPORTANTE:
+El proyecto ha cambiado significativamente respecto de la versión actual del documento. Necesito que analices qué partes quedaron obsoletas, cuáles deben modificarse y cuáles deben eliminarse.
+
+==================================================
+1. NUEVO ENFOQUE DEL PROYECTO
+==================================================
+
+Ahora Local seguirá siendo una aplicación móvil orientada a centralizar información local de una comuna, pero YA NO tendrá funcionalidades de delivery ni de realización de pedidos.
+
+El proyecto se desarrollará utilizando:
+
+- Flutter para el frontend móvil.
+- Laravel para el backend.
+- PostgreSQL como base de datos.
+- La aplicación final estará enfocada únicamente en Android.
+- No desarrollaré una versión web para usuarios finales.
+- El backend expondrá una API para ser consumida por Flutter.
+
+Por lo tanto, elimina del alcance todo lo relacionado con:
+
+- pedidos
+- delivery
+- productos para compra
+- detalle de pedidos
+- estados de pedidos
+- direcciones de entrega
+- métodos de pago asociados a pedidos
+- carrito de compra
+- comercio electrónico
+- cualquier flujo cuyo propósito sea comprar o solicitar productos a domicilio
+
+No quiero que intentes conservar Delivery "por si acaso". El nuevo proyecto NO tendrá Delivery.
+
+==================================================
+2. NUEVO MÓDULO DE INFORMACIÓN LOCAL
+==================================================
+
+El primer gran componente del sistema será un módulo de información local.
+
+La aplicación permitirá consultar información de distintos lugares o servicios de la comuna.
+
+Por ejemplo:
+
+- farmacias
+- restaurantes
+- comercios
+- cajeros automáticos
+- otros lugares o servicios relevantes
+
+La aplicación NO permitirá comprar productos ni realizar pedidos.
+
+La información que interesa almacenar/mostrar es principalmente:
+
+- nombre
+- tipo o categoría
+- dirección
+- ubicación geográfica
+- teléfono o medio de contacto
+- horarios de atención
+- días de atención
+- otra información básica útil del lugar
+
+La aplicación debe poder mostrar estos lugares en un mapa y permitir filtrar la información según su categoría.
+
+Necesito que revises los requerimientos existentes del módulo Mapa y determines cuáles siguen siendo válidos, cuáles deben modificarse y cuáles deben eliminarse.
+
+==================================================
+3. NUEVO MÓDULO: FORO COMUNITARIO
+==================================================
+
+El antiguo "Tablón de Anuncios" cambiará conceptualmente a un "Foro Comunitario".
+
+Esta modificación es importante.
+
+NO quiero modelarlo como un simple sistema de anuncios.
+
+La idea es que Ahora Local tenga 4 foros comunitarios principales, cada uno asociado a un tema o espacio de conversación muy común dentro de una ciudad/comuna.
+
+Por ahora no quiero fijar obligatoriamente los nombres definitivos de los cuatro foros si eso requiere una decisión posterior, pero quiero que el sistema esté diseñado para soportar exactamente 4 foros principales y que estos puedan configurarse mediante datos, no mediante cuatro tablas separadas.
+
+Cada foro permitirá que los usuarios publiquen mensajes.
+
+La idea general es:
+
+FORO
+ └── MENSAJES
+       └── publicados por USUARIOS
+
+Los mensajes normales deben aparecer ordenados cronológicamente o utilizando una lógica de publicación razonable.
+
+==================================================
+4. CONCEPTO DE MENSAJE DESTACADO
+==================================================
+
+Esta es una de las partes más importantes del nuevo proyecto.
+
+El modelo de negocio de Ahora Local estará basado principalmente en los "mensajes destacados".
+
+Un mensaje destacado NO debe entenderse como un anuncio separado de los mensajes normales.
+
+Es un mensaje normal del foro al que se le otorga una condición especial de visibilidad.
+
+Conceptualmente:
+
+Usuario publica mensaje
+        ↓
+Mensaje normal
+        ↓
+Mensaje puede convertirse en destacado
+        ↓
+Permanece visible durante más tiempo
+        ↓
+Tiene prioridad sobre mensajes normales
+        ↓
+Aparece siempre arriba mientras esté vigente
+
+La idea visual/comportamental es parecida al funcionamiento del chat global de Clash of Clans, donde un mensaje con prioridad puede permanecer arriba y tener mayor visibilidad.
+
+El mensaje destacado debe:
+
+- aparecer antes que los mensajes normales;
+- permanecer arriba mientras esté vigente;
+- tener una fecha de inicio;
+- tener una fecha de término;
+- dejar automáticamente de ser destacado cuando termine su vigencia;
+- seguir existiendo como mensaje normal después de perder el estado destacado, salvo que se determine otra regla;
+- permitir implementar una lógica de monetización.
+
+El sistema debe dejar preparada la arquitectura para que en el futuro un usuario, comercio o administrador pueda pagar para destacar un mensaje.
+
+IMPORTANTE:
+No quiero que inventes una pasarela de pago si todavía no está definida.
+
+En esta etapa quiero que el modelo de datos y los requerimientos permitan representar correctamente el concepto de "mensaje destacado", pero el mecanismo exacto de pago puede quedar como una decisión futura.
+
+También quiero contemplar que un destacado pueda ser activado mediante validación administrativa en caso de que todavía no exista integración de pagos.
+
+==================================================
+5. USUARIOS
+==================================================
+
+Quiero simplificar considerablemente el sistema de usuarios.
+
+La cuenta de usuario debe ser similar conceptualmente a plataformas sencillas como Pokémon Showdown.
+
+El usuario no necesita un perfil social complejo.
+
+La cuenta debe estar basada principalmente en:
+
+- nombre de usuario
+- contraseña
+- correo electrónico O número de teléfono asociado
+
+El correo o teléfono se utilizará como medio de asociación/recuperación/autenticación según corresponda.
+
+No quiero que diseñes una red social ni perfiles complejos.
+
+La entidad Usuario debe mantenerse simple.
+
+La contraseña obviamente debe almacenarse de forma segura mediante hash y nunca en texto plano.
+
+También analiza si realmente necesitamos mantener la tabla ROLES y USUARIO_ROL del modelo antiguo. Si se justifica conservar roles para administración del sistema, propón una solución simple. No mantengas complejidad únicamente porque existía en el modelo anterior.
+
+==================================================
+6. TECNOLOGÍAS ACTUALIZADAS
+==================================================
+
+Corrige cualquier parte del documento que todavía indique tecnologías antiguas o diferentes.
+
+La tecnología objetivo será:
+
+Frontend:
+- Flutter
+- Android
+
+Backend:
+- Laravel
+- API REST
+
+Base de datos:
+- PostgreSQL
+
+Control de versiones:
+- Git
+- GitHub
+
+Elimina o marca como obsoletas las referencias a:
+
+- Kotlin como frontend principal
+- Android Studio + Kotlin como arquitectura del frontend
+- Firebase como backend principal
+- Firebase Firestore como base de datos principal
+- MongoDB como alternativa, salvo que consideres necesario mencionarlo históricamente
+- versión web para usuarios finales
+
+Respecto de autenticación, analiza la documentación actual y determina cómo debe quedar expresado después del cambio a Laravel + PostgreSQL. No asumas automáticamente que Firebase Authentication seguirá siendo parte de la solución si ya no es necesario.
+
+==================================================
+7. ACTUALIZACIÓN DE REQUERIMIENTOS
+==================================================
+
+Quiero que revises TODOS los requerimientos funcionales y no funcionales actuales del documento.
+
+Necesito que:
+
+1. Identifiques los requerimientos que siguen siendo válidos.
+2. Identifiques los que deben modificarse.
+3. Identifiques los que deben eliminarse.
+4. Propongas nuevos requerimientos necesarios para el nuevo sistema.
+5. Renumeres los requerimientos de forma coherente.
+
+Quiero separar claramente:
+
+- Requerimientos funcionales del módulo Información Local/Mapa.
+- Requerimientos funcionales del Foro Comunitario.
+- Requerimientos funcionales de Mensajes Destacados.
+- Requerimientos funcionales de Usuarios y autenticación.
+- Requerimientos funcionales de administración, si son necesarios.
+- Requerimientos no funcionales.
+
+El resultado debe estar redactado de manera formal y apropiada para una tesis de Ingeniería Civil en Informática.
+
+==================================================
+8. ACTUALIZACIÓN DE OBJETIVOS
+==================================================
+
+Revisa también:
+
+- objetivo general
+- objetivos específicos
+- alcance
+- límites
+- descripción del proyecto
+- descripción de módulos
+
+Elimina cualquier referencia a Delivery y pedidos.
+
+El nuevo objetivo general debe representar correctamente que Ahora Local busca:
+
+- centralizar información local;
+- facilitar el acceso a información de lugares y servicios;
+- proporcionar espacios de participación/comunicación comunitaria;
+- permitir mensajes destacados como mecanismo de monetización.
+
+No conviertas el objetivo en algo excesivamente comercial. Sigue siendo principalmente un proyecto tecnológico y de servicio local.
+
+==================================================
+9. MODELO DE DATOS
+==================================================
+
+Después de actualizar los requisitos, propón el nuevo modelo entidad-relación.
+
+Quiero que analices si la estructura conceptual debería ser aproximadamente:
+
+USUARIOS
+FOROS
+MENSAJES
+MENSAJES_DESTACADOS
+TIPOS_LUGAR
+LUGARES
+HORARIOS_LUGAR
+
+y las entidades adicionales que realmente sean necesarias.
+
+NO quiero que simplemente copies el DER anterior y elimines PEDIDOS.
+
+Quiero un modelo nuevo basado en el nuevo dominio.
+
+Especialmente analiza:
+
+- relación Usuario → Mensajes
+- relación Foro → Mensajes
+- relación Mensaje → Mensaje Destacado
+- relación Lugar → Tipo de Lugar
+- relación Lugar → Horarios
+- información geográfica de los lugares
+- posibilidad de administración
+- integridad y restricciones
+
+Explica brevemente por qué cada entidad existe.
+
+==================================================
+10. NO PROGRAMAR TODAVÍA
+==================================================
+
+Por ahora NO quiero que implementes Laravel, Flutter ni APIs.
+
+Primero quiero cerrar correctamente:
+
+1. alcance
+2. objetivos
+3. módulos
+4. requerimientos
+5. reglas de negocio
+6. modelo de datos
+
+Después de eso podremos comenzar la implementación.
+
+==================================================
+11. FORMA DE ENTREGAR EL RESULTADO
+==================================================
+
+Quiero que estructures tu respuesta en este orden:
+
+1. Resumen de los cambios realizados al proyecto.
+2. Elementos eliminados del proyecto anterior.
+3. Nuevo alcance de Ahora Local.
+4. Nuevos módulos.
+5. Objetivo general actualizado.
+6. Objetivos específicos actualizados.
+7. Requerimientos funcionales actualizados.
+8. Requerimientos no funcionales actualizados.
+9. Reglas de negocio del Foro Comunitario.
+10. Reglas de negocio de Mensajes Destacados.
+11. Modelo de datos propuesto.
+12. Entidades y relaciones explicadas.
+13. Cambios necesarios en el documento de tesis.
+14. Decisiones que todavía deberían quedar abiertas antes de programar.
+15. Recomendación de siguiente paso.
+
+Quiero que seas crítico.
+
+Si encuentras inconsistencias entre el documento antiguo y el nuevo enfoque, señálalas explícitamente en vez de esconderlas.
+
+NO agregues funcionalidades innecesarias solamente porque sean comunes en otras aplicaciones.
+
+El objetivo es mantener Ahora Local relativamente simple, funcional y realizable como proyecto de titulación individual.
+
+El proyecto debe quedar preparado para evolucionar posteriormente, pero sin sobrearquitectura.
+
+Adjunto el documento actual del proyecto. Utilízalo como base para realizar esta actualización.
+
+IMPORTANTE SOBRE EL DISEÑO:
+
+No quiero que conviertas el foro en una red social completa.
+
+No necesito de momento:
+
+- seguidores
+- likes
+- reacciones complejas
+- perfiles públicos elaborados
+- mensajes privados
+- grupos creados por usuarios
+- sistema de amistad
+- publicaciones con múltiples niveles de comentarios
+
+Quiero comenzar con una estructura simple:
+
+USUARIO
+   ↓
+MENSAJE
+   ↓
+FORO
+
+y opcionalmente:
+
+MENSAJE
+   ↓
+MENSAJE_DESTACADO
+
+El objetivo es tener una base sencilla que después podamos ampliar.

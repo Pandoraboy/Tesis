@@ -1,0 +1,22 @@
+{
+  "folders": [
+    {
+      "name": "Ahora Local",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/vendor": true,
+      "**/node_modules": true,
+      "**/.dart_tool": true,
+      "**/build": true
+    },
+    "search.exclude": {
+      "docs/fuentes/**": true,
+      "**/vendor/**": true,
+      "**/.dart_tool/**": true
+    },
+    "files.trimTrailingWhitespace": true
+  }
+}

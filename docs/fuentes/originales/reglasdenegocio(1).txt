@@ -1,0 +1,84 @@
+Foros
+RB-01: Un usuario autenticado puede publicar mensajes.
+RB-02: Cada mensaje pertenece a un único foro.
+RB-03: Existen cuatro foros comunitarios.
+RB-04: Un mensaje puede ser destacado.
+RB-05: Un mensaje destacado aparece sobre los mensajes normales.
+RB-06: Un mensaje destacado tiene fecha de inicio y vencimiento.
+RB-07: Al vencer, el mensaje pierde automáticamente la condición de destacado.
+RB-08: Un administrador puede validar o cancelar un destacado.
+
+Lugares 
+RB-09: Cada lugar pertenece a una categoría.
+RB-10: Un lugar puede tener múltiples horarios.
+RB-11: Los lugares contienen información de contacto y ubicación.
+RB-12: Solo usuarios con permisos administrativos pueden modificar la información de los lugares.
+
+| Acción              | Visitante | Usuario | Admin |
+| ------------------- | --------: | ------: | ----: |
+| Ver lugares         |         ✅ |       ✅ |     ✅ |
+| Ver horarios        |         ✅ |       ✅ |     ✅ |
+| Ver foros           |         ✅ |       ✅ |     ✅ |
+| Publicar mensaje    |         ❌ |       ✅ |     ✅ |
+| Eliminar su mensaje |         ❌ |       ✅ |     ✅ |
+| Destacar mensaje    |         ❌ |       ✅ |     ✅ |
+| Crear lugar         |         ❌ |       ❌ |     ✅ |
+| Editar lugar        |         ❌ |       ❌ |     ✅ |
+| Moderar mensajes    |         ❌ |       ❌ |     ✅ |
+| Validar destacado   |         ❌ |       ❌ |     ✅ |
+
+Casos de uso
+
+USUARIO
+
+Registrarse
+Iniciar sesión
+Cerrar sesión
+Recuperar contraseña
+
+INFORMACIÓN LOCAL
+
+Ver lugares
+Buscar lugares
+Filtrar lugares
+Ver detalle de lugar
+Ver horarios
+Ver ubicación en mapa
+
+FORO
+
+Ver foros
+Entrar a foro
+Ver mensajes
+Publicar mensaje
+Eliminar mensaje propio
+
+DESTACADOS
+
+Solicitar destacado
+Consultar estado
+Ver destacado
+
+ADMINISTRACIÓN
+
+Gestionar usuarios
+Gestionar lugares
+Gestionar categorías
+Gestionar horarios
+Gestionar mensajes
+Gestionar destacados
+Gestionar foros
+
+REQUISITOS
+    ↓
+REGLAS DE NEGOCIO
+    ↓
+CASOS DE USO
+    ↓
+DER
+    ↓
+API
+    ↓
+LARAVEL
+    ↓
+FLUTTER
