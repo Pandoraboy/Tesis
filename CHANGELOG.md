@@ -1,6 +1,14 @@
 # Registro de cambios
 
 Todos los cambios relevantes del proyecto se documentarán en este archivo.
+### Destacados
+- Solicitud por autor activo y consulta por autor o administrador.
+- Aprobación, rechazo y cancelación administrativos.
+- Fechas normalizadas y conexión PostgreSQL en UTC.
+- Prioridad calculada por vigencia antes de paginar.
+- Inicio inclusivo y fin exclusivo, sin tareas programadas.
+- Mensajes ocultos no aparecen aunque tengan destacado.
+- MVP: un registro de destacado por mensaje, sin renovación.
 
 ## [Sin publicar] · Foros y mensajes — 2026-10-06
 
