@@ -1,30 +1,109 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
-import 'package:ahora_local/main.dart';
+import 'package:ahora_local/core/network/api_client.dart';
+import 'package:ahora_local/features/lugares/data/lugares_repository.dart';
+import 'package:ahora_local/features/lugares/presentation/lugares_page.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('muestra un lugar recibido desde la API', (tester) async {
+    final client = MockClient((request) async {
+      expect(request.method, 'GET');
+      expect(request.url.path, '/api/v1/lugares');
+      expect(request.url.queryParameters['page'], '1');
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      return http.Response(
+        jsonEncode({
+          'data': [
+            {
+              'id': 1,
+              'nombre': 'Café de la Plaza',
+              'categoria': {'id': 1, 'nombre': 'Cafeterías'},
+              'direccion': 'Sector centro',
+              'latitud': -36.424,
+              'longitud': -71.958,
+              'descripcion': null,
+              'telefono': null,
+              'estado_horario': 'abierto',
+            },
+          ],
+          'meta': {
+            'current_page': 1,
+            'last_page': 1,
+            'total': 1,
+            'per_page': 20,
+          },
+        }),
+        200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    addTearDown(client.close);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    final repository = LugaresRepository(ApiClient(client: client));
+
+    await tester.pumpWidget(
+      MaterialApp(home: LugaresPage(repository: repository)),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Café de la Plaza'), findsOneWidget);
+    expect(find.text('Cafeterías'), findsOneWidget);
+    expect(find.text('Sector centro'), findsOneWidget);
+    expect(find.text('Abierto'), findsOneWidget);
+    expect(find.text('1 lugares disponibles'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('permite reintentar después de un error', (tester) async {
+    var intentos = 0;
+
+    final client = MockClient((request) async {
+      intentos++;
+
+      if (intentos == 1) {
+        return http.Response('', 500);
+      }
+
+      return http.Response(
+        jsonEncode({
+          'data': [],
+          'meta': {
+            'current_page': 1,
+            'last_page': 1,
+            'total': 0,
+            'per_page': 20,
+          },
+        }),
+        200,
+      );
+    });
+
+    addTearDown(client.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LugaresPage(
+          repository: LugaresRepository(ApiClient(client: client)),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('No se pudo completar la solicitud.'), findsOneWidget);
+
+    await tester.tap(find.text('Reintentar'));
+    await tester.pumpAndSettle();
+
+    expect(intentos, 2);
+    expect(find.text('No hay lugares disponibles.'), findsOneWidget);
+    expect(find.text('Reintentar'), findsNothing);
   });
 }
