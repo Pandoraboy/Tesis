@@ -1,6 +1,23 @@
-# Contrato REST propuesto · /api/v1
+# Contrato REST · /api/v1
 
-Documento previo a implementación. Identificadores y rutas se fijarán con los tests de cada entrega.
+Actualizado 2026-10-06. Autenticación, categorías, lugares y horarios están implementados; recuperación, foros, destacados y administración de usuarios/foros siguen siendo propuestas. Ver rutas y pruebas como fuente ejecutable.
+
+## API existente
+
+- Auth: POST /auth/register y /auth/login (throttle:5,1); GET /auth/me y POST /auth/logout autenticados.
+- Categorías: GET /categorias público; POST /categorias, PATCH y DELETE /categorias/{categoria} para admin activo.
+- Lugares: GET /lugares y /lugares/{lugar} públicos; POST, PATCH y DELETE correspondientes para admin activo.
+- Horarios: GET /lugares/{lugar}/horarios público; POST en esa colección y PATCH/DELETE /lugares/{lugar}/horarios/{horario} para admin activo.
+- Categorías y lugares se desactivan; horarios se borran físicamente.
+- Lugares usa buscar, categoria_id, page y per_page; paginación 20 por defecto, máximo 100.
+- Solo el listado de lugares usa meta de paginación actualmente; categorías y horarios devuelven data sin meta.
+- Respuestas de lugares incluyen categoria, horarios y estado_horario: abierto/cerrado/sin_horarios, calculado en America/Santiago. Horarios TIME pueden serializarse con segundos; la entrada API usa HH:mm.
+- Registro devuelve data con id, username, role y active. Login devuelve data.user, access_token, token_type y expires_at (7 días). Me devuelve identidad mínima; logout revoca el token actual.
+- Existe además /api/user heredado; no es el contrato previsto para Flutter. Evaluar retirarlo antes de integrar cuentas.
+
+## Mapa de rutas existentes y propuestas
+
+Las rutas de recuperación, foros, mensajes, destacados y /admin de la tabla siguiente son **pendientes**, no endpoints disponibles.
 
 | Método | Ruta | Acceso | Resultado |
 |---|---|---|---|
@@ -29,7 +46,7 @@ Documento previo a implementación. Identificadores y rutas se fijarán con los 
 
 ## Respuestas
 
-Colecciones: `{data: [...], meta: {current_page, per_page, total, last_page}}`. Singular: `{data: {...}}`.
+Colección paginada de lugares: `{data: [...], meta: {current_page, per_page, total, last_page}}`. Categorías y horarios: `{data: [...]}`. Singular: `{data: {...}}`.
 Error: `{message: '...', errors: {...}}` para validaciones; sin detalles internos. 201 creación, 200 lectura/cambio, 204 desactivación, 401 sesión, 403 permiso, 404 ausente/inactivo, 409 transición inválida/duplicado, 422 datos, 429 frecuencia.
 
 Propuesta: per_page=20, máximo 100. Usuario, rol y autor se obtienen en servidor, nunca desde campos libres enviados por cliente. En escritura de horario se verifica también que el horario pertenezca al lugar de la ruta.

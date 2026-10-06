@@ -1,44 +1,64 @@
-# Workspace operativo
+# Continuidad operativa
 
-## Base de trabajo
+Actualizado: 2026-10-06. Repositorio vigente: https://github.com/Pandoraboy/Tesis
 
-Se reaprovecharon los cinco avances adjuntos y la documentación del repositorio. El cambio de calendario es explícito: avanzar por incrementos terminados, con una sola entrega funcional en curso. No se prometen fechas sin conocer dedicación, fecha límite académica y entorno local.
+## Punto de partida para la siguiente sesión
 
-## Decisiones tomadas de los avances
+Laravel ya está implementado para categorías, autenticación, lugares y horarios. El usuario ejecutó toda la suite: **49 pruebas aprobadas, 169 verificaciones**. Flutter se está instalando; `mobile/` todavía no contiene una aplicación ejecutable. Consultar README y AGENTS antes de trabajar.
 
-- Flutter Android, Laravel REST y PostgreSQL.
-- Consulta pública de lugares y foros; escritura autenticada.
-- Cuatro foros configurables en una sola tabla.
-- Usuarios simples: nombre de usuario, contraseña protegida y al menos correo o teléfono.
-- Destacado asociado a un mensaje normal; pierde prioridad al vencer y conserva el mensaje.
-- Roles `user` y `admin`; administración sencilla.
-- Pagos diferidos; validación administrativa para el piloto.
+La siguiente entrega es una **lista pública de lugares en Flutter consumiendo la API**, con detalle y horarios. El mapa sigue siendo la experiencia principal acordada, pero reutilizará la capa de datos validada con esta lista.
 
-## Propuestas de adaptación
+## Entorno observado
 
-Estas propuestas habilitan el diseño, pero deben confirmarse antes de las migraciones correspondientes: foro temático en vez de plaza obligatoria; un único registro de destacado por mensaje en el MVP; solicitudes con estados; horarios nocturnos y de 24 horas; administración en pantallas Android protegidas; recuperación por correo primero y teléfono pendiente de proveedor. Ver ADR-004 y decisiones abiertas.
+- Windows 11; VS Code y PowerShell.
+- Proyecto del usuario: `C:\Users\jimen\OneDrive\Desktop\tesi\Ahora_Local_Workspace_Tesis_v0.2\Ahora-San-Carlos`.
+- Backend en la subcarpeta `backend`.
+- PHP 8.4.26 y Composer 2.10.2 mediante Herd; Laravel 13.35.0; PostgreSQL 18.
+- Bases: `ahora_local` y `ahora_local_test`; credenciales privadas en archivos locales.
+- `php artisan serve`: API local en `http://127.0.0.1:8000/api/v1`.
+- Flutter/Dart/Android SDK: confirmar con `flutter --version` y `flutter doctor`; no asumir instalación terminada.
 
-## Próxima entrega: E1, categorías de extremo a extremo
+La máquina del agente no es el computador del usuario. No afirmar que se modificaron sus archivos de Windows o se ejecutaron pruebas allí sin evidencia. No publicar datos ni secretos locales.
 
-1. Revisar alcance y propuestas de E0.
-2. Registrar versiones de PHP, Composer, PostgreSQL, Flutter, Dart y Android SDK del equipo de trabajo.
-3. Inicializar Laravel en `backend/` y Flutter en `mobile/`, preservando documentación.
-4. Configurar PostgreSQL local y una base exclusiva de pruebas.
-5. Crear migración y modelo de categoría, validaciones, rutas públicas de lectura y escritura administrativa.
-6. Probar éxito, entradas inválidas y permisos en API.
-7. Crear pantalla Flutter: inicial, cargando, datos, vacío y error; evento de reintento.
-8. Guardar evidencia y actualizar el avance.
+## Secuencia inmediata
 
-Dependencia: la escritura administrativa necesita una identidad administrativa autenticada mínima; no dejar rutas de escritura abiertas para adelantar el CRUD.
+1. Confirmar pendientes de instalación reproducible descritos abajo.
+2. Terminar Flutter y Android; seleccionar emulador o teléfono real.
+3. Inicializar la app Android en `mobile/` conservando archivos útiles existentes.
+4. Definir configuración central de API para el dispositivo elegido. El localhost del teléfono no es el localhost del PC.
+5. Separar cliente HTTP compartido y módulo Lugares: modelos, acceso a datos, estado, vistas y widgets reutilizables.
+6. Consultar listado, mostrar tarjetas y gestionar cargando/datos/vacío/error/reintento.
+7. Mostrar detalle, categoría, horarios y estado calculado por backend; añadir búsqueda, filtro y paginación.
+8. Verificar en dispositivo y documentar el flujo antes de incorporar mapa.
 
-## Forma de aprender mientras avanzamos
+## Pendientes detectados en la revisión de f3c04b7
 
-Cada tarea tendrá propósito, entidades afectadas, flujo petición/respuesta, ubicación del código, ejecución y resultado observado. En Laravel: ruta → autorización/validación → controlador → modelo o servicio justificado → PostgreSQL → JSON. En Flutter: evento → solicitud → estado → vista.
+Las correcciones siguientes se indicaron al usuario, pero su aplicación aún debe comprobarse en el siguiente commit:
 
-## Comprobación de esta sesión
+- `database/factories/UserFactory.php` usa `name`; debe generar `username` único, minúsculo y compatible con las reglas actuales.
+- `database/seeders/DatabaseSeeder.php` usa `name`; adaptar a `username`. No ejecutar el seeder heredado antes de corregirlo. Las cuentas demo deben identificarse como demo y nunca convertirse en credenciales productivas.
+- `.env.example` apunta a SQLite; cambiar la plantilla a PostgreSQL, puerto 5432 y base `ahora_local`, manteniendo contraseña vacía. La migración de cuentas contiene SQL específico de PostgreSQL.
+- `.env.testing` es local e ignorado: documentar o agregar una plantilla segura cuando se cierre instalación reproducible.
 
-No se localizaron ejecutables PHP, Composer, Flutter, Dart, PostgreSQL ni Docker en este entorno. La ausencia aquí no determina qué está instalado en el computador del usuario. Este entregable prepara el workspace; no presenta pruebas de ejecución del producto.
+Otros pendientes, sin reabrir todo el backend:
 
-## Continuidad
+- `/api/user` es una ruta heredada que devuelve el modelo completo salvo campos ocultos. Evaluar eliminarla y usar `/api/v1/auth/me` antes de integrar cuentas en Flutter.
+- Para futuras escrituras de usuarios comunes, centralizar comprobación de cuenta activa; Sanctum autentica pero no impone esa regla por sí solo.
+- Revisar formato con Pint cuando se toque el módulo correspondiente; no mezclar limpieza masiva con una entrega de producto.
+- Horarios excluye feriados/cierres excepcionales; bloqueo concurrente existe, pero no hay prueba de concurrencia ni prueba específica de cambios de reloj durante un tramo nocturno.
+- La documentación de diseño puede contener propuestas anteriores; el código, pruebas y decisiones actuales prevalecen para describir lo implementado.
 
-Al cerrar una entrega, completar `docs/validacion/PLANTILLA-EVIDENCIA.md`, marcar solo lo demostrado y registrar el próximo paso. Las fuentes históricas y el SQL candidato no reemplazan las migraciones de Laravel.
+## Decisiones vigentes
+
+- Laravel REST + PostgreSQL + Flutter Android.
+- Modularidad y DRY: reutilizar conceptos comunes y mantener responsabilidades pequeñas, sin capas genéricas preventivas.
+- Lectura pública; escritura autenticada; gestión de categorías/lugares/horarios para administrador activo.
+- Mapa con negocios y foros, tarjetas y alternativa de lista compartiendo datos.
+- Foros: Plaza de Armas, Cementerio, Estación, Alameda; coordenadas pendientes.
+- Cuenta username/contraseña y correo o teléfono; roles user/admin.
+- Destacados de vigencia limitada con aprobación administrativa; pagos diferidos.
+- API primero; siguiente pantalla después de validar su contrato.
+
+## Cómo cerrar un incremento
+
+Actualizar README cuando cambie el estado general, este archivo para continuidad, backlog y CHANGELOG. Registrar comando, entorno, resultado y limitaciones en evidencia. Ejecutar pruebas proporcionales; ampliar solo si cambios o fallos lo justifican. No hacer push sin autorización ni cambiar dependencias automáticamente. Nunca usar bases reales para pruebas destructivas.
