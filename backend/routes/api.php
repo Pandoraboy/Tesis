@@ -1,52 +1,71 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoriaLugarController;
+use App\Http\Controllers\Api\HorarioLugarController;
+use App\Http\Controllers\Api\LugarController;
+use App\Http\Middleware\EnsureActiveAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\CategoriaLugarController;
-use App\Http\Middleware\EnsureActiveAdmin;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\LugarController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::get('/v1/categorias', [CategoriaLugarController::class, 'index']);
+Route::prefix('v1')->group(function () {
+    // Autenticación.
+    Route::prefix('auth')->group(function () {
+        Route::middleware('throttle:5,1')->group(function () {
+            Route::post('register', [AuthController::class, 'register']);
+            Route::post('login', [AuthController::class, 'login']);
+        });
 
-Route::post('/v1/categorias', [CategoriaLugarController::class, 'store'])
-    ->middleware(['auth:sanctum', EnsureActiveAdmin::class]);
-
-Route::patch(
-    '/v1/categorias/{categoria}',
-    [CategoriaLugarController::class, 'update']
-)->middleware(['auth:sanctum', EnsureActiveAdmin::class]);
-
-Route::delete(
-    '/v1/categorias/{categoria}',
-    [CategoriaLugarController::class, 'destroy']
-)->middleware(['auth:sanctum', EnsureActiveAdmin::class]);
-
-Route::prefix('v1/auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register'])
-        ->middleware('throttle:5,1');
-
-    Route::post('/login', [AuthController::class, 'login'])
-        ->middleware('throttle:5,1');
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::get('me', [AuthController::class, 'me']);
+            Route::post('logout', [AuthController::class, 'logout']);
+        });
     });
-});
 
-Route::get('/v1/lugares', [LugarController::class, 'index']);
-Route::get('/v1/lugares/{lugar}', [LugarController::class, 'show']);
+    // Consultas públicas.
+    Route::get('categorias', [CategoriaLugarController::class, 'index']);
 
-Route::middleware([
-    'auth:sanctum',
-    EnsureActiveAdmin::class,
-])->group(function () {
-    Route::post('/v1/lugares', [LugarController::class, 'store']);
-    Route::patch('/v1/lugares/{lugar}', [LugarController::class, 'update']);
-    Route::delete('/v1/lugares/{lugar}', [LugarController::class, 'destroy']);
+    Route::get('lugares', [LugarController::class, 'index']);
+    Route::get('lugares/{lugar}', [LugarController::class, 'show']);
+    Route::get(
+        'lugares/{lugar}/horarios',
+        [HorarioLugarController::class, 'index']
+    );
+
+    // Administración: requiere una cuenta administradora activa.
+    Route::middleware([
+        'auth:sanctum',
+        EnsureActiveAdmin::class,
+    ])->group(function () {
+        Route::post('categorias', [CategoriaLugarController::class, 'store']);
+        Route::patch(
+            'categorias/{categoria}',
+            [CategoriaLugarController::class, 'update']
+        );
+        Route::delete(
+            'categorias/{categoria}',
+            [CategoriaLugarController::class, 'destroy']
+        );
+
+        Route::post('lugares', [LugarController::class, 'store']);
+        Route::patch('lugares/{lugar}', [LugarController::class, 'update']);
+        Route::delete('lugares/{lugar}', [LugarController::class, 'destroy']);
+
+        Route::post(
+            'lugares/{lugar}/horarios',
+            [HorarioLugarController::class, 'store']
+        );
+        Route::patch(
+            'lugares/{lugar}/horarios/{horario}',
+            [HorarioLugarController::class, 'update']
+        );
+        Route::delete(
+            'lugares/{lugar}/horarios/{horario}',
+            [HorarioLugarController::class, 'destroy']
+        );
+    });
 });

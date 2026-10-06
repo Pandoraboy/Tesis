@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Lugar extends Model
 {
@@ -36,4 +37,10 @@ class Lugar extends Model
             'categoria_lugar_id'
         );
     }
+    public function horarios(): HasMany
+{
+    return $this->hasMany(HorarioLugar::class, 'lugar_id')
+        ->orderBy('dia_semana')
+        ->orderBy('hora_apertura');
+}
 }
