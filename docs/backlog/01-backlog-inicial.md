@@ -1,26 +1,30 @@
 # Backlog por entregas verificables
 
-Actualizado 2026-10-06, código revisado 09763d2. Un incremento en curso; avance por funcionalidad comprobada, sin calendario antiguo.
+Actualizado 2026-10-08, código revisado 53ceadd. Un incremento en curso; avance por funcionalidad comprobada, sin calendario antiguo.
 
 | Entrega | Estado real | Restante |
 |---|---|---|
 | Workspace | Alcance y convenciones documentados | Mantener continuidad |
-| Categorías | API y pruebas | Selector/gestión Flutter |
-| Lugares y horarios | API, DEMO, lista/detalle Android y estado/horarios | Buscador/filtro visual, pruebas detalle, gestión |
+| Categorías | API y pruebas | Gestión Flutter |
+| Lugares y horarios | API, DEMO, lista/detalle Android y estado/horarios | Pruebas detalle, gestión |
 | Mapa | Coordenadas de negocios y flujo acordado | Proveedor, GPS/proximidad, coordenadas foros, mapa/tarjetas |
 | Cuentas | Sanctum, permisos y administración de estado | Sesión/login/registro Flutter y recuperación |
 | Foros/mensajes | API, lectura, publicación, retirada y moderación | Pantallas Android |
 | Destacados | Solicitud/revisión/prioridad por vigencia | Pantallas de usuario/admin; pagos fuera del MVP |
 | Piloto/tesis | Pendiente | HTTPS, release, respaldo, datos reales y evaluación |
 
-## En curso: búsqueda y categoría en Flutter
+## En curso: mapa 2D
 
-- [ ] Modelo y consulta de categorías activas.
-- [ ] Buscador y selector reutilizando parámetros existentes.
-- [ ] Cambios de filtro vuelven a página 1.
-- [ ] Actualización/paginación conservan filtros.
-- [ ] Vacío, error, reintento y combinación de filtros verificados.
-- [ ] Análisis/tests y comprobación en Android.
+- [x] Inicio y navegación inferior con conservación de estado.
+- [x] Búsqueda/categoría y pruebas de envío/limpieza/conservación de filtros.
+- [x] Librería acordada: flutter_map; boceto en docs/diseno/.
+- [ ] Proveedor de mapa de fondo, atribución y condiciones de uso.
+- [ ] Mapa de tres DEMO e iconos por categoría.
+- [ ] Tarjeta inferior que se amplía al deslizar; detalle/horarios reutilizados.
+- [ ] Definir carga de marcadores para no omitir lugares por paginación.
+- [ ] Filtros mapa/lista sin duplicar reglas.
+- [ ] GPS con alternativa sin permiso; coordenadas verificadas de foros.
+- [ ] Análisis/tests pertinentes y comprobación real Android.
 
 ## Cerrado en la sesión
 
@@ -32,7 +36,7 @@ Actualizado 2026-10-06, código revisado 09763d2. Un incremento en curso; avance
 - [x] Detalle con descripción, teléfono si existe y horarios por día.
 - [x] Locales DEMO en app Android comprobados por usuario.
 
-Evidencia reportada por usuario: 114 pruebas backend / 516 assertions; Flutter analyze sin incidencias y 2 tests aprobados. Tests móviles de listado/reintento; detalle probado manualmente. No afirmar cobertura automática de detalle, GPS, producción o piloto.
+Evidencia reportada por usuario: 114 pruebas backend / 516 assertions; Flutter analyze sin incidencias y 4 tests aprobados. Tests móviles de listado/reintento y filtros; detalle y navegación principal comprobados manualmente. No afirmar cobertura automática de detalle, GPS, producción o piloto.
 
 ## Criterios siguientes
 

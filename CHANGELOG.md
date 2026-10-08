@@ -85,3 +85,11 @@ Las correcciones de fábrica, seeder y plantilla de entorno están pendientes de
 - Backlog inicial.
 - Registro de decisiones técnicas.
 - Plantillas para incidencias de GitHub.
+
+
+## [Continuidad de inicio y mapa] - 2026-10-08
+
+- Revisado commit 53ceadd: Inicio, navegación inferior con IndexedStack y búsqueda/categoría implementados.
+- Actualizados README raíz/móvil, AGENTS, WORKSPACE y backlog; añadido boceto y decisiones en docs/diseno.
+- Elección vigente: flutter_map, mapa 2D, iconos por categoría y tarjeta inferior ampliable; proveedor pendiente. Logo/colores pendientes.
+- Evidencia del usuario: cuatro pruebas Flutter aprobadas y navegación en emulador con Laravel. Sin ejecución Flutter por el agente ni mapa implementado.

@@ -11,7 +11,7 @@ Las instrucciones actuales del usuario tienen prioridad. Después siguen las dec
 
 ## Estado que no debe perderse
 
-Backend Laravel implementa categorías, cuentas Sanctum, lugares, horarios, foros, mensajes, destacados y administración. Última suite reportada por el usuario el 2026-10-06: 114 pruebas, 516 assertions. Flutter Android ejecuta lista, tarjetas, detalle y horarios; flutter analyze sin incidencias y 2 pruebas aprobadas reportadas. El mapa no está implementado. Próximo incremento: buscador y filtro de categoría en Flutter, conservando paginación. README actualizado con revisión de 09763d2; las cifras anteriores de 49 pruebas describen un hito histórico.
+Backend Laravel implementa categorías, cuentas Sanctum, lugares, horarios, foros, mensajes, destacados y administración. Última suite backend reportada: 114 pruebas / 516 assertions (2026-10-06). Código revisado 53ceadd (2026-10-08): Flutter incluye Inicio, navegación inferior, búsqueda/categoría, lista/detalle/horarios. Usuario reporta cuatro tests Flutter aprobados y navegación real en emulador. Mapa y Chat son provisionales; sesión móvil pendiente. Próximo incremento: mapa 2D con flutter_map, proveedor por elegir, iconos de categoría y tarjeta inferior ampliable. Leer docs/diseno/01-inicio-y-mapa.md. Logo/colores pendientes; no sustituir esta decisión por la propuesta anterior de MapLibre.
 
 Foros acordados: Plaza de Armas, Cementerio, Estación y Alameda. Leer README para alcance completo. No agregar pagos, delivery, catálogo de productos individuales, iOS ni funcionalidades sociales ajenas al alcance.
 

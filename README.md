@@ -2,7 +2,7 @@
 
 Proyecto de tesis: aplicación Android para descubrir negocios y servicios de San Carlos y participar en cuatro foros comunitarios. **Laravel REST + PostgreSQL + Flutter Android**.
 
-Repositorio vigente: [Pandoraboy/Tesis](https://github.com/Pandoraboy/Tesis). Estado actualizado al **6 de octubre de 2026**, a partir del código publicado en `09763d2` y las verificaciones reportadas por el usuario.
+Repositorio vigente: [Pandoraboy/Tesis](https://github.com/Pandoraboy/Tesis). Estado actualizado al **8 de octubre de 2026**, a partir del código publicado en `53ceadd` y las verificaciones reportadas por el usuario.
 
 ## Para continuar el proyecto — personas e IA
 
@@ -31,25 +31,26 @@ Las pantallas móviles de cuentas, participación y administración todavía est
 
 | Módulo | Backend implementado | Flutter implementado / pendiente |
 |---|---|---|
-| Categorías | Consulta pública; crear, editar y desactivar como admin | Nombre de categoría en tarjetas; selector y gestión pendientes |
+| Categorías | Consulta pública; crear, editar y desactivar como admin | Nombre de categoría y selector implementados; gestión pendiente |
 | Cuentas | Registro, login, identidad, logout y tokens Sanctum; bloqueo de inactivos | Login, registro y sesión pendientes |
-| Lugares | Listado, detalle, búsqueda, filtro, paginación y CRUD admin | Lista, tarjetas, paginación, actualización y navegación al detalle; buscador/filtro y gestión pendientes |
+| Lugares | Listado, detalle, búsqueda, filtro, paginación y CRUD admin | Lista, tarjetas, búsqueda, filtro, paginación, actualización y detalle; gestión pendiente |
 | Horarios | Tramos semanales, nocturnos, 24 horas, validación de superposición y estado de atención | Estado en tarjeta y horarios por día en detalle |
 | Foros y mensajes | Cuatro foros, lectura, publicación, retirada lógica y moderación | Pantallas pendientes |
 | Destacados | Solicitud, aprobación/rechazo/cancelación y prioridad por vigencia | Pantallas pendientes |
 | Administración | Foros, usuarios comunes y destacados; gestión de categorías/lugares/horarios | Interfaz pendiente |
 | Datos DEMO | Tres locales ficticios y 28 tramos semanales; seeder conservador al repetir | Consultados en emulador |
+| Inicio y navegación | No requiere endpoint propio | Inicio, tarjetas de acceso y barra inferior; Mapa/Chat provisionales |
 | Mapa y ubicación | Coordenadas de lugares disponibles; consulta por proximidad pendiente | Proveedor, mapa, GPS y marcadores pendientes |
 
-**Flujo comprobado por el usuario:** PostgreSQL → API Laravel → lista de tarjetas en Android → detalle → horarios → regreso a lista.
+**Flujo comprobado por el usuario:** PostgreSQL → API Laravel → Inicio → Búsqueda con filtros → detalle → horarios; regreso y cambio de secciones conservan estado.
 
-Evidencia reportada en Windows el 2026-10-06:
+Evidencia reportada en Windows (backend: 2026-10-06; Flutter: 2026-10-08):
 
 - Backend: `php artisan test` → **114 pruebas aprobadas, 516 assertions**; incluye dos ejemplos de Laravel.
-- Flutter: `flutter analyze` sin incidencias y `flutter test` → **2 pruebas aprobadas**.
-- Emulador: lista y detalle de los tres locales DEMO comprobados manualmente.
+- Flutter: `flutter analyze` sin incidencias y `flutter test` → **4 pruebas aprobadas**.
+- Emulador: lista/detalle DEMO e Inicio con navegación comprobados manualmente con Laravel encendido.
 
-Estas son ejecuciones del usuario, no del agente que actualizó la documentación. Las dos pruebas Flutter cubren listado con respuesta simulada y recuperación tras error; no cubren todavía navegación/detalle, horarios, filtros ni conexión real. No hay validación de producción ni piloto.
+Estas son ejecuciones del usuario, no del agente que actualizó la documentación. Las cuatro pruebas Flutter cubren listado, recuperación tras error, búsqueda/limpieza y categoría conservada al actualizar, mediante MockClient. La navegación principal y el detalle se comprobaron manualmente; no tienen cobertura automática todavía. No hay validación de producción ni piloto.
 
 ## Arquitectura: modularidad y DRY
 
@@ -72,6 +73,9 @@ La superposición de horarios permanece en `HorarioLugarController`; extraerla c
 | Ubicación en `mobile/lib/` | Responsabilidad |
 |---|---|
 | `main.dart` | Composición de la app, tema y ciclo de vida del cliente HTTP |
+| `core/navigation/principal_page.dart` | Barra inferior, creación diferida y conservación de secciones con IndexedStack |
+| `features/inicio/presentation/` | Inicio y tarjeta de acceso reutilizable con callbacks |
+| `features/categorias/` | Modelo y repositorio de categorías |
 | `core/config/api_config.dart` | URL central configurable con `API_BASE_URL` |
 | `core/network/api_client.dart` | GET JSON, UTF-8, timeout y errores comunes |
 | `features/lugares/models/` | `Lugar`, `EstadoHorario` y `HorarioLugar` |
@@ -79,7 +83,7 @@ La superposición de horarios permanece en `HorarioLugarController`; extraerla c
 | `features/lugares/presentation/` | Lista y detalle con carga, error y reintento |
 | `features/lugares/presentation/widgets/lugar_card.dart` | Tarjeta reutilizable; acción al tocar opcional |
 
-Se usa `StatefulWidget` + `FutureBuilder`; las consultas se crean en `initState` o por acciones explícitas, no dentro de `build`. El repositorio ya acepta búsqueda/categoría aunque todavía no existen sus controles visuales. Elegir dependencias de estado/mapa según necesidades concretas.
+Se usa `StatefulWidget` + `FutureBuilder`; las consultas se crean en `initState` o por acciones explícitas, no dentro de `build`. Búsqueda y categoría tienen controles visuales; cambiar filtros vuelve a página 1, actualizar/paginar conserva filtros. PrincipalPage crea cada sección al abrirla y la conserva con IndexedStack. Inicio abre directamente durante desarrollo: todavía no existe login/sesión Flutter.
 
 Identificadores de dominio en español sin tildes (`Lugar`, `estacion`); texto visible con tildes. Autenticación conserva `username`, `role` y `active`. `\u00f3` en JSON es una representación válida de «ó», no un nombre distinto en la base.
 
@@ -210,14 +214,25 @@ flutter test
 
 Las pruebas actuales usan `MockClient`: no requieren Laravel ni emulador. Verificar también el flujo real en Android al cambiar integración o navegación.
 
+## Diseño y decisiones vigentes del mapa
+
+Referencia: [boceto principal](docs/diseno/bocetomain.jfif) y [decisiones de navegación/mapa](docs/diseno/01-inicio-y-mapa.md).
+
+- Inicio, Mapa, Búsqueda y Chat / Tablón; tarjetas y barra inferior acceden a las mismas secciones.
+- Elegido `flutter_map` por simplicidad. MapLibre fue evaluado y no es la elección vigente. La dependencia y el mapa aún no están instalados/implementados; proveedor de fondo pendiente.
+- Mapa 2D con iconos por categoría (tienda, comida, cajero, etc.). Material inicialmente; referencia visual al radar de GTA SA, sin recursos originales incorporados.
+- Tocar marcador abre tarjeta inferior; deslizar la amplía para mostrar información y horarios, reutilizando modelos y reglas existentes.
+- Datos propios administrados en Laravel. Coordenadas manuales latitud/longitud, seleccionando la entrada y validando ubicación; Google Maps puede servir de referencia para recogerlas, sujeto a sus condiciones de uso.
+- Primero tres locales DEMO; después GPS y marcadores de foros con coordenadas verificadas. Logo y colores definitivos pendientes.
+
 ## Próximas entregas, en orden
 
-1. **Buscador y selector de categoría en Flutter**, reutilizando filtros del API; volver a página 1 al cambiar filtros, conservarlos al paginar/actualizar y cubrir vacío/error.
-2. Ampliar pruebas de detalle, navegación y representación de horarios; extraer widgets compartidos de carga/error cuando su reutilización aporte claridad.
-3. Mapa 2D con tarjetas y detalle compartidos con la lista; elegir proveedor, validar coordenadas de foros e integrar GPS/proximidad con alternativa si se deniega permiso.
-4. Registro/login/sesión segura en Flutter y manejo de vencimiento/revocación; recuperación de contraseña pendiente en backend.
-5. Foros y mensajes en Flutter; después destacados y pantallas administrativas dentro del alcance acordado.
-6. Preparar HTTPS, permisos release, firma/despliegue, respaldo, datos reales y evaluación del piloto/tesis.
+1. Mapa 2D con `flutter_map`: seleccionar proveedor compatible y documentar atribución/condiciones; mostrar DEMO, iconos y tarjeta ampliable. No presentar solo la primera página del API como catálogo completo: definir carga de marcadores y límites.
+2. Añadir filtros compartidos, GPS con alternativa sin permiso y coordenadas validadas de foros. Mantener útil el mapa sin GPS.
+3. Ampliar pruebas de navegación principal, detalle y horarios según nuevos cambios.
+4. Registro/login/sesión segura Flutter y manejo de vencimiento/revocación; recuperación de contraseña pendiente en backend. Conectar Inicio después de login.
+5. Foros/mensajes, destacados y pantallas administrativas dentro del alcance.
+6. HTTPS, permisos release, firma/despliegue, respaldo, datos reales y evaluación del piloto/tesis.
 
 No medir avance con porcentajes ficticiamente exactos ni confundir API disponible con pantalla terminada. No están probados concurrencia real, cambios de reloj en tramos nocturnos, release ni despliegue.
 

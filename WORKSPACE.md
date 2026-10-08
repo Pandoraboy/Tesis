@@ -1,16 +1,18 @@
 # Continuidad operativa
 
-Actualizado: 2026-10-06. Código revisado: `09763d2`, [Pandoraboy/Tesis](https://github.com/Pandoraboy/Tesis).
+Actualizado: 2026-10-08. Código revisado: `53ceadd`, [Pandoraboy/Tesis](https://github.com/Pandoraboy/Tesis).
 
 ## Estado para retomar
 
-Leer README y AGENTS. Backend: categorías, autenticación, lugares/horarios, foros/mensajes, destacados y administración disponibles. Flutter Android: lista, tarjetas, detalle y horarios conectados a Laravel, comprobados por el usuario en emulador. Mapa, cuentas y foros móviles pendientes.
+Leer README y AGENTS. Backend: categorías, autenticación, lugares/horarios, foros/mensajes, destacados y administración disponibles. Flutter Android: Inicio, navegación, búsqueda/categoría, lista, tarjetas, detalle y horarios conectados a Laravel, comprobados por el usuario en emulador. Mapa, cuentas y foros móviles pendientes.
 
-Evidencia del usuario: backend 114 tests / 516 assertions; Flutter analyze sin incidencias y 2 tests aprobados. No son ejecuciones del agente. Las pruebas móviles actuales cubren listado y reintento, no detalle/mapa.
+Evidencia del usuario: backend 114 tests / 516 assertions; Flutter analyze sin incidencias y 4 tests aprobados. No son ejecuciones del agente. Las pruebas móviles cubren listado, reintento, búsqueda/limpieza y categoría/actualización; no detalle/mapa ni navegación principal.
 
 ## Siguiente incremento
 
-Buscador y filtro por categoría en Flutter. El repositorio de lugares ya admite buscar/categoriaId; falta modelo/repositorio de categorías y controles visuales. Resetear página al cambiar filtros, preservarlos al actualizar/paginar; verificar combinación y ausencia de resultados. Reutilizar datos/widgets cuando se incorpore mapa.
+Mapa 2D con flutter_map (elección vigente por simplicidad), tres negocios DEMO, iconos por categoría y tarjeta inferior ampliable. Proveedor de fondo pendiente: revisar condiciones/atribución antes de configurar. Modelos/repositorios y detalle se reutilizan; definir cómo cargar marcadores sin omitir páginas del API. Luego GPS y coordenadas de foros. Boceto y decisiones: docs/diseno/01-inicio-y-mapa.md.
+
+Inicio y navegación inferior ya implementados con IndexedStack y creación diferida; conserva estado al cambiar secciones. Búsqueda/categoría ya implementadas y probadas. Mapa y Chat aún son pantallas provisionales; la app abre Inicio sin login durante desarrollo. Logo y colores no definidos.
 
 ## Entorno
 
@@ -26,9 +28,9 @@ Bases: ahora_local y ahora_local_test. Laravel serve en 127.0.0.1:8000; Flutter 
 - Seeder general crea cuenta demo; usar ForoSeeder y LugaresDemoSeeder explícitos para cargar catálogos. No crear credenciales productivas desde factory.
 - .env.testing sigue siendo configuración local; seguir instrucciones de README para base exclusiva de pruebas. No usar migrate:fresh en desarrollo.
 - /api/user sigue devolviendo el modelo salvo campos ocultos; revisar antes de publicación y usar auth/me en pantallas nuevas.
-- Sesión Flutter, recuperación de contraseña, GPS/proximidad, coordenadas de foros y proveedor de mapa pendientes.
+- Sesión Flutter, recuperación de contraseña, GPS/proximidad, coordenadas de foros y proveedor de fondo pendientes; librería elegida: flutter_map.
 - Estado horario se refresca al consultar; sin refresco periódico ni feriados/excepciones. Concurrencia real/DST nocturno y producción sin validar.
-- Dos pruebas Flutter; ampliar detalle/navegación/horarios al cerrar ese módulo.
+- Cuatro pruebas Flutter; ampliar detalle/navegación/horarios al cerrar ese módulo.
 - Contrato propuesto y documentos históricos pueden estar desactualizados: confirmar cada endpoint en routes/api.php y Requests/pruebas.
 
 ## Trabajo y cierre
