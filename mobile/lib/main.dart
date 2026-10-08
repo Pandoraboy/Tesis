@@ -7,6 +7,7 @@ import 'features/lugares/data/lugares_repository.dart';
 import 'core/navigation/principal_page.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
