@@ -9,13 +9,13 @@ class ApiException implements Exception {
   const ApiException(
     this.message, {
     this.statusCode,
+    this.code,
     this.validationErrors = const {},
   });
-
   final String message;
   final int? statusCode;
+  final String? code;
   final Map<String, List<String>> validationErrors;
-
   @override
   String toString() => message;
 }
@@ -23,7 +23,6 @@ class ApiException implements Exception {
 class ApiClient {
   ApiClient({required this.client, String baseUrl = ApiConfig.baseUrl})
     : _baseUri = Uri.parse(baseUrl.endsWith('/') ? baseUrl : '$baseUrl/');
-
   final http.Client client;
   final Uri _baseUri;
 
@@ -58,46 +57,33 @@ class ApiClient {
     final uri = _baseUri
         .resolve(path)
         .replace(queryParameters: queryParameters);
-
     final headers = <String, String>{
       'Accept': 'application/json',
       if (body != null) 'Content-Type': 'application/json; charset=utf-8',
       if (token != null) 'Authorization': 'Bearer $token',
     };
-
     try {
       final request = http.Request(method, uri);
       request.headers.addAll(headers);
-
-      if (body != null) {
-        request.body = jsonEncode(body);
-      }
-
-      // El límite incluye recibir el cuerpo completo de la respuesta.
+      if (body != null) request.body = jsonEncode(body);
       final response = await (() async {
         final streamed = await client.send(request);
         return http.Response.fromStream(streamed);
       })().timeout(const Duration(seconds: 15));
-
       if (response.statusCode < 200 || response.statusCode >= 300) {
+        final datos = _leerError(response);
         throw ApiException(
           _mensajeError(response.statusCode),
           statusCode: response.statusCode,
-          validationErrors: _leerErroresValidacion(response),
+          code: datos['code'] is String ? datos['code'] as String : null,
+          validationErrors: _leerErroresValidacion(response.statusCode, datos),
         );
       }
-
-      // Logout responde 204 y no contiene JSON.
-      if (response.statusCode == 204) {
-        return <String, dynamic>{};
-      }
-
+      if (response.statusCode == 204) return <String, dynamic>{};
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-
       if (decoded is! Map<String, dynamic>) {
         throw const FormatException('Se esperaba un objeto JSON.');
       }
-
       return decoded;
     } on TimeoutException {
       throw const ApiException(
@@ -124,33 +110,28 @@ class ApiClient {
     };
   }
 
-  Map<String, List<String>> _leerErroresValidacion(http.Response response) {
-    if (response.statusCode != 422) {
-      return const {};
-    }
-
+  Map<String, dynamic> _leerError(http.Response response) {
     try {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-
-      if (decoded is! Map<String, dynamic>) {
-        return const {};
-      }
-
-      final errors = decoded['errors'];
-
-      if (errors is! Map<String, dynamic>) {
-        return const {};
-      }
-
-      return Map<String, List<String>>.unmodifiable({
-        for (final entry in errors.entries)
-          if (entry.value is List)
-            entry.key: List<String>.unmodifiable(
-              (entry.value as List).whereType<String>(),
-            ),
-      });
+      return decoded is Map<String, dynamic> ? decoded : const {};
     } on FormatException {
       return const {};
     }
+  }
+
+  Map<String, List<String>> _leerErroresValidacion(
+    int statusCode,
+    Map<String, dynamic> datos,
+  ) {
+    if (statusCode != 422) return const {};
+    final errors = datos['errors'];
+    if (errors is! Map<String, dynamic>) return const {};
+    return Map<String, List<String>>.unmodifiable({
+      for (final entry in errors.entries)
+        if (entry.value is List)
+          entry.key: List<String>.unmodifiable(
+            (entry.value as List).whereType<String>(),
+          ),
+    });
   }
 }

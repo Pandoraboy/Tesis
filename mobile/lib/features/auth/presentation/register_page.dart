@@ -6,10 +6,7 @@ import '../../../core/network/api_client.dart';
 import '../data/auth_repository.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({
-    required this.repository,
-    super.key,
-  });
+  const RegisterPage({required this.repository, super.key});
 
   final AuthRepository repository;
 
@@ -151,9 +148,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                           if (correo.isNotEmpty &&
                               (correo.length > 255 ||
-                                  !RegExp(
-                                    r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                                  ).hasMatch(correo))) {
+                                  !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+                                      .hasMatch(correo))) {
                             return 'Revisa el correo electrónico.';
                           }
                           return null;
@@ -163,15 +159,15 @@ class _RegisterPageState extends State<RegisterPage> {
                         controller: _phone,
                         campo: 'phone',
                         etiqueta: 'Teléfono',
-                        ayuda: 'Formato internacional, por ejemplo +56912345678.',
+                        ayuda:
+                            'Formato internacional, por ejemplo +56912345678.',
                         keyboardType: TextInputType.phone,
                         validator: (value) {
                           final telefono = (value ?? '').trim();
 
                           if (telefono.isNotEmpty &&
-                              !RegExp(
-                                r'^\+[1-9][0-9]{7,14}$',
-                              ).hasMatch(telefono)) {
+                              !RegExp(r'^\+[1-9][0-9]{7,14}$')
+                                  .hasMatch(telefono)) {
                             return 'Incluye +, código de país y número.';
                           }
                           return null;

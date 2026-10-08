@@ -196,10 +196,7 @@ class _LugaresPageState extends State<LugaresPage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             '${resultado.total} lugares disponibles',
             style: Theme.of(context).textTheme.titleSmall,
@@ -207,13 +204,10 @@ class _LugaresPageState extends State<LugaresPage> {
         ),
         Expanded(
           child: ListView.separated(
-            key: ValueKey(
-              '${resultado.paginaActual}|$_buscar|$_categoriaId',
-            ),
+            key: ValueKey('${resultado.paginaActual}|$_buscar|$_categoriaId'),
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
             itemCount: resultado.lugares.length,
-            separatorBuilder: (context, index) =>
-                const SizedBox(height: 8),
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final lugar = resultado.lugares[index];
 

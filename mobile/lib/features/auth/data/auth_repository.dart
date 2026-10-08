@@ -47,6 +47,42 @@ class AuthRepository {
     );
   }
 
+  Future<Sesion> loginGoogle({required String idToken}) async {
+    final json = await _api.postJson(
+      'auth/google/login',
+      body: {'id_token': idToken},
+    );
+
+    return _leerRespuesta(
+      () => Sesion.fromJson(json['data'] as Map<String, dynamic>),
+    );
+  }
+
+  Future<Cuenta> registerGoogle({
+    required String username,
+    required String idToken,
+  }) async {
+    final json = await _api.postJson(
+      'auth/google/register',
+      body: {'username': username.trim().toLowerCase(), 'id_token': idToken},
+    );
+
+    return _leerRespuesta(
+      () => Cuenta.fromJson(json['data'] as Map<String, dynamic>),
+    );
+  }
+
+  Future<void> vincularGoogle({
+    required String token,
+    required String idToken,
+  }) async {
+    await _api.postJson(
+      'auth/google/link',
+      token: token,
+      body: {'id_token': idToken},
+    );
+  }
+
   Future<Cuenta> me(String token) async {
     final json = await _api.getJson('auth/me', token: token);
 

@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../../../core/session/sesion_controller.dart';
 import '../../../core/session/usuarios_recordados_storage.dart';
 import 'register_page.dart';
+import 'google_register_page.dart';
+import '../data/google_sign_in_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({required this.sesionController, super.key});
@@ -20,6 +22,9 @@ class _LoginPageState extends State<LoginPage> {
   List<String> _usuarios = const [];
   bool _cargando = true;
   bool _gestionando = false;
+  bool _googleEnCurso = false;
+  String? _errorGoogle;
+  final _googleService = GoogleSignInService();
   bool _mostrarFormulario = false;
   bool _recordarUsuario = false;
   bool _ocultarPassword = true;
@@ -44,13 +49,17 @@ class _LoginPageState extends State<LoginPage> {
     });
     try {
       final usuarios = await _recordadosStorage.listar();
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _usuarios = usuarios;
         _mostrarFormulario = usuarios.isEmpty;
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _errorHistorial = 'No se pudieron cargar los usuarios recordados.';
         _mostrarFormulario = true;
@@ -81,7 +90,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _quitarUsuario(String username) async {
-    if (_gestionando || widget.sesionController.ocupado) return;
+    if (_gestionando || _googleEnCurso || widget.sesionController.ocupado) {
+      return;
+    }
     setState(() {
       _gestionando = true;
       _errorHistorial = null;
@@ -89,7 +100,9 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await _recordadosStorage.quitar(username);
       final usuarios = await _recordadosStorage.listar();
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _usuarios = usuarios;
         if (usuarios.isEmpty) {
@@ -97,7 +110,9 @@ class _LoginPageState extends State<LoginPage> {
         }
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _errorHistorial = 'No se pudo quitar el usuario. Intenta nuevamente.';
       });
@@ -109,8 +124,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _entrar() async {
-    if (widget.sesionController.ocupado || _gestionando) return;
-    if (!_formKey.currentState!.validate()) return;
+    if (widget.sesionController.ocupado || _gestionando || _googleEnCurso) {
+      return;
+    }
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     FocusScope.of(context).unfocus();
     // Capturamos valores antes del login: SesionGate retirará esta
     // pantalla cuando la autenticación termine correctamente.
@@ -122,7 +141,9 @@ class _LoginPageState extends State<LoginPage> {
       username: _usernameController.text,
       password: _passwordController.text,
     );
-    if (!entro) return;
+    if (!entro) {
+      return;
+    }
     TextInput.finishAutofillContext();
     if (mounted) {
       _passwordController.clear();
@@ -150,14 +171,18 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _crearCuenta() async {
-    if (widget.sesionController.ocupado || _gestionando) return;
+    if (widget.sesionController.ocupado || _gestionando || _googleEnCurso) {
+      return;
+    }
     final username = await Navigator.of(context).push<String>(
       MaterialPageRoute<String>(
         builder: (context) =>
             RegisterPage(repository: widget.sesionController.repository),
       ),
     );
-    if (!mounted || username == null) return;
+    if (!mounted || username == null) {
+      return;
+    }
     _usernameController.text = username;
     _passwordController.clear();
     setState(() {
@@ -171,12 +196,74 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<void> _continuarConGoogle() async {
+    if (_googleEnCurso || _gestionando || widget.sesionController.ocupado) {
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    _passwordController.clear();
+    setState(() {
+      _googleEnCurso = true;
+      _errorGoogle = null;
+    });
+    final controller = widget.sesionController;
+    try {
+      final idToken = await _googleService.obtenerIdToken();
+      if (!mounted || idToken == null) {
+        return;
+      }
+      var entro = await controller.loginGoogle(idToken: idToken);
+      if (entro || !mounted) {
+        return;
+      }
+      if (controller.errorCode == 'google_account_not_linked') {
+        final creada = await Navigator.of(context).push<bool>(
+          MaterialPageRoute<bool>(
+            builder: (context) => GoogleRegisterPage(
+              repository: controller.repository,
+              idToken: idToken,
+            ),
+          ),
+        );
+        if (!mounted || creada != true) {
+          return;
+        }
+        entro = await controller.loginGoogle(idToken: idToken);
+        if (entro || !mounted) {
+          return;
+        }
+        setState(
+          () => _errorGoogle =
+              'Tu cuenta se creó, pero no se pudo iniciar sesión. '
+              'Pulsa Continuar con Google nuevamente.',
+        );
+      } else {
+        setState(
+          () => _errorGoogle =
+              controller.error ?? 'No se pudo iniciar sesión con Google.',
+        );
+      }
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(
+        () => _errorGoogle =
+            'No se pudo completar el acceso con Google. Revisa la conexión '
+            'y la configuración de Google en el dispositivo.',
+      );
+    } finally {
+      if (mounted) setState(() => _googleEnCurso = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: widget.sesionController,
       builder: (context, child) {
-        final ocupado = widget.sesionController.ocupado || _gestionando;
+        final ocupado =
+            widget.sesionController.ocupado || _gestionando || _googleEnCurso;
         return Scaffold(
           appBar: AppBar(title: const Text('Ahora Local')),
           body: SafeArea(
@@ -258,6 +345,31 @@ class _LoginPageState extends State<LoginPage> {
                                   label: const Text('Ver cuentas recordadas'),
                                 ),
                               _formulario(ocupado),
+                            ],
+                            const SizedBox(height: 20),
+                            OutlinedButton(
+                              onPressed: ocupado ? null : _continuarConGoogle,
+                              child: _googleEnCurso
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text('Continuar con Google'),
+                            ),
+                            if (_errorGoogle != null) ...[
+                              const SizedBox(height: 12),
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  _errorGoogle!,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                                ),
+                              ),
                             ],
                             const SizedBox(height: 20),
                             TextButton(
@@ -351,7 +463,10 @@ class _LoginPageState extends State<LoginPage> {
                       setState(() => _recordarUsuario = value ?? false);
                     },
             ),
-            if (widget.sesionController.error != null) ...[
+            if (widget.sesionController.error != null &&
+                widget.sesionController.errorCode !=
+                    'google_account_not_linked' &&
+                _errorGoogle == null) ...[
               const SizedBox(height: 12),
               Semantics(
                 liveRegion: true,
