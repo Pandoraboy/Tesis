@@ -4,6 +4,7 @@ import '../../features/categorias/data/categorias_repository.dart';
 import '../../features/inicio/presentation/inicio_page.dart';
 import '../../features/lugares/data/lugares_repository.dart';
 import '../../features/lugares/presentation/lugares_page.dart';
+import '../../features/mapa/presentation/mapa_page.dart';
 
 class PrincipalPage extends StatefulWidget {
   const PrincipalPage({
@@ -52,11 +53,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
 
   Widget _crearPagina(int indice) {
     return switch (indice) {
-      1 => const _SeccionPendiente(
-        titulo: 'Mapa Local',
-        icono: Icons.map_outlined,
-        descripcion: 'Aquí podrás explorar los negocios en el mapa.',
-      ),
+      1 => const MapaPage(),
       2 => LugaresPage(
         repository: widget.lugaresRepository,
         categoriasRepository: widget.categoriasRepository,
