@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'core/network/api_client.dart';
 import 'features/categorias/data/categorias_repository.dart';
 import 'features/lugares/data/lugares_repository.dart';
-import 'features/lugares/presentation/lugares_page.dart';
+import 'core/navigation/principal_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,13 +46,11 @@ class _MyAppState extends State<MyApp> {
       title: 'Ahora Local',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00695C),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
         useMaterial3: true,
       ),
-      home: LugaresPage(
-        repository: _lugaresRepository,
+      home: PrincipalPage(
+        lugaresRepository: _lugaresRepository,
         categoriasRepository: _categoriasRepository,
       ),
     );
