@@ -8,6 +8,7 @@ import 'core/session/sesion_storage.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/categorias/data/categorias_repository.dart';
 import 'features/lugares/data/lugares_repository.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,10 +56,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Ahora Local',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.oscuro,
       home: SesionGate(
         controller: _sesionController,
         lugaresRepository: _lugaresRepository,

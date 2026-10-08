@@ -37,4 +37,9 @@ class User extends Authenticatable
 {
     return $this->hasMany(Mensaje::class, 'user_id');
 }
+
+    public function identities(): HasMany
+{
+    return $this->hasMany(UserIdentity::class);
+}
 }

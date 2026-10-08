@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\HorarioLugarController;
 use App\Http\Controllers\Api\LugarController;
 use App\Http\Controllers\Api\MensajeController;
 use App\Http\Controllers\Api\DestacadoController;
+use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\Admin\DestacadoController as AdminDestacadoController;
 use App\Http\Controllers\Api\Admin\ForoController as AdminForoController;
 use App\Http\Controllers\Api\Admin\UsuarioController;
@@ -27,12 +28,22 @@ Route::prefix('v1')->group(function () {
         Route::middleware('throttle:5,1')->group(function () {
             Route::post('register', [AuthController::class, 'register']);
             Route::post('login', [AuthController::class, 'login']);
+            Route::post('google/register', [GoogleAuthController::class, 'register']);
+            Route::post('google/login', [GoogleAuthController::class, 'login']);
         });
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('me', [AuthController::class, 'me']);
             Route::post('logout', [AuthController::class, 'logout']);
         });
+
+        Route::post('google/link', [GoogleAuthController::class, 'vincular'])
+            ->middleware([
+           'auth:sanctum',
+           EnsureActiveUser::class,
+          'throttle:5,1',
+    ]);
+
     });
 
     // Consultas públicas: categorías.

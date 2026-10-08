@@ -41,8 +41,9 @@ class AuthController extends Controller
 
         if (
             ! $user
-            || ! Hash::check($datos['password'], $user->password)
             || ! $user->active
+            || $user->password === null
+            || ! Hash::check($datos['password'], $user->password)
         ) {
             return response()->json([
                 'message' => 'No se pudo iniciar sesión con esas credenciales.',

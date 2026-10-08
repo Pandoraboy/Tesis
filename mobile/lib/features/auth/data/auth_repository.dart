@@ -7,6 +7,32 @@ class AuthRepository {
 
   final ApiClient _api;
 
+  Future<Cuenta> register({
+    required String username,
+    required String password,
+    required String passwordConfirmation,
+    String? email,
+    String? phone,
+  }) async {
+    final correo = email?.trim() ?? '';
+    final telefono = phone?.trim() ?? '';
+
+    final json = await _api.postJson(
+      'auth/register',
+      body: {
+        'username': username.trim().toLowerCase(),
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+        if (correo.isNotEmpty) 'email': correo.toLowerCase(),
+        if (telefono.isNotEmpty) 'phone': telefono,
+      },
+    );
+
+    return _leerRespuesta(
+      () => Cuenta.fromJson(json['data'] as Map<String, dynamic>),
+    );
+  }
+
   Future<Sesion> login({
     required String username,
     required String password,
