@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'core/network/api_client.dart';
+import 'features/categorias/data/categorias_repository.dart';
 import 'features/lugares/data/lugares_repository.dart';
 import 'features/lugares/presentation/lugares_page.dart';
 
@@ -19,13 +20,18 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late final http.Client _httpClient;
   late final LugaresRepository _lugaresRepository;
+  late final CategoriasRepository _categoriasRepository;
 
   @override
   void initState() {
     super.initState();
 
     _httpClient = http.Client();
-    _lugaresRepository = LugaresRepository(ApiClient(client: _httpClient));
+
+    final apiClient = ApiClient(client: _httpClient);
+
+    _lugaresRepository = LugaresRepository(apiClient);
+    _categoriasRepository = CategoriasRepository(apiClient);
   }
 
   @override
@@ -40,10 +46,15 @@ class _MyAppState extends State<MyApp> {
       title: 'Ahora Local',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00695C),
+        ),
         useMaterial3: true,
       ),
-      home: LugaresPage(repository: _lugaresRepository),
+      home: LugaresPage(
+        repository: _lugaresRepository,
+        categoriasRepository: _categoriasRepository,
+      ),
     );
   }
 }

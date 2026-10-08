@@ -6,12 +6,17 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 import 'package:ahora_local/core/network/api_client.dart';
+import 'package:ahora_local/features/categorias/data/categorias_repository.dart';
 import 'package:ahora_local/features/lugares/data/lugares_repository.dart';
 import 'package:ahora_local/features/lugares/presentation/lugares_page.dart';
 
 void main() {
   testWidgets('muestra un lugar recibido desde la API', (tester) async {
     final client = MockClient((request) async {
+      if (request.url.path == '/api/v1/categorias') {
+        return http.Response(jsonEncode({'data': []}), 200);
+      }
+
       expect(request.method, 'GET');
       expect(request.url.path, '/api/v1/lugares');
       expect(request.url.queryParameters['page'], '1');
@@ -45,10 +50,15 @@ void main() {
 
     addTearDown(client.close);
 
-    final repository = LugaresRepository(ApiClient(client: client));
+    final apiClient = ApiClient(client: client);
 
     await tester.pumpWidget(
-      MaterialApp(home: LugaresPage(repository: repository)),
+      MaterialApp(
+        home: LugaresPage(
+          repository: LugaresRepository(apiClient),
+          categoriasRepository: CategoriasRepository(apiClient),
+        ),
+      ),
     );
 
     await tester.pumpAndSettle();
@@ -58,6 +68,7 @@ void main() {
     expect(find.text('Sector centro'), findsOneWidget);
     expect(find.text('Abierto'), findsOneWidget);
     expect(find.text('1 lugares disponibles'), findsOneWidget);
+    expect(find.text('Todas las categorías'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
@@ -65,6 +76,12 @@ void main() {
     var intentos = 0;
 
     final client = MockClient((request) async {
+      if (request.url.path == '/api/v1/categorias') {
+        return http.Response(jsonEncode({'data': []}), 200);
+      }
+
+      expect(request.url.path, '/api/v1/lugares');
+
       intentos++;
 
       if (intentos == 1) {
@@ -87,10 +104,13 @@ void main() {
 
     addTearDown(client.close);
 
+    final apiClient = ApiClient(client: client);
+
     await tester.pumpWidget(
       MaterialApp(
         home: LugaresPage(
-          repository: LugaresRepository(ApiClient(client: client)),
+          repository: LugaresRepository(apiClient),
+          categoriasRepository: CategoriasRepository(apiClient),
         ),
       ),
     );
