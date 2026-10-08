@@ -100,31 +100,6 @@ Identificadores de dominio en español sin tildes (`Lugar`, `estacion`); texto v
 - Fechas de destacados normalizadas a UTC; conexión PostgreSQL configurada en UTC. Vigencia: inicio inclusivo y fin exclusivo. Prioridad calculada antes de paginar, sin duplicar mensajes ni necesitar cron. Al vencer pierde prioridad y mantiene estado `aprobado`.
 - Los foros conservan nombre/slug; admin edita descripción/activo. Seeder no sobrescribe ajustes existentes.
 
-## API existente
-
-Base: `/api/v1`. `Admin` significa **Sanctum + cuenta administradora activa**; participación exige **Sanctum + cuenta activa**.
-
-| Ruta relativa | Métodos y acceso |
-|---|---|
-| `auth/register`, `auth/login` | POST público; throttle 5/min |
-| `auth/me`, `auth/logout` | GET identidad / POST logout; autenticados |
-| `categorias` | GET público / POST admin |
-| `categorias/{categoria}` | PATCH / DELETE admin |
-| `lugares` | GET público / POST admin |
-| `lugares/{lugar}` | GET público / PATCH / DELETE admin |
-| `lugares/{lugar}/horarios` | GET público / POST admin |
-| `lugares/{lugar}/horarios/{horario}` | PATCH / DELETE admin |
-| `foros`, `foros/{foro}` | GET público |
-| `foros/{foro}/mensajes` | GET público / POST cuenta activa, throttle 10/min |
-| `mensajes/{mensaje}` | DELETE autor o admin activo |
-| `mensajes/{mensaje}/destacado` | POST autor activo, throttle 5/min / GET autor o admin activo |
-| `admin/destacados` | GET admin |
-| `admin/destacados/{destacado}` | PATCH admin |
-| `admin/usuarios` | GET admin |
-| `admin/usuarios/{usuario}` | PATCH admin |
-| `admin/foros` | GET admin |
-| `admin/foros/{foro}` | PATCH admin |
-
 Lugares: filtros `buscar`, `categoria_id`, `page`, `per_page` (20 por defecto, máximo 100). Listado y detalle incluyen categoría, horarios y `estado_horario`. Listados paginados devuelven `data` y `meta` (`current_page`, `per_page`, `total`, `last_page`). Mensajes incluyen identidad pública del autor y `es_destacado`; los contactos privados no forman parte de su respuesta.
 
 Existe también la ruta heredada `/api/user`, autenticada, que devuelve el modelo de usuario salvo campos ocultos. Para nuevas pantallas usar `/api/v1/auth/me`; revisar la ruta heredada antes de publicar. Comprobar contratos precisos en Requests/controladores/pruebas y rutas con `php artisan route:list --path=api/v1 -v`.
