@@ -11,7 +11,7 @@ Las instrucciones actuales del usuario tienen prioridad. Después siguen las dec
 
 ## Estado que no debe perderse
 
-Backend Laravel implementa categorías, cuentas Sanctum, lugares, horarios, foros, mensajes, destacados y administración. Última suite backend reportada: 114 pruebas / 516 assertions (2026-10-06). Código revisado 53ceadd (2026-10-08): Flutter incluye Inicio, navegación inferior, búsqueda/categoría, lista/detalle/horarios. Usuario reporta cuatro tests Flutter aprobados y navegación real en emulador. Mapa y Chat son provisionales; sesión móvil pendiente. Próximo incremento: mapa 2D con flutter_map, proveedor por elegir, iconos de categoría y tarjeta inferior ampliable. Leer docs/diseno/01-inicio-y-mapa.md. Logo/colores pendientes; no sustituir esta decisión por la propuesta anterior de MapLibre.
+Base revisada: c300fa5. Backend y Flutter ya incluyen sesión, registro/login local y Google; usuario reportó login Google exitoso en emulador. Mapa usa flutter_map con fondo OSM, sin marcadores. Perfil mínimo y vinculación están preparados en el incremento H1, pero sin validación ejecutada. Leer docs/PLAN_CONTINUIDAD.md y docs/validacion/2026-10-20-perfil-google.md. Próxima acción: ejecutar pruebas y comprobar H1 en Android antes de cerrarlo; después sesión/visitante y mapa funcional. No repetir autenticación existente ni sustituir flutter_map por MapLibre.
 
 Foros acordados: Plaza de Armas, Cementerio, Estación y Alameda. Leer README para alcance completo. No agregar pagos, delivery, catálogo de productos individuales, iOS ni funcionalidades sociales ajenas al alcance.
 
@@ -43,7 +43,7 @@ Foros acordados: Plaza de Armas, Cementerio, Estación y Alameda. Leer README pa
 ## Pruebas y límites
 
 - PostgreSQL de pruebas: ahora_local_test; desarrollo: ahora_local.
-- Las pruebas API actuales usan DatabaseTransactions y necesitan esquema migrado.
+- Las pruebas anteriores usan DatabaseTransactions; las Google de integración usan RefreshDatabase. Confirmar base exclusiva y descartable ahora_local_test antes de ejecutar.
 - No usar migrate:fresh, borrados ni restauraciones sobre datos reales sin autorización específica.
 - Probar éxito, entrada inválida, permisos y límites importantes según la operación.
 - Ejecutar un archivo específico cuando un filtro coincida por substring o el shell interprete caracteres especiales.

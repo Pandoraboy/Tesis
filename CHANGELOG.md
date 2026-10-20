@@ -1,5 +1,15 @@
 # Registro de cambios
 
+## [Sin publicar] · Perfil mínimo y vinculación Google — 2026-10-20
+
+- Estado propio google_linked en /auth/me, conservando los campos existentes.
+- Códigos 409 diferenciados para conflictos de vínculo sin cambiar las reglas de pertenencia.
+- Mi cuenta en Android: consulta, vínculo, confirmación posterior, reintento y logout.
+- Sesión coordina credenciales; cancelación y doble envío controlados, rechazo Google distinguido de sesión revocada mediante /me.
+- Pruebas backend y Flutter añadidas; continuidad y procedimiento Windows documentados.
+- Implementación candidata: pruebas/compilación no ejecutadas por falta de herramientas; instalador remoto bloqueado por revisión automática. Sin dependencias nuevas ni migración nueva.
+
+
 ## [Sin publicar] · Integración Android y documentación — 2026-10-06
 
 - Flutter Android: configuración central, cliente HTTP, modelos y repositorio de lugares.

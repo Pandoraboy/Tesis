@@ -1,4 +1,21 @@
-# Backlog por entregas verificables
+# Backlog vigente · 2026-10-20
+
+Plan detallado: [PLAN_CONTINUIDAD](../PLAN_CONTINUIDAD.md).
+
+## En curso: H1 perfil y Google
+
+- [x] Código de indicador propio en /me y códigos de conflictos de vínculo.
+- [x] Código de Mi cuenta, consulta, vínculo y cierre mediante sesión existente.
+- [x] Casos de prueba backend y Flutter escritos.
+- [ ] Ejecutar pruebas backend y Flutter/analyze.
+- [ ] Validar Android: mismo usuario tras vincular y volver a entrar con Google.
+- [ ] Comprobar regresión y registrar evidencia antes de cerrar H1.
+
+Siguientes hitos: H2 sesión/visitante, H3 mapa de negocios, H4 foros Android, H5 destacados/gestión, H6 recuperación/release/piloto. Los avances escritos aún no se consideran funcionalidades validadas.
+
+## Registro histórico anterior
+
+# Backlog por entregas verificables (histórico)
 
 Actualizado 2026-10-08, código revisado 53ceadd. Un incremento en curso; avance por funcionalidad comprobada, sin calendario antiguo.
 

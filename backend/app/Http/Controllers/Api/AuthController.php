@@ -79,7 +79,12 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'data' => $this->accountData($user),
+            'data' => [
+                ...$this->accountData($user),
+                'google_linked' => $user->identities()
+                    ->where('provider', 'google')
+                    ->exists(),
+            ],
         ]);
     }
 

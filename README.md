@@ -1,5 +1,8 @@
 # Ahora Local · San Carlos
 
+> Continuidad 2026-10-20: perfil mínimo y vínculo Google preparados sobre c300fa5, pendientes de ejecutar pruebas. Ver [plan vigente](docs/PLAN_CONTINUIDAD.md) y [validación H1](docs/validacion/2026-10-20-perfil-google.md). El estado del 8 de octubre que sigue es histórico y no incluye todos los avances de sesión/Google.
+
+
 Proyecto de tesis: aplicación Android para descubrir negocios y servicios de San Carlos y participar en cuatro foros comunitarios. **Laravel REST + PostgreSQL + Flutter Android**.
 
 Repositorio vigente: [Pandoraboy/Tesis](https://github.com/Pandoraboy/Tesis). Estado actualizado al **8 de octubre de 2026**, a partir del código publicado en `53ceadd` y las verificaciones reportadas por el usuario.

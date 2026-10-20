@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/login_page.dart';
+import '../../features/perfil/presentation/perfil_page.dart';
 import '../../features/categorias/data/categorias_repository.dart';
 import '../../features/lugares/data/lugares_repository.dart';
 import '../navigation/principal_page.dart';
@@ -83,6 +84,15 @@ class _SesionGateState extends State<SesionGate> {
             appBar: AppBar(
               title: Text(controller.cuenta!.username),
               actions: [
+                IconButton(
+                  tooltip: 'Mi cuenta',
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => PerfilPage(controller: controller),
+                    ),
+                  ),
+                  icon: const Icon(Icons.account_circle_outlined),
+                ),
                 IconButton(
                   tooltip: 'Cerrar sesión',
                   onPressed: controller.ocupado

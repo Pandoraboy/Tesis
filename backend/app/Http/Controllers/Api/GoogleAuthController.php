@@ -9,6 +9,7 @@ use App\Services\GoogleIdentityService;
 use App\Http\Requests\Auth\GoogleRegisterRequest;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -182,11 +183,12 @@ class GoogleAuthController extends Controller
                     ->first();
 
                 if ($vinculada) {
-                    abort_unless(
-                        $vinculada->provider_subject === $identidad['subject'],
-                        409,
-                        'Esta cuenta ya tiene otra cuenta de Google vinculada.'
-                    );
+                    if ($vinculada->provider_subject !== $identidad['subject']) {
+                        throw new HttpResponseException(response()->json([
+                            'message' => 'Esta cuenta ya tiene otra cuenta de Google vinculada.',
+                            'code' => 'google_already_linked',
+                        ], 409));
+                    }
 
                     return;
                 }
@@ -195,11 +197,12 @@ class GoogleAuthController extends Controller
                     ->where('provider_subject', $identidad['subject'])
                     ->exists();
 
-                abort_if(
-                    $ocupada,
-                    409,
-                    'Esta cuenta de Google ya está vinculada.'
-                );
+                if ($ocupada) {
+                    throw new HttpResponseException(response()->json([
+                        'message' => 'Esta cuenta de Google ya está vinculada.',
+                        'code' => 'google_identity_in_use',
+                    ], 409));
+                }
 
                 $usuario->identities()->create([
                     'provider' => 'google',
@@ -209,6 +212,7 @@ class GoogleAuthController extends Controller
         } catch (UniqueConstraintViolationException $exception) {
             return response()->json([
                 'message' => 'No se pudo vincular: ya existe una vinculación.',
+                'code' => 'google_link_conflict',
             ], 409);
         }
 
