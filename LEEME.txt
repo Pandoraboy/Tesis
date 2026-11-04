@@ -1,0 +1,1 @@
+Perfil Flutter: copiar mobile y docs sobre el proyecto actual. Requiere API perfil instalada y ApiClient.patchJson de la edicion anterior. No agrega migraciones ni dependencias. Seguir docs/validacion/2026-11-04-perfil-contacto-flutter.md. Trece pruebas preparadas; Flutter no disponible aqui. No incluye chats ni apertura WhatsApp todavia.

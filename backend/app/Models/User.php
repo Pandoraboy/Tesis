@@ -13,7 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['username', 'email', 'phone', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'whatsapp_phone', 'whatsapp_enabled'])]
 class User extends Authenticatable
 {
     use HasApiTokens;
@@ -31,6 +31,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'active' => 'boolean',
+            'whatsapp_enabled' => 'boolean',
         ];
     }
     public function mensajes(): HasMany

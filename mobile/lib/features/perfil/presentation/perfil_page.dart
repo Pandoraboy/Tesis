@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../../core/session/sesion_controller.dart';
 import '../../auth/data/google_sign_in_service.dart';
+import '../data/perfil_repository.dart';
+import 'widgets/contacto_perfil_form.dart';
 
 class PerfilPage extends StatefulWidget {
   const PerfilPage({
     required this.controller,
     this.seleccionarGoogle,
+    this.perfilRepository,
     super.key,
   });
 
   final SesionController controller;
+  final PerfilRepository? perfilRepository;
   final Future<String?> Function()? seleccionarGoogle;
 
   @override
@@ -30,7 +34,9 @@ class _PerfilPageState extends State<PerfilPage> {
 
   Future<void> _actualizar() async {
     final actualizado = await widget.controller.actualizarCuenta();
-    if (mounted) setState(() => _actualizado = actualizado);
+    if (mounted && actualizado) {
+      setState(() { _actualizado = true; });
+    }
   }
 
   Future<void> _vincular() async {
@@ -86,6 +92,12 @@ class _PerfilPageState extends State<PerfilPage> {
                     const LinearProgressIndicator(),
                     const SizedBox(height: 16),
                   ],
+                  if (_actualizado && widget.perfilRepository != null)
+                    ContactoPerfilForm(
+                      key: const ValueKey('perfil-contacto-form'),
+                      controller: controller,
+                      repository: widget.perfilRepository!,
+                    ),
                   const Text('Acceso con Google'),
                   const SizedBox(height: 8),
                   Text(

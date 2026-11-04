@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/login_page.dart';
 import '../../features/perfil/presentation/perfil_page.dart';
+import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/categorias/data/categorias_repository.dart';
 import '../../features/lugares/data/lugares_repository.dart';
 import '../navigation/principal_page.dart';
@@ -12,12 +13,14 @@ class SesionGate extends StatefulWidget {
     required this.controller,
     required this.lugaresRepository,
     required this.categoriasRepository,
+    this.perfilRepository,
     super.key,
   });
 
   final SesionController controller;
   final LugaresRepository lugaresRepository;
   final CategoriasRepository categoriasRepository;
+  final PerfilRepository? perfilRepository;
 
   @override
   State<SesionGate> createState() => _SesionGateState();
@@ -144,7 +147,10 @@ class _SesionGateState extends State<SesionGate> {
                   tooltip: 'Mi cuenta',
                   onPressed: () => Navigator.of(context).push<void>(
                     MaterialPageRoute<void>(
-                      builder: (_) => PerfilPage(controller: controller),
+                      builder: (_) => PerfilPage(
+                        controller: controller,
+                        perfilRepository: widget.perfilRepository,
+                      ),
                     ),
                   ),
                   icon: const Icon(Icons.account_circle_outlined),

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PerfilController;
 use App\Http\Controllers\Api\CategoriaLugarController;
 use App\Http\Controllers\Api\ForoController;
 use App\Http\Controllers\Api\HorarioLugarController;
@@ -72,6 +73,11 @@ Route::prefix('v1')->group(function () {
         'auth:sanctum',
         EnsureActiveUser::class,
     ])->group(function () {
+        // Perfil privado del titular: contacto voluntario, separado del acceso.
+        Route::get('perfil', [PerfilController::class, 'show']);
+        Route::patch('perfil', [PerfilController::class, 'update'])
+            ->middleware('throttle:10,1');
+
         // Publicación de mensajes.
         Route::post(
             'foros/{foro}/mensajes',
