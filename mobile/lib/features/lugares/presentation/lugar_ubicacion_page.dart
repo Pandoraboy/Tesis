@@ -11,7 +11,8 @@ class UbicacionLugar {
 }
 
 class LugarUbicacionPage extends StatefulWidget {
-  const LugarUbicacionPage({super.key});
+  const LugarUbicacionPage({super.key, this.ubicacionInicial});
+  final UbicacionLugar? ubicacionInicial;
 
   @override
   State<LugarUbicacionPage> createState() => _LugarUbicacionPageState();
@@ -19,6 +20,17 @@ class LugarUbicacionPage extends StatefulWidget {
 
 class _LugarUbicacionPageState extends State<LugarUbicacionPage> {
   LatLng? _seleccion;
+
+  @override
+  void initState() {
+    super.initState();
+    final punto = widget.ubicacionInicial;
+    if (punto != null && punto.latitud.isFinite && punto.longitud.isFinite &&
+        punto.latitud >= -90 && punto.latitud <= 90 &&
+        punto.longitud >= -180 && punto.longitud <= 180) {
+      _seleccion = LatLng(punto.latitud, punto.longitud);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +46,7 @@ class _LugarUbicacionPageState extends State<LugarUbicacionPage> {
             Expanded(
               child: FlutterMap(
                 options: MapOptions(
-                  initialCenter: MapaConfig.centroSanCarlos,
+                  initialCenter: _seleccion ?? MapaConfig.centroSanCarlos,
                   initialZoom: MapaConfig.zoomInicial,
                   minZoom: 5,
                   maxZoom: 19,

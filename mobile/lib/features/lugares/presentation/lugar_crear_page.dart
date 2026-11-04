@@ -6,6 +6,7 @@ import '../../categorias/data/categorias_repository.dart';
 import '../../categorias/models/categoria_lugar.dart';
 import '../data/lugares_repository.dart';
 import '../models/nuevo_lugar.dart';
+import '../models/lugar.dart';
 import 'lugar_ubicacion_page.dart';
 
 class LugarCrearPage extends StatefulWidget {
@@ -14,6 +15,7 @@ class LugarCrearPage extends StatefulWidget {
     required this.categoriasRepository,
     required this.sesionController,
     this.categoriaInicialId,
+    this.lugarInicial,
     super.key,
   });
 
@@ -21,6 +23,7 @@ class LugarCrearPage extends StatefulWidget {
   final CategoriasRepository categoriasRepository;
   final SesionController sesionController;
   final int? categoriaInicialId;
+  final Lugar? lugarInicial;
 
   @override
   State<LugarCrearPage> createState() => _LugarCrearPageState();
@@ -39,10 +42,21 @@ class _LugarCrearPageState extends State<LugarCrearPage> {
   bool _guardando = false;
   String? _errorCategorias;
   String? _error;
+  bool get _editando => widget.lugarInicial != null;
 
   @override
   void initState() {
     super.initState();
+    final lugar = widget.lugarInicial;
+    if (lugar != null) {
+      _campos['nombre']!.text = lugar.nombre;
+      _campos['direccion']!.text = lugar.direccion;
+      _campos['descripcion']!.text = lugar.descripcion ?? '';
+      _campos['telefono']!.text = lugar.telefono ?? '';
+      _campos['latitud']!.text = lugar.latitud.toStringAsFixed(7);
+      _campos['longitud']!.text = lugar.longitud.toStringAsFixed(7);
+      _categoriaId = lugar.categoriaId;
+    }
     _cargarCategorias();
   }
 
@@ -92,7 +106,12 @@ class _LugarCrearPageState extends State<LugarCrearPage> {
 
   Future<void> _elegirUbicacion() async {
     final punto = await Navigator.of(context).push<UbicacionLugar>(
-      MaterialPageRoute<UbicacionLugar>(builder: (_) => const LugarUbicacionPage()),
+      MaterialPageRoute<UbicacionLugar>(builder: (_) => LugarUbicacionPage(
+        ubicacionInicial: _numero(_campos['latitud']!.text) != null &&
+                _numero(_campos['longitud']!.text) != null
+            ? UbicacionLugar(_numero(_campos['latitud']!.text)!, _numero(_campos['longitud']!.text)!)
+            : null,
+      )),
     );
     if (!mounted || punto == null) {
       return;
@@ -130,7 +149,9 @@ class _LugarCrearPageState extends State<LugarCrearPage> {
     });
     try {
       final lugar = await widget.sesionController.conSesion(
-        (token) => widget.repository.crear(datos: datos, token: token),
+        (token) => _editando
+            ? widget.repository.actualizar(id: widget.lugarInicial!.id, datos: datos, token: token)
+            : widget.repository.crear(datos: datos, token: token),
       );
       if (!mounted) {
         return;
@@ -155,7 +176,7 @@ class _LugarCrearPageState extends State<LugarCrearPage> {
       _form.currentState?.validate();
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'No se confirmó la creación. Revisa Búsqueda antes de volver a enviarlo.');
+        setState(() => _error = 'No se confirmó el guardado. Actualiza el detalle o Búsqueda antes de volver a enviarlo.');
       }
     } finally {
       if (mounted) {
@@ -210,7 +231,7 @@ class _LugarCrearPageState extends State<LugarCrearPage> {
       builder: (context, child) => PopScope(
         canPop: !_guardando,
         child: Scaffold(
-          appBar: AppBar(title: const Text('Agregar lugar')),
+          appBar: AppBar(title: Text(_editando ? 'Editar lugar' : 'Agregar lugar')),
           body: SafeArea(
             child: Form(
               key: _form,
@@ -254,7 +275,9 @@ class _LugarCrearPageState extends State<LugarCrearPage> {
                     const SizedBox(height: 16),
                     _campo('latitud', 'Latitud *', requerido: true),
                     _campo('longitud', 'Longitud *', requerido: true),
-                    const Text('El lugar se publicará activo y sin horarios de atención.'),
+                    Text(_editando
+                        ? 'Los horarios de atención se conservan.'
+                        : 'El lugar se publicará activo y sin horarios de atención.'),
                     if (!widget.sesionController.puedeAdministrar)
                       const Text('Necesitas una cuenta administradora activa.'),
                     if (_error != null) ...[
@@ -267,7 +290,7 @@ class _LugarCrearPageState extends State<LugarCrearPage> {
                               !widget.sesionController.puedeAdministrar || _cargandoCategorias ||
                               _errorCategorias != null || _categorias.isEmpty
                           ? null : _guardar,
-                      child: Text(_guardando ? 'Guardando…' : 'Guardar lugar'),
+                      child: Text(_guardando ? 'Guardando…' : _editando ? 'Guardar cambios' : 'Guardar lugar'),
                     ),
                   ],
                 ),

@@ -1,3 +1,5 @@
+> Incremento candidato 2026-11-04: edición admin desde detalle de Búsqueda/Mapa, formulario compartido y PATCH existente, con refresco de ambas vistas. [Validación pendiente](docs/validacion/2026-11-04-editar-lugar.md). Sin migraciones ni cambios backend.
+
 > Corrección candidata 2026-11-04: grupos compactos por zoom, pines pequeños y selección por lista para ubicaciones coincidentes. [Validación pendiente](docs/validacion/2026-11-04-agrupacion-mapa.md). Usuario reportó 62 pruebas aprobadas del catálogo anterior y pidió corregir la saturación visual.
 
 > Incremento candidato 2026-11-04: catálogo completo de marcadores, carga de todas las páginas, selección/tarjeta/detalle y actualización con conservación ante error. [Validación pendiente](docs/validacion/2026-11-04-catalogo-mapa.md). No se ejecutó Flutter aquí.

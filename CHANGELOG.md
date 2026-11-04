@@ -1,3 +1,16 @@
+## Edición de lugares Android · candidato 2026-11-04
+
+- Editar lugar visible para admin activo en detalle de lista/mapa; reutiliza formulario con datos precargados.
+- PATCH autenticado, conservación de horarios/activo y refresco de Búsqueda/Mapa tras guardar.
+- Selector abre en coordenadas actuales; ID de categoría incorporado al modelo sin romper constructores existentes.
+- Ocho casos de prueba preparados; no ejecutados por falta de Flutter. Sin cambios backend, esquema, paquetes o push.
+
+## Diagnostico de consultas/API · 2026-11-04
+
+- Agregadas mediciones GET secuenciales y planes de busqueda/categoria/conteos, sin cambios a tablas o endpoints.
+- Reporte JSON sin contenido de lugares, con tiempo HTTP/ciclo, tamano, conteos y errores.
+- Ejecucion pendiente en Windows; no hay PowerShell/psql/API del usuario disponibles aqui.
+
 ## Legibilidad del mapa · candidato 2026-11-04
 
 - Grupos con contador según distancia visual/zoom; pines individuales más pequeños.

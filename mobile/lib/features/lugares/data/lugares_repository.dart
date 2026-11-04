@@ -37,6 +37,17 @@ class LugaresRepository {
 
   final ApiClient _apiClient;
 
+  Future<Lugar> actualizar({required int id, required NuevoLugar datos, required String token}) async {
+    final json = await _apiClient.patchJson('lugares/$id', body: datos.toJson(), token: token);
+    try {
+      return Lugar.fromJson(json['data'] as Map<String, dynamic>);
+    } on FormatException {
+      throw const ApiException('No se pudo leer el lugar actualizado. Actualiza el detalle antes de reenviar.');
+    } on TypeError {
+      throw const ApiException('No se pudo leer el lugar actualizado. Actualiza el detalle antes de reenviar.');
+    }
+  }
+
   Future<List<Lugar>> listarParaMapa() async {
     final lugares = <int, Lugar>{};
     int? totalEsperado;

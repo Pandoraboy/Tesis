@@ -1,3 +1,17 @@
+## Edición admin preparada · 2026-11-04
+
+- [x] Código de formulario compartido, precarga y PATCH desde detalle.
+- [x] Refresco entre Búsqueda y Mapa y pruebas nuevas preparadas.
+- [ ] Ejecutar Flutter/analyze/suite y recorrido de edición en Android.
+- [ ] Perfil: contacto voluntario wa.me, número privado por defecto y texto preparado.
+- [ ] Chats Android después de preparar perfil/contacto; sin OpenWA ni API de pago para abrir conversación.
+
+## Diagnostico de rendimiento · 2026-11-04
+
+- [x] Revisar indices existentes y plan general aportado por el usuario (1,196 ms de ejecucion).
+- [x] Preparar medicion de API y planes de filtros/conteos.
+- [ ] Ejecutar en entorno del usuario y analizar resultados; no crear indices/vistas antes de medir su utilidad.
+
 ## Catálogo de mapa preparado · 2026-11-04
 
 - [x] Código para recopilar todas las páginas y detectar carga incompleta.

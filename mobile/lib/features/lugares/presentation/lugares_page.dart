@@ -18,12 +18,14 @@ class LugaresPage extends StatefulWidget {
     required this.categoriasRepository,
     this.sesionController,
     this.onVerEnMapa,
+    this.cambiosLugares,
   });
 
   final LugaresRepository repository;
   final CategoriasRepository categoriasRepository;
   final SesionController? sesionController;
   final ValueChanged<Lugar>? onVerEnMapa;
+  final ValueNotifier<int>? cambiosLugares;
 
   @override
   State<LugaresPage> createState() => _LugaresPageState();
@@ -45,6 +47,7 @@ class _LugaresPageState extends State<LugaresPage> {
   void initState() {
     super.initState();
     widget.sesionController?.addListener(_cambioSesion);
+    widget.cambiosLugares?.addListener(_actualizarPorCambio);
     _resultado = _consultarLugares();
     _cargarCategorias();
   }
@@ -52,6 +55,7 @@ class _LugaresPageState extends State<LugaresPage> {
   @override
   void dispose() {
     widget.sesionController?.removeListener(_cambioSesion);
+    widget.cambiosLugares?.removeListener(_actualizarPorCambio);
     _buscarController.dispose();
     super.dispose();
   }
@@ -59,6 +63,10 @@ class _LugaresPageState extends State<LugaresPage> {
   @override
   void didUpdateWidget(covariant LugaresPage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.cambiosLugares != widget.cambiosLugares) {
+      oldWidget.cambiosLugares?.removeListener(_actualizarPorCambio);
+      widget.cambiosLugares?.addListener(_actualizarPorCambio);
+    }
     if (oldWidget.sesionController != widget.sesionController) {
       oldWidget.sesionController?.removeListener(_cambioSesion);
       widget.sesionController?.addListener(_cambioSesion);
@@ -68,6 +76,12 @@ class _LugaresPageState extends State<LugaresPage> {
   void _cambioSesion() {
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  void _actualizarPorCambio() {
+    if (mounted) {
+      _cargar(_pagina);
     }
   }
 
@@ -104,6 +118,9 @@ class _LugaresPageState extends State<LugaresPage> {
           lugarId: lugarId,
           repository: widget.repository,
           permiteVerEnMapa: widget.onVerEnMapa != null,
+          sesionController: widget.sesionController,
+          categoriasRepository: widget.categoriasRepository,
+          cambiosLugares: widget.cambiosLugares,
         ),
       ),
     );

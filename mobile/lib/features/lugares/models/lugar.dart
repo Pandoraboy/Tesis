@@ -33,6 +33,7 @@ class Lugar {
     this.descripcion,
     this.telefono,
     this.horarios = const [],
+    this.categoriaId,
   });
 
   final int id;
@@ -45,6 +46,7 @@ class Lugar {
   final String? descripcion;
   final String? telefono;
   final List<HorarioLugar> horarios;
+  final int? categoriaId;
 
   bool get tieneUbicacionValida =>
       latitud.isFinite && longitud.isFinite &&
@@ -71,6 +73,7 @@ class Lugar {
       id: (json['id'] as num).toInt(),
       nombre: json['nombre'] as String,
       categoriaNombre: categoria['nombre'] as String,
+      categoriaId: (categoria['id'] as num?)?.toInt(),
       direccion: json['direccion'] as String,
       latitud: (json['latitud'] as num).toDouble(),
       longitud: (json['longitud'] as num).toDouble(),

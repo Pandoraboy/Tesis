@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/session/sesion_controller.dart';
+import '../../categorias/data/categorias_repository.dart';
 import '../data/lugares_repository.dart';
 import '../models/horario_lugar.dart';
 import '../models/lugar.dart';
 import 'widgets/lugar_card.dart';
+import 'lugar_crear_page.dart';
 
 class LugarDetallePage extends StatefulWidget {
   const LugarDetallePage({
@@ -12,11 +15,17 @@ class LugarDetallePage extends StatefulWidget {
     required this.lugarId,
     required this.repository,
     this.permiteVerEnMapa = false,
+    this.sesionController,
+    this.categoriasRepository,
+    this.cambiosLugares,
   });
 
   final int lugarId;
   final LugaresRepository repository;
   final bool permiteVerEnMapa;
+  final SesionController? sesionController;
+  final CategoriasRepository? categoriasRepository;
+  final ValueNotifier<int>? cambiosLugares;
 
   @override
   State<LugarDetallePage> createState() => _LugarDetallePageState();
@@ -24,11 +33,71 @@ class LugarDetallePage extends StatefulWidget {
 
 class _LugarDetallePageState extends State<LugarDetallePage> {
   late Future<Lugar> _resultado;
+  bool _abriendoEdicion = false;
 
   @override
   void initState() {
     super.initState();
+    widget.sesionController?.addListener(_cambioSesion);
     _resultado = widget.repository.obtener(widget.lugarId);
+  }
+
+  void _cambioSesion() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant LugarDetallePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sesionController != widget.sesionController) {
+      oldWidget.sesionController?.removeListener(_cambioSesion);
+      widget.sesionController?.addListener(_cambioSesion);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.sesionController?.removeListener(_cambioSesion);
+    super.dispose();
+  }
+
+  Future<void> _editarLugar(Lugar lugar) async {
+    final sesion = widget.sesionController;
+    final categorias = widget.categoriasRepository;
+    if (_abriendoEdicion || sesion == null || categorias == null ||
+        !sesion.puedeAdministrar || sesion.ocupado) {
+      return;
+    }
+    setState(() => _abriendoEdicion = true);
+    try {
+      final actualizado = await Navigator.of(context).push<Lugar>(MaterialPageRoute<Lugar>(
+        builder: (_) => LugarCrearPage(
+          repository: widget.repository,
+          categoriasRepository: categorias,
+          sesionController: sesion,
+          lugarInicial: lugar,
+        ),
+      ));
+      if (!mounted || actualizado == null) {
+        return;
+      }
+      setState(() {
+      _resultado = Future.value(actualizado);
+      });
+      final cambios = widget.cambiosLugares;
+      if (cambios != null) {
+        cambios.value++;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lugar actualizado.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _abriendoEdicion = false);
+      }
+    }
   }
 
   void _cargar() {
@@ -89,6 +158,15 @@ class _LugarDetallePageState extends State<LugarDetallePage> {
             padding: const EdgeInsets.all(12),
             children: [
               LugarCard(lugar: lugar),
+              if (widget.sesionController?.puedeAdministrar == true && widget.categoriasRepository != null) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _abriendoEdicion || widget.sesionController!.ocupado
+                      ? null : () => _editarLugar(lugar),
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Editar lugar'),
+                ),
+              ],
               if (widget.permiteVerEnMapa) ...[
                 const SizedBox(height: 12),
                 FilledButton.icon(

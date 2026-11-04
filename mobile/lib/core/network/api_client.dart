@@ -47,6 +47,12 @@ class ApiClient {
     return _request('POST', path, body: body, token: token);
   }
 
+  Future<Map<String, dynamic>> patchJson(
+    String path, {
+    required Map<String, dynamic> body,
+    required String token,
+  }) => _request('PATCH', path, body: body, token: token);
+
   Future<Map<String, dynamic>> _request(
     String method,
     String path, {

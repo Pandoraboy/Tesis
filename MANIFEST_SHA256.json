@@ -1,10 +1,19 @@
 {
-  "mobile/lib/features/mapa/presentation/mapa_page.dart": "75a512c0d30d250fdc196e54807be58aebfa7678d2e1459cfac97397d8e0d5bc",
+  "mobile/lib/core/network/api_client.dart": "2267b68b6e783a4a835e9b6b79a1da8a9fb80db5ba404a31f93b78d9bf1e51b0",
+  "mobile/lib/core/navigation/principal_page.dart": "bbd7c47d18f3eea5f229d6d16a360cbed60e7174a4b4fa1e20cb36ff6d5f47ff",
+  "mobile/lib/features/lugares/data/lugares_repository.dart": "fb20a6a3af00bf57fb8c9dffa25d3e9c8332dddd5936c83083f6629790cc237d",
+  "mobile/lib/features/lugares/models/lugar.dart": "22d0da959359f8a9b32f7f1b62c2701e9f973f6bb1665b2b9f7edfbb6772d8b5",
+  "mobile/lib/features/lugares/presentation/lugar_crear_page.dart": "6a866254487f6a45032824a99c3f90d0d4e30139ac86b25da38bf3f431f23f01",
+  "mobile/lib/features/lugares/presentation/lugar_ubicacion_page.dart": "1864184f4e1343bdde96250036fd4cd4d5f615fc4c14b6010f577f0b39c6a8b4",
+  "mobile/lib/features/lugares/presentation/lugar_detalle_page.dart": "593309b1bcfc921c5f69590800500f7f94dd2523880ac4ef0611066b3e8b685f",
+  "mobile/lib/features/lugares/presentation/lugares_page.dart": "dd068c901962f73ae40bdd60bb760a4ed0773a4f12bea96249a6c56671825978",
+  "mobile/lib/features/mapa/presentation/mapa_page.dart": "ed0ce385e976a5c7fa51b5b8ddb0320c8eaa43127a81c109e185988eaead8b58",
   "mobile/lib/features/mapa/presentation/widgets/lugares_mapa_layer.dart": "d81978a3bcad8ddc8786aeccf15c49c689fda04e17838c218c148206031a5bfc",
   "mobile/lib/features/mapa/services/agrupador_lugares.dart": "85c690d033be6a83f18ce837a149ec406d37680136897fe16debfeeb381d5d1f",
-  "mobile/test/agrupacion_mapa_test.dart": "f3304e693d69cbdacc95db9baa59dbb5fbe739b04c6439c4c0ec83c75d9f6c52",
-  "docs/validacion/2026-11-04-agrupacion-mapa.md": "5334f51c5fa2f4ff18a571956bb37b7ff8f47bd1695b9df71f8d8d981d7741fa",
-  "README.md": "83cb1cae73d1041bd01d2fba4e93c344dac0e0cfc166c34c2a82a4dac54537e9",
-  "WORKSPACE.md": "874a989d6ce7ef39e674c7bb8c16206d6834cb9bcb9f2b2c837f4c09e3c131cf",
-  "CHANGELOG.md": "b2c2ba7442b17b54aa60ea4e9342b3d3d7c3a815c9c3c90be1b612f8bed7c317"
+  "mobile/test/lugar_editar_test.dart": "8cb2216799b024163464d32bdd4b80c7d0260051e9a9e55746b7ddde6ef51068",
+  "docs/validacion/2026-11-04-editar-lugar.md": "f0c6c831db3b5a83caedf0638ea9214dbcd9af6627605b452baa69df08fa3d64",
+  "README.md": "4b00fcdc2e9e00d3a20c9b2892a3735e2aa4910c7f22bc42cbdb65e127c76557",
+  "WORKSPACE.md": "d96cdc873e98d349fd08aeacb6b07da74162ee97946cff6b0504514d9f1caf19",
+  "CHANGELOG.md": "a2ff12ae22c817f14c72ee7e02d89a74a5e8a10613d61f559e7a2718f9ebcd3d",
+  "docs/backlog/01-backlog-inicial.md": "ce2b5798dc8720edd43e0d583053cfe68f2736d4d017ad1a45d432701cebc05d"
 }

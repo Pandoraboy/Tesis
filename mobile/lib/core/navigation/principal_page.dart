@@ -32,6 +32,13 @@ class PrincipalPage extends StatefulWidget {
 class _PrincipalPageState extends State<PrincipalPage> {
   int _seccion = 0;
   Lugar? _lugarEnMapa;
+  final _cambiosLugares = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    _cambiosLugares.dispose();
+    super.dispose();
+  }
 
   // Cada sección se crea al abrirla y conserva su estado.
   late final List<Widget?> _paginas;
@@ -67,12 +74,16 @@ class _PrincipalPageState extends State<PrincipalPage> {
         lugarSeleccionado: _lugarEnMapa,
         tileProvider: widget.mapaTileProvider,
         repository: widget.lugaresRepository,
+        sesionController: widget.sesionController,
+        categoriasRepository: widget.categoriasRepository,
+        cambiosLugares: _cambiosLugares,
       ),
       2 => LugaresPage(
         repository: widget.lugaresRepository,
         categoriasRepository: widget.categoriasRepository,
         sesionController: widget.sesionController,
         onVerEnMapa: _verLugarEnMapa,
+        cambiosLugares: _cambiosLugares,
       ),
       3 => const _SeccionPendiente(
         titulo: 'Chat / Tablón',

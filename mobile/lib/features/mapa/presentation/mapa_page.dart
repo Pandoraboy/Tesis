@@ -4,6 +4,8 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/config/mapa_config.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/session/sesion_controller.dart';
+import '../../categorias/data/categorias_repository.dart';
 import '../../lugares/data/lugares_repository.dart';
 import '../../lugares/models/lugar.dart';
 import '../../lugares/presentation/lugar_detalle_page.dart';
@@ -12,11 +14,15 @@ import 'widgets/lugar_mapa_tarjeta.dart';
 import 'widgets/lugares_mapa_layer.dart';
 
 class MapaPage extends StatefulWidget {
-  const MapaPage({super.key, this.lugarSeleccionado, this.tileProvider, this.repository});
+  const MapaPage({super.key, this.lugarSeleccionado, this.tileProvider, this.repository,
+    this.sesionController, this.categoriasRepository, this.cambiosLugares});
 
   final Lugar? lugarSeleccionado;
   final TileProvider? tileProvider;
   final LugaresRepository? repository;
+  final SesionController? sesionController;
+  final CategoriasRepository? categoriasRepository;
+  final ValueNotifier<int>? cambiosLugares;
 
   @override
   State<MapaPage> createState() => _MapaPageState();
@@ -31,6 +37,7 @@ class _MapaPageState extends State<MapaPage> {
   String? _error;
   List<Lugar> _lugares = const [];
   Lugar? _seleccion;
+  bool _recargaPendiente = false;
 
   LatLng? get _puntoSeleccionado {
     final lugar = _seleccion;
@@ -53,7 +60,16 @@ class _MapaPageState extends State<MapaPage> {
   void initState() {
     super.initState();
     _seleccion = widget.lugarSeleccionado;
+    widget.cambiosLugares?.addListener(_actualizarPorCambio);
     _cargar();
+  }
+
+  void _actualizarPorCambio() {
+    if (_cargando) {
+      _recargaPendiente = true;
+    } else {
+      _cargar();
+    }
   }
 
   Future<void> _cargar() async {
@@ -62,6 +78,7 @@ class _MapaPageState extends State<MapaPage> {
       return;
     }
     final consulta = ++_consulta;
+    _recargaPendiente = false;
     setState(() {
       _cargando = true;
       _error = null;
@@ -71,17 +88,24 @@ class _MapaPageState extends State<MapaPage> {
       if (!mounted || consulta != _consulta) {
         return;
       }
+      var moverSeleccion = false;
       setState(() {
         _lugares = lugares;
         _cargaCompleta = true;
         // La actualización confirma qué lugares siguen publicados.
         final seleccionId = _seleccion?.id;
         if (seleccionId != null) {
+          final anterior = _seleccion!;
           final coincidencias = lugares.where((lugar) => lugar.id == seleccionId);
           _seleccion = coincidencias.isEmpty ? null : coincidencias.first;
+          moverSeleccion = _seleccion != null &&
+              (_seleccion!.latitud != anterior.latitud || _seleccion!.longitud != anterior.longitud);
         }
         _cargando = false;
       });
+      if (moverSeleccion) {
+        _programarEnfoque();
+      }
     } catch (error) {
       if (!mounted || consulta != _consulta) {
         return;
@@ -90,12 +114,20 @@ class _MapaPageState extends State<MapaPage> {
         _cargando = false;
         _error = error is ApiException ? error.message : 'No se pudieron cargar los lugares.';
       });
+    } finally {
+      if (mounted && consulta == _consulta && _recargaPendiente) {
+        _cargar();
+      }
     }
   }
 
   @override
   void didUpdateWidget(covariant MapaPage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.cambiosLugares != widget.cambiosLugares) {
+      oldWidget.cambiosLugares?.removeListener(_actualizarPorCambio);
+      widget.cambiosLugares?.addListener(_actualizarPorCambio);
+    }
     if (oldWidget.lugarSeleccionado != widget.lugarSeleccionado) {
       _seleccion = widget.lugarSeleccionado;
       _programarEnfoque();
@@ -186,13 +218,19 @@ class _MapaPageState extends State<MapaPage> {
       return;
     }
     Navigator.of(context).push<void>(MaterialPageRoute<void>(
-      builder: (_) => LugarDetallePage(lugarId: lugar.id, repository: widget.repository!),
+      builder: (_) => LugarDetallePage(
+        lugarId: lugar.id, repository: widget.repository!,
+        sesionController: widget.sesionController,
+        categoriasRepository: widget.categoriasRepository,
+        cambiosLugares: widget.cambiosLugares,
+      ),
     ));
   }
 
   @override
   void dispose() {
     _consulta++;
+    widget.cambiosLugares?.removeListener(_actualizarPorCambio);
     _mapController.dispose();
     super.dispose();
   }
