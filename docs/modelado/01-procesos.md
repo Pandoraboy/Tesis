@@ -21,7 +21,6 @@ stateDiagram-v2
     [*] --> Pendiente
     Pendiente --> Aprobado: administrador define vigencia
     Pendiente --> Rechazado: administrador rechaza
-    Pendiente --> Cancelado: administrador cancela
     Aprobado --> Cancelado: administrador cancela
     Aprobado --> Expirado: tiempo alcanza fin
 ```
@@ -36,3 +35,17 @@ Administrador autenticado valida datos → modifica categoría/lugar/horario o v
 
 Lectura: inicial → cargando → datos/vacío/error; reintento vuelve a cargando.
 Formulario: edición → enviando → éxito/error. Impedir envíos repetidos mientras está enviando.
+
+
+## CU-05 · Denunciar y revisar un mensaje (acordado; no implementado)
+
+Usuario autenticado selecciona un mensaje → elige motivo y añade comentario opcional → envía denuncia → moderador revisa mensaje y denuncia → descarta o toma medidas (borrado lógico del mensaje y/o timeout) → sistema conserva la decisión. Denunciar no retira automáticamente el mensaje ni sanciona al autor.
+
+El timeout impide publicar en los cuatro chats durante 10 minutos, 1 hora, 24 horas o 7 días; permite leer y usar el mapa. Al finalizar cesa la restricción temporal, siempre sujeto a las demás reglas vigentes.
+
+Pendientes de especificación: catálogo de motivos, duplicados, estados y visibilidad de la resolución; levantamiento por moderador y superposición de timeouts. El levantamiento administrativo y los límites de jerarquía ya están acordados.
+
+
+## CU-06 · Solicitar cambios del mapa (acordado; no implementado)
+
+Moderador crea ticket de alta, corrección de datos o cierre/inexistencia → administrador revisa → aprueba o rechaza con motivo → moderador consulta estado y decisión. La solicitud no modifica directamente los datos publicados. El administrador revisa los datos propuestos antes de confirmar. Aprobar aplica los datos y registra la resolución en una sola transacción; un fallo revierte la operación y mantiene el ticket pendiente. Rechazar no modifica el lugar. Estados: pendiente, aprobado y rechazado. Falta definir campos por tipo de solicitud.

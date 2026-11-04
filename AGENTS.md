@@ -11,7 +11,9 @@ Las instrucciones actuales del usuario tienen prioridad. Después siguen las dec
 
 ## Estado que no debe perderse
 
-Base revisada: c300fa5. Backend y Flutter ya incluyen sesión, registro/login local y Google; usuario reportó login Google exitoso en emulador. Mapa usa flutter_map con fondo OSM, sin marcadores. Perfil mínimo y vinculación están preparados en el incremento H1, pero sin validación ejecutada. Leer docs/PLAN_CONTINUIDAD.md y docs/validacion/2026-10-20-perfil-google.md. Próxima acción: ejecutar pruebas y comprobar H1 en Android antes de cerrarlo; después sesión/visitante y mapa funcional. No repetir autenticación existente ni sustituir flutter_map por MapLibre.
+Base publicada revisada: 81f44a2 (2026-11-04). Backend y Flutter ya incluyen login/registro local y Google, perfil mínimo/vínculo, visitante, directorio y alta de lugares admin. Mapa flutter_map con OSM y marcador del lugar seleccionado desde detalle, enfoque con zoom 18. El usuario confirmó pruebas/recorridos de visitante, importación y alta, y recorrido de mapa en emulador. No repetir estas implementaciones. La prueba específica de vincular y volver al mismo ID sigue pendiente de evidencia; ver docs/PLAN_CONTINUIDAD.md y docs/validacion/2026-11-04-estado-integrado.md.
+
+Siguiente incremento recomendado: catálogo completo de marcadores con paginación, tarjeta y detalle. Chat Android, roles moderador/propietario, timeouts, denuncias y tickets no implementados. Los requisitos acordados constan en docs/requisitos/05-consolidado-base.md; no confundirlos con permisos actuales user/admin. No sustituir flutter_map por otro motor.
 
 Foros acordados: Plaza de Armas, Cementerio, Estación y Alameda. Leer README para alcance completo. No agregar pagos, delivery, catálogo de productos individuales, iOS ni funcionalidades sociales ajenas al alcance.
 

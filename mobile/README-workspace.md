@@ -1,3 +1,3 @@
-# Aplicación Flutter Android
+# Trabajo móvil
 
-Pendiente de inicialización. Primera pantalla: categorías consumidas de la API. Estados inicial/cargando/datos/vacío/error y reintento. Android es objetivo de tesis; iOS queda diferido. Dependencias de HTTP, mapas y estado se eligen tras verificar compatibilidad, sin introducir librerías preventivamente.
+La app Flutter ya está inicializada y funciona en Android. El estado vigente, ejecución, pruebas y límites están en [README móvil](README.md) y [continuidad general](../WORKSPACE.md). Este archivo sustituye la referencia antigua que indicaba inicialización pendiente.

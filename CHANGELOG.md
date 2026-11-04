@@ -1,5 +1,14 @@
 # Registro de cambios
 
+## Documentación sincronizada · 2026-11-04
+
+- Estado real de visitante, importación OSM, alta admin y enfoque del mapa alineado con 81f44a2 y reportes del usuario.
+- Recuperados acuerdos RF_35–RF_48, jerarquía, denuncias/timeouts y tickets, señalados como pendientes de implementar.
+- README raíz/backend/móvil, WORKSPACE, estado de AGENTS, plan, backlog, matriz de permisos y evidencia integrados.
+- Corregida ruta del JSON fuente a backend/app/Imports y diferenciadas pruebas ejecutadas por usuario, revisión estática y pendientes.
+- Sin cambios de código, esquema, dependencias, datos ni push. Los hitos que siguen son registros históricos.
+
+
 ## [Sin publicar] · Perfil mínimo y vinculación Google — 2026-10-20
 
 - Estado propio google_linked en /auth/me, conservando los campos existentes.

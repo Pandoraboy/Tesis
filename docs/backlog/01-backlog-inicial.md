@@ -1,17 +1,35 @@
-# Backlog vigente · 2026-10-20
+# Backlog vigente · 2026-11-04
 
-Plan detallado: [PLAN_CONTINUIDAD](../PLAN_CONTINUIDAD.md).
+Base revisada: `81f44a2`. [Plan](../PLAN_CONTINUIDAD.md) y [evidencia](../validacion/2026-11-04-estado-integrado.md).
 
-## En curso: H1 perfil y Google
+## Avances con evidencia del usuario
 
-- [x] Código de indicador propio en /me y códigos de conflictos de vínculo.
-- [x] Código de Mi cuenta, consulta, vínculo y cierre mediante sesión existente.
-- [x] Casos de prueba backend y Flutter escritos.
-- [ ] Ejecutar pruebas backend y Flutter/analyze.
-- [ ] Validar Android: mismo usuario tras vincular y volver a entrar con Google.
-- [ ] Comprobar regresión y registrar evidencia antes de cerrar H1.
+- [x] Entrada visitante y directorio Android.
+- [x] Pruebas del importador y carga inicial: 350 OSM + 3 DEMO.
+- [x] Pruebas y recorrido completo del alta de lugares admin.
+- [x] Recorrido detalle → Ver en el mapa, zoom y marcador en emulador.
+- [ ] Registrar resultado explícito de las cinco pruebas del incremento de mapa y suite consolidada actual.
+- [ ] Confirmar recorrido de vinculación Google al mismo ID de H1.
 
-Siguientes hitos: H2 sesión/visitante, H3 mapa de negocios, H4 foros Android, H5 destacados/gestión, H6 recuperación/release/piloto. Los avances escritos aún no se consideran funcionalidades validadas.
+## Siguiente incremento recomendado: catálogo en mapa
+
+- [ ] Cargar todos los lugares pertinentes sin omitir páginas.
+- [ ] Mostrar marcadores y estados de carga/error/vacío.
+- [ ] Abrir tarjeta y detalle al tocar marcador.
+- [ ] Compartir criterios de filtro con Búsqueda sin duplicar reglas.
+- [ ] Probar primera apertura, regreso, selección de otro lugar y zonas rurales.
+- [ ] Medir rendimiento en dispositivo físico/profile si persisten los tirones.
+
+## Después
+
+- [ ] Chats Android sobre API existente: lectura, publicación y retirada.
+- [ ] Cerrar reglas mínimas de denuncias/timeouts y tickets antes de implementar sus estados.
+- [ ] Roles moderador/propietario y cupos con permisos en servidor.
+- [ ] Tickets internos, resolución atómica y revisión de concurrencia.
+- [ ] Edición/horarios y destacados móviles.
+- [ ] Recuperación, Internet principal, HTTPS, firma/OAuth release, OSM y piloto.
+
+El visitante no necesita GPS. Usuarios comunes no proponen correcciones del mapa en la base. No añadir pagos, WebSockets ni redes sociales preventivamente.
 
 ## Registro histórico anterior
 

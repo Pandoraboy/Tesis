@@ -7,14 +7,17 @@
 - Consulta pública sin cuenta.
 - Registro, inicio, cierre de sesión y recuperación de acceso.
 - Cuatro foros configurables, lectura pública y escritura autenticada.
-- Eliminación lógica propia y moderación administrativa.
+- Eliminación lógica propia y moderación por administrador y moderador; acciones del moderador en definición.
+- Tickets internos de alta, corrección y cierre de lugares; moderadores consultan todos y administración resuelve. Usuarios comunes no acceden a tickets del mapa en la versión base.
 - Solicitud y activación administrativa de destacados, vigencia y pérdida automática de prioridad.
 - Administración básica mediante operaciones protegidas y una interfaz mínima por definir.
 - Pruebas, despliegue de piloto, evaluación y documentación académica.
 
 ## Diferido
 
-Pagos reales, créditos, iOS, ClaveÚnica, eventos independientes, reportes con flujo completo, notificaciones y tiempo real con WebSockets. La cercanía y el filtro de abiertos se añaden después del directorio, si se confirma su prioridad. No se afirmará disponibilidad física de cajeros sin una fuente de datos confiable.
+Propuestas de corrección del mapa enviadas por usuarios comunes: candidatas a una versión posterior (por ejemplo, 1.1), sin compromiso de implementación en la base. Esto no afecta sus denuncias de mensajes, incluidas en el alcance actual.
+
+Pagos reales, créditos, iOS, ClaveÚnica, eventos independientes, reportes generales distintos de los tickets del mapa, notificaciones y tiempo real con WebSockets. La cercanía y el filtro de abiertos se añaden después del directorio, si se confirma su prioridad. No se afirmará disponibilidad física de cajeros sin una fuente de datos confiable.
 
 ## Excluido
 

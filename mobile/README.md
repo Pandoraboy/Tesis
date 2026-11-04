@@ -1,30 +1,27 @@
 # Ahora Local · Flutter Android
 
-Estado 2026-10-08, revisión 53ceadd. Leer [README principal](../README.md), [AGENTS](../AGENTS.md) y [continuidad](../WORKSPACE.md).
+Estado 2026-11-04 sobre `81f44a2`. [README principal](../README.md), [continuidad](../WORKSPACE.md) y [evidencia](../docs/validacion/2026-11-04-estado-integrado.md).
 
-Implementado: Inicio con accesos y barra inferior; Búsqueda con nombre/categoría, lista/paginación, tarjetas, detalle y horarios. PrincipalPage crea secciones al abrirlas y conserva estado con IndexedStack. Mapa y Chat son provisionales; login/sesión Flutter pendientes. Un cliente HTTP compartido y repositorios por módulo; reglas de horario en Laravel.
+Implementados: sesión, registro/login local y Google, perfil/vínculo, visitante, Inicio, Búsqueda con filtros/paginación, detalle y alta de lugares admin. El detalle permite ir a la pestaña Mapa con foco, zoom 18 y marcador. Los recorridos recientes fueron confirmados por el usuario. Falta el catálogo completo de marcadores, Chat Android, edición/horarios y destacados móviles. No hay roles moderador/propietario implementados.
 
-## Ejecutar
+## Ejecutar y comprobar
 
-Desde mobile, con Laravel y PostgreSQL disponibles para datos reales:
+Con dependencias ya instaladas, Laravel y PostgreSQL disponibles, desde mobile:
 
 ```powershell
-flutter pub get
 flutter devices
-flutter run -d emulator-5554
-```
-
-Consultar ID real del dispositivo. Emulador usa http://10.0.2.2:8000/api/v1/. URL configurable con --dart-define=API_BASE_URL=... incluyendo /api/v1/. R reinicia; r recarga. Inicio no consulta API hasta abrir Búsqueda.
-
-## Verificar
-
-```powershell
 flutter analyze
 flutter test
 ```
 
-Cuatro pruebas MockClient reportadas aprobadas por usuario: listado, reintento, búsqueda/limpieza y categoría conservada al actualizar. No necesitan servidor ni emulador. Navegación comprobada manualmente; sin tests propios aún. El agente de documentación no ejecutó Flutter.
+Conservar pubspec.lock y el comando de flutter run con los parámetros API/Google que ya funcionan. La API del emulador por defecto es http://10.0.2.2:8000/api/v1/; API_BASE_URL permite cambiarla. En teléfono físico no usar esa dirección del emulador: configurar acceso al backend correspondiente.
 
-## Siguiente
+Pruebas específicas recientes: visitante_test.dart, lugar_crear_test.dart y ver_lugar_mapa_test.dart. Usan HTTP simulado; las de cámara usan teselas locales y no descargan OSM. Los recorridos Android con backend real son una comprobación distinta.
 
-[Mapa e inicio acordados](../docs/diseno/01-inicio-y-mapa.md): flutter_map, vista 2D, iconos por categoría, tarjeta inferior ampliable y tres DEMO iniciales. Proveedor de fondo pendiente. Logo/colores pendientes. Resolver paginación de marcadores y luego GPS/foros. Internet/HTTP configurado solo en debug; preparar Internet en manifiesto principal y API HTTPS para release.
+## Flujo
+
+SesionGate separa navegación visitante/autenticada; PrincipalPage conserva secciones con IndexedStack. ApiClient centraliza HTTP y errores; repositorios convierten datos de cada módulo. El detalle devuelve la selección a Búsqueda; PrincipalPage cambia de pestaña y el mapa enfoca después de estar listo. conSesion coordina las escrituras privadas del alta; Laravel autoriza nuevamente.
+
+## Antes de publicar
+
+Internet está en manifiestos debug/profile, no en main. Preparar permiso principal, HTTPS, firma/OAuth release y proveedor/atribución/caché OSM. Medir rendimiento en teléfono físico/profile; el emulador/debug no determina rendimiento de release. No declarar listo el piloto por el recorrido de desarrollo.

@@ -1,49 +1,32 @@
 # Plan de continuidad · Ahora Local
 
-Actualizado: 2026-10-20. Base de implementación: `c300fa5`, origin/main revisado en esta sesión.
+Actualizado: 2026-11-04. Base de código revisada: `81f44a2`. [Estado integrado y evidencia](validacion/2026-11-04-estado-integrado.md).
 
-## Estado actual
-
-Backend Laravel/PostgreSQL con directorio, horarios, cuentas locales/Google, foros, mensajes, destacados y administración. Flutter Android con directorio, sesión, login/registro local y Google; mapa base OSM sin marcadores y Chat provisional. Login Google real fue reportado por el usuario.
-
-Este incremento añade perfil mínimo/vinculación en código y pruebas, **pendiente de ejecutar**. No se ha validado PHP, Flutter, emulador ni producción en esta máquina. No instalar ni actualizar dependencias para aplicar estos archivos; no necesitan migración nueva.
-
-## Hitos
-
-| Hito | Resultado | Estado |
+| Hito | Avance comprobado o presente | Pendiente |
 |---|---|---|
-| H0 · Pruebas actuales | Reproducir suites de la base y cambios | Pendiente de entorno con PHP/Flutter |
-| H1 · Perfil y Google | Consultar estado propio, vincular y entrar a la misma cuenta | Código y pruebas preparados; validación pendiente |
-| H2 · Sesión y visitante | Lectura pública y manejo de sesiones durante uso | Pendiente |
-| H3 · Mapa funcional | Marcadores Laravel, páginas completas, tarjeta y filtros | Pendiente; después GPS |
-| H4 · Foros Android | Lectura, publicación, retirada y permisos | API existente; interfaz pendiente |
-| H5 · Destacados/gestión | Solicitud propia y revisión/gestión mínima | API existente; interfaz pendiente |
-| H6 · Recuperación/piloto | Recuperar acceso, HTTPS, release, respaldo y evaluación | Pendiente |
+| H0 · Pruebas | Usuario reportó aprobación de visitante, importador y alta | Registrar ejecución actual consolidada y pruebas específicas de mapa |
+| H1 · Perfil/Google | Código y pruebas presentes; login Google confirmado antes | Recorrido local → vínculo → logout → Google con mismo ID y casos de conflicto |
+| H2 · Visitante/sesión | Entrada pública y regreso al login validados; conSesion usado para alta | Integrar sesión en las siguientes escrituras privadas y tratamiento de ciclo de vida que se requiera |
+| H3 · Mapa/directorio | OSM local importado; alta Android; detalle → marcador/enfoque validado | Catálogo completo de marcadores, paginación, tarjeta/detalle y filtros; luego GPS |
+| H4 · Comunidad | API de cuatro foros/mensajes disponible | Lectura/publicación/retirada Android; después denuncias y timeout con permisos de servidor |
+| H5 · Gestión | Alta de lugares admin Android y API de gestión existentes | Edición, horarios, destacados móviles; moderador/propietario, cupos y tickets |
+| H6 · Piloto | Alcance base definido y datos iniciales disponibles | Recuperación, HTTPS, Internet principal, firma/OAuth release, OSM, respaldo y evaluación |
 
-## Siguiente acción
+## Orden siguiente
 
-Aplicar paquete sobre c300fa5 con `git apply --check` antes de modificar archivos. Validar GoogleLinkApiTest, suite backend, flutter analyze, perfil_test y suite móvil. Ver [procedimiento y evidencia](validacion/2026-10-20-perfil-google.md).
+1. Completar el mapa del catálogo conservando navegación y consultas públicas existentes. Resolver todas las páginas; reutilizar modelos/repositorios y el detalle.
+2. Añadir selección y tarjeta por marcador, y filtros coherentes con Búsqueda. Probar error, vacío y lugares rurales.
+3. Integrar la interfaz de foros sobre la API existente. No crear otro chat o introducir WebSockets como requisito preventivo.
+4. Implementar jerarquía y moderación/tickets por etapas, después de cerrar sus reglas mínimas. Validar permisos primero en backend.
 
-No cerrar H1 hasta comprobar en Android: login local → Mi cuenta → vincular Google → cerrar sesión → entrar con Google al mismo id. Comprobar también cuenta ya creada con Google, cancelación, identidad ocupada, recuperación tras red y sesión revocada.
+El orden es una recomendación técnica, no una obligación que desplace instrucciones futuras del usuario. No ampliar el alcance a propuestas del mapa por usuarios comunes, pagos, delivery o iOS.
 
-## Decisiones preservadas
+## Reglas de cierre
 
-- API primero, PostgreSQL, Flutter Android, cuenta activa para escrituras.
-- Cuatro foros: Plaza de Armas, Cementerio, Estación y Alameda.
-- Lectura pública conforme a ADR-002; navegación visitante aún pendiente.
-- flutter_map existente; mapa base no equivale a directorio geográfico terminado.
-- Destacados administrativos; sin pagos, delivery, iOS o WebSockets en el MVP.
-- Estado horario calculado solo en Laravel con America/Santiago.
+Pruebas específicas, regresión pertinente, recorrido Android y evidencia con origen de cada resultado. Una revisión estática o un archivo de pruebas no demuestra ejecución. No cerrar H1 por el funcionamiento de otros módulos. No declarar el mapa terminado por enfocar un solo lugar.
 
-## Hallazgos previos todavía abiertos
+## Límites y decisiones abiertas
 
-- Sesión recuperada se valida; falta tratamiento central para operaciones privadas de otros módulos y segundo plano. H1 solo trata consultas/vínculo del perfil.
-- Release sin permiso Internet principal y con firma debug. OAuth release y HTTPS sin validar.
-- Recuperación de cuentas locales, incluidas las de solo teléfono, sin definir mecanismo.
-- Ruta heredada /api/user pendiente de revisar antes del despliegue.
-- Tests Google usan RefreshDatabase; otros usan DatabaseTransactions. Base de pruebas exclusiva y descartable: ahora_local_test.
-- Las cifras antiguas de pruebas son históricas; presencia de tests no prueba que estén aprobados.
+Los roles implementados siguen siendo user/admin. El propietario con superpermisos y cinco administradores adicionales es un acuerdo futuro; la asignación SQL puntual de admin en desarrollo no implementa esa jerarquía. Pendientes funcionales en [consolidado](requisitos/05-consolidado-base.md).
 
-## Registro de cierre por hito
-
-Anotar commit, cambios, comandos ejecutados, resultados reales y próximo paso en WORKSPACE y CHANGELOG. Preservar .env, configuraciones privadas, datos y lockfiles. No marcar terminado por revisión estática.
+Pruebas PostgreSQL solo en ahora_local_test; desarrollo en ahora_local. No reinstalar dependencias ni reiniciar bases para continuar sin necesidad. Mantener esquema ejecutable en migraciones, autenticación existente, flutter_map y estado horario America/Santiago en Laravel.

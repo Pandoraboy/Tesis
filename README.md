@@ -1,224 +1,100 @@
 # Ahora Local · San Carlos
 
-> Continuidad 2026-10-20: perfil mínimo y vínculo Google preparados sobre c300fa5, pendientes de ejecutar pruebas. Ver [plan vigente](docs/PLAN_CONTINUIDAD.md) y [validación H1](docs/validacion/2026-10-20-perfil-google.md). El estado del 8 de octubre que sigue es histórico y no incluye todos los avances de sesión/Google.
+Aplicación Android para consultar lugares y servicios de San Carlos y participar en cuatro foros comunitarios. Backend Laravel REST, PostgreSQL y Flutter Android, con `flutter_map` y fondo OpenStreetMap.
 
+Estado documental: **4 de noviembre de 2026**. Código revisado: `81f44a2` de `main`. Esta actualización solo modifica documentación; no incorpora funciones nuevas.
 
-Proyecto de tesis: aplicación Android para descubrir negocios y servicios de San Carlos y participar en cuatro foros comunitarios. **Laravel REST + PostgreSQL + Flutter Android**.
+## Estado de los módulos
 
-Repositorio vigente: [Pandoraboy/Tesis](https://github.com/Pandoraboy/Tesis). Estado actualizado al **8 de octubre de 2026**, a partir del código publicado en `53ceadd` y las verificaciones reportadas por el usuario.
-
-## Para continuar el proyecto — personas e IA
-
-1. Leer este README, [AGENTS.md](AGENTS.md) y [WORKSPACE.md](WORKSPACE.md).
-2. Revisar rutas, modelos, migraciones y pruebas del módulo antes de modificarlo.
-3. Consultar el [backlog](docs/backlog/01-backlog-inicial.md) y la documentación del contrato cuando corresponda.
-4. Desarrollar un incremento verificable: implementar, analizar/probar, comprobar en Android y registrar el avance.
-
-**Las migraciones y el código actual definen lo implementado.** Los documentos históricos en `docs/fuentes/`, el SQL candidato y los contratos propuestos pueden contener diseños anteriores. No implementarlos automáticamente ni reintroducir el antiguo calendario. Las instrucciones actuales del usuario tienen prioridad.
-
-## Producto y alcance
-
-La experiencia objetivo es un **mapa 2D de San Carlos**, con marcadores de negocios y foros. Seleccionar un negocio mostrará una tarjeta y permitirá abrir su detalle. Habrá una alternativa de lista con búsqueda y filtro por categoría, compartiendo modelos, consultas y tarjetas con el mapa.
-
-Los negocios muestran categoría, descripción general de lo que ofrecen, dirección, contacto y horarios. No habrá catálogo producto por producto. Los cuatro foros son **Plaza de Armas, Cementerio, Estación y Alameda**, accesibles desde mapa o lista sin exigir proximidad física. Sus coordenadas deben validarse.
-
-| Persona | Comportamiento actual del backend |
-|---|---|
-| Visitante | Consultar categorías activas, lugares visibles, horarios, foros activos y mensajes visibles |
-| Usuario activo | Registrarse/iniciar sesión, publicar, retirar sus mensajes y solicitar/consultar el destacado de un mensaje propio |
-| Administrador activo | Gestionar categorías, lugares y horarios; moderar mensajes; revisar destacados; administrar estado de usuarios comunes y descripción/estado de los cuatro foros |
-
-Las pantallas móviles de cuentas, participación y administración todavía están pendientes. Fuera del alcance: carrito, pedidos, delivery, mensajes privados, seguidores, iOS y pagos reales. Los destacados se aprueban administrativamente en el MVP.
-
-## Estado real
-
-| Módulo | Backend implementado | Flutter implementado / pendiente |
+| Módulo | Implementación actual | Evidencia y pendiente |
 |---|---|---|
-| Categorías | Consulta pública; crear, editar y desactivar como admin | Nombre de categoría y selector implementados; gestión pendiente |
-| Cuentas | Registro, login, identidad, logout y tokens Sanctum; bloqueo de inactivos | Login, registro y sesión pendientes |
-| Lugares | Listado, detalle, búsqueda, filtro, paginación y CRUD admin | Lista, tarjetas, búsqueda, filtro, paginación, actualización y detalle; gestión pendiente |
-| Horarios | Tramos semanales, nocturnos, 24 horas, validación de superposición y estado de atención | Estado en tarjeta y horarios por día en detalle |
-| Foros y mensajes | Cuatro foros, lectura, publicación, retirada lógica y moderación | Pantallas pendientes |
-| Destacados | Solicitud, aprobación/rechazo/cancelación y prioridad por vigencia | Pantallas pendientes |
-| Administración | Foros, usuarios comunes y destacados; gestión de categorías/lugares/horarios | Interfaz pendiente |
-| Datos DEMO | Tres locales ficticios y 28 tramos semanales; seeder conservador al repetir | Consultados en emulador |
-| Inicio y navegación | No requiere endpoint propio | Inicio, tarjetas de acceso y barra inferior; Mapa/Chat provisionales |
-| Mapa y ubicación | Coordenadas de lugares disponibles; consulta por proximidad pendiente | Proveedor, mapa, GPS y marcadores pendientes |
+| Cuentas | Registro/login local y Google, sesión, cierre, perfil mínimo y vínculo Google | Login Google confirmado anteriormente por el usuario; recorrido completo de vinculación al mismo ID sigue pendiente de evidencia específica |
+| Acceso visitante | Entrada sin cuenta, consulta pública y regreso al acceso | Pruebas y recorrido Android confirmados por el usuario |
+| Directorio | Categorías, búsqueda, filtros, paginación, lista, detalle y horarios | Consulta Android confirmada; 350 lugares OSM cargados más 3 DEMO en la exportación revisada |
+| Importación OSM | JSON local, simulación, filtros, transacción y origen único tipo+ID | Pruebas y carga confirmadas por el usuario; repetir conserva datos existentes |
+| Alta de lugares | Botón para admin activo, formulario y selección de ubicación | Pruebas y recorrido completo confirmados por el usuario |
+| Mapa | Fondo OSM, detalle → Ver en el mapa, enfoque con zoom 18, marcador del lugar elegido y controles de centrado | Recorrido confirmado en emulador; faltan marcadores de todo el catálogo, filtros en mapa y navegación desde esos marcadores |
+| Foros y mensajes | API de cuatro foros, mensajes, retirada propia y moderación administrativa | Interfaz Android pendiente; Chat/Tablón es provisional |
+| Destacados | API de solicitud, revisión y prioridad por vigencia | Interfaz Android pendiente; sin pagos |
+| Moderación ampliada | Acuerdos sobre moderador, denuncias, timeout y tickets | Sin implementar |
+| Propietario y cupos | Jerarquía y máximo cinco administradores adicionales acordados | Sin implementar; código actual solo reconoce `user` y `admin` |
 
-**Flujo comprobado por el usuario:** PostgreSQL → API Laravel → Inicio → Búsqueda con filtros → detalle → horarios; regreso y cambio de secciones conservan estado.
+Las pruebas reportadas por el usuario se distinguen de las ejecutadas por quien revisa el código. En esta revisión no se ejecutaron PHP, Flutter ni emulador: faltan las herramientas. No se dispone de una cifra actual consolidada de toda la suite; los recuentos históricos no son el resultado de este commit.
 
-Evidencia reportada en Windows (backend: 2026-10-06; Flutter: 2026-10-08):
+## Guía para continuar
 
-- Backend: `php artisan test` → **114 pruebas aprobadas, 516 assertions**; incluye dos ejemplos de Laravel.
-- Flutter: `flutter analyze` sin incidencias y `flutter test` → **4 pruebas aprobadas**.
-- Emulador: lista/detalle DEMO e Inicio con navegación comprobados manualmente con Laravel encendido.
+1. Leer [WORKSPACE](WORKSPACE.md) y [AGENTS](AGENTS.md).
+2. Revisar la [definición de la base](docs/requisitos/05-consolidado-base.md), [actores](docs/requisitos/02-actores.md), [plan](docs/PLAN_CONTINUIDAD.md) y [backlog](docs/backlog/01-backlog-inicial.md).
+3. Leer las migraciones, rutas, Requests y pruebas del módulo: el código define lo implementado, los requisitos definen lo acordado.
+4. Implementar un incremento verificable, registrar pruebas y recorrido y actualizar documentación.
 
-Estas son ejecuciones del usuario, no del agente que actualizó la documentación. Las cuatro pruebas Flutter cubren listado, recuperación tras error, búsqueda/limpieza y categoría conservada al actualizar, mediante MockClient. La navegación principal y el detalle se comprobaron manualmente; no tienen cobertura automática todavía. No hay validación de producción ni piloto.
+**Siguiente incremento recomendado:** mostrar los lugares del catálogo en el mapa, sin perder registros por paginación; tocar un marcador abre su tarjeta y permite llegar al detalle. El enfoque desde Búsqueda ya funciona y debe conservarse. GPS/proximidad van después y no condicionan el acceso al mapa.
 
-## Arquitectura: modularidad y DRY
+## Actores: implementación y objetivo
 
-Mantener responsabilidades claras, composición y reutilización de conceptos compartidos. Evitar controladores gigantes, URLs repetidas por pantalla, reglas duplicadas y repositorios/interfaces genéricos sin necesidad real.
-
-**Laravel:** ruta → middleware → Form Request → controlador → modelo/servicio → PostgreSQL → JSON.
-
-- `routes/api.php`: contrato y grupos de permisos.
-- `app/Http/Middleware`: `EnsureActiveUser` y `EnsureActiveAdmin`; Sanctum autentica.
-- `app/Http/Requests`: entrada y autorización; categorías conserva validación en controlador.
-- `app/Http/Controllers/Api`: coordinación y respuestas; subcarpeta `Admin` para operaciones administrativas.
-- `app/Models`: relaciones, casts y campos permitidos.
-- `app/Services`: `EstadoHorarioService`, `DestacadoService` y `UsuarioService` para sus reglas de negocio.
-- `database/migrations`: esquema e integridad; crear migraciones nuevas al evolucionar esquemas ya aplicados.
-
-La superposición de horarios permanece en `HorarioLugarController`; extraerla cuando una nueva operación necesite reutilizarla. No hacer refactorizaciones masivas para uniformar estilo durante otra entrega.
-
-**Flutter actual:** pantalla → repositorio del módulo → cliente HTTP → API → modelos → widgets.
-
-| Ubicación en `mobile/lib/` | Responsabilidad |
+| Actor | Comportamiento actual |
 |---|---|
-| `main.dart` | Composición de la app, tema y ciclo de vida del cliente HTTP |
-| `core/navigation/principal_page.dart` | Barra inferior, creación diferida y conservación de secciones con IndexedStack |
-| `features/inicio/presentation/` | Inicio y tarjeta de acceso reutilizable con callbacks |
-| `features/categorias/` | Modelo y repositorio de categorías |
-| `core/config/api_config.dart` | URL central configurable con `API_BASE_URL` |
-| `core/network/api_client.dart` | GET JSON, UTF-8, timeout y errores comunes |
-| `features/lugares/models/` | `Lugar`, `EstadoHorario` y `HorarioLugar` |
-| `features/lugares/data/lugares_repository.dart` | Listado con filtros/paginación y consulta del detalle |
-| `features/lugares/presentation/` | Lista y detalle con carga, error y reintento |
-| `features/lugares/presentation/widgets/lugar_card.dart` | Tarjeta reutilizable; acción al tocar opcional |
+| Visitante | Consulta lugares y mapa desde Android; API de foros/mensajes pública, interfaz de chats pendiente |
+| Usuario activo (`user`) | Cuenta y consulta móvil; API permite publicar, retirar mensajes propios y solicitar destacados |
+| Administrador activo (`admin`) | Alta de lugares Android; API de gestión y moderación existente |
+| Moderador / propietario | Actores acordados; aún no hay roles ni operaciones correspondientes en código |
 
-Se usa `StatefulWidget` + `FutureBuilder`; las consultas se crean en `initState` o por acciones explícitas, no dentro de `build`. Búsqueda y categoría tienen controles visuales; cambiar filtros vuelve a página 1, actualizar/paginar conserva filtros. PrincipalPage crea cada sección al abrirla y la conserva con IndexedStack. Inicio abre directamente durante desarrollo: todavía no existe login/sesión Flutter.
+La matriz objetivo incluye permisos futuros y está identificada como tal. No prometer timeouts, denuncias, tickets, cupos ni superpermisos hasta implementarlos en servidor. Los usuarios comunes no proponen cambios del mapa en la versión base.
 
-Identificadores de dominio en español sin tildes (`Lugar`, `estacion`); texto visible con tildes. Autenticación conserva `username`, `role` y `active`. `\u00f3` en JSON es una representación válida de «ó», no un nombre distinto en la base.
+## Arquitectura y reglas
 
-## Reglas de negocio que deben conservarse
+Laravel: rutas → autenticación/middleware → Form Requests → controladores → modelos/servicios → PostgreSQL. Estado horario en `EstadoHorarioService`, zona `America/Santiago`; no duplicarlo en Flutter. Migraciones nuevas para evolucionar un esquema aplicado.
 
-- Lectura pública solo de contenido visible. Desactivar una categoría oculta sus lugares; desactivar un foro oculta su contenido sin borrarlo.
-- Categorías, lugares y mensajes se retiran lógicamente. Los tramos horarios se eliminan físicamente.
-- Estado horario calculado en servidor, zona `America/Santiago`: `abierto`, `cerrado` o `sin_horarios`. Apertura inclusiva, cierre exclusivo, varios tramos, continuidad nocturna y domingo→lunes. No persistir ni recalcular este estado en Flutter.
-- Sin horarios no se asume cerrado. No hay excepciones de feriados/cierres especiales. La app actualiza el estado al consultar o pulsar actualizar; no tiene refresco periódico automático.
-- Registro exige username/contraseña y correo o teléfono. El servidor asigna `role=user` y `active=true`. Tokens Bearer duran 7 días; logout revoca el token usado.
-- Desactivar un usuario común revoca todos sus tokens; reactivarlo no recupera tokens anteriores. El endpoint administrativo no modifica cuentas admin ni roles/contactos/contraseñas.
-- Solo el autor activo solicita destacado; autor o admin activo consulta la solicitud. Un registro de destacado por mensaje, sin nueva solicitud ni renovación en este MVP.
-- Transiciones: pendiente → aprobado/rechazado; aprobado → cancelado. Aprobación exige fechas con zona horaria y contenido visible; rechazo/cancelación exige motivo. Revisor asignado por servidor.
-- Fechas de destacados normalizadas a UTC; conexión PostgreSQL configurada en UTC. Vigencia: inicio inclusivo y fin exclusivo. Prioridad calculada antes de paginar, sin duplicar mensajes ni necesitar cron. Al vencer pierde prioridad y mantiene estado `aprobado`.
-- Los foros conservan nombre/slug; admin edita descripción/activo. Seeder no sobrescribe ajustes existentes.
+Flutter: sesión y cliente HTTP compartidos → repositorios por módulo → modelos → vistas/widgets. `PrincipalPage` conserva secciones con `IndexedStack`. El detalle devuelve el lugar elegido, Búsqueda comunica el evento al navegador y Mapa centra su controlador cuando está listo. Las escrituras pasan por la sesión y Laravel vuelve a autorizar; ocultar botones no sustituye los permisos del servidor.
 
-Lugares: filtros `buscar`, `categoria_id`, `page`, `per_page` (20 por defecto, máximo 100). Listado y detalle incluyen categoría, horarios y `estado_horario`. Listados paginados devuelven `data` y `meta` (`current_page`, `per_page`, `total`, `last_page`). Mensajes incluyen identidad pública del autor y `es_destacado`; los contactos privados no forman parte de su respuesta.
+- Lectura pública solo de contenido activo; categoría inactiva oculta sus lugares.
+- Sin horarios significa información desconocida. Varios tramos, nocturnos y atención 24 h se calculan en backend.
+- Cuenta inactiva no escribe; el registro público no asigna roles administrativos.
+- Destacados: pendiente → aprobado/rechazado; aprobado → cancelado. Prioridad derivada de fechas y visibilidad, sin cron ni pagos.
+- Foros fijos: Plaza de Armas, Cementerio, Estación y Alameda. Se conserva su identidad y se configura descripción/estado.
 
-Existe también la ruta heredada `/api/user`, autenticada, que devuelve el modelo de usuario salvo campos ocultos. Para nuevas pantallas usar `/api/v1/auth/me`; revisar la ruta heredada antes de publicar. Comprobar contratos precisos en Requests/controladores/pruebas y rutas con `php artisan route:list --path=api/v1 -v`.
+## Entorno y ejecución
 
-## Entorno observado
+Backend: PHP compatible con `backend/composer.json`, Composer, PostgreSQL y dependencias fijadas por `composer.lock`. Móvil: Flutter compatible con el SDK Dart declarado en `mobile/pubspec.yaml`; conservar `pubspec.lock` y la configuración Google que ya funciona.
 
-Windows 11, VS Code y PowerShell. PHP **8.4.26** y Composer **2.10.2** vía Herd; Laravel **13.35.0**, Sanctum **4.3.3** y PostgreSQL **18**. Flutter **3.47.6**, Dart **3.13.5**, Android SDK **36.0.0**, NDK **28.2.13676358**. Emulador `Medium_Phone_API_37.0`, Android 17/API 37; dispositivo observado `emulator-5554`.
-
-Los lockfiles fijan dependencias. No ejecutar actualizaciones de versiones para continuar una tarea sin necesidad. Los avisos de Chrome/Visual Studio en `flutter doctor` no bloquearon el desarrollo Android.
-
-## Ejecutar el backend
-
-Crear previamente en PostgreSQL las bases `ahora_local` (desarrollo) y `ahora_local_test` (pruebas). Desde la raíz:
+Desde `backend`, con `.env` local configurado y PostgreSQL encendido:
 
 ```powershell
-cd backend
-composer install
-# Solo en una instalación nueva; no sobrescribir un .env existente:
-Copy-Item .env.example .env
-```
-
-Configurar en `.env` la conexión `pgsql`, host, puerto, usuario y contraseña privados. La plantilla ya apunta a `ahora_local`. Después, en una instalación nueva:
-
-```powershell
-php artisan key:generate
-php artisan config:clear
 php artisan migrate
-php artisan db:seed --class=ForoSeeder
-# Opcional, solo local/testing; tres locales ficticios:
-php artisan db:seed --class=LugaresDemoSeeder
-php artisan serve
+php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-El servidor debe seguir ejecutándose mientras se usa la app. Comprobación en el PC: `http://127.0.0.1:8000/api/v1/lugares`.
+Estos comandos suponen una instalación preparada. No reemplazar un `.env` existente. Para primera instalación y configuración, ver [backend](backend/README.md).
 
-Los locales DEMO tienen coordenadas ilustrativas, no representan negocios reales. El seeder conserva lugares/horarios existentes al repetir; no restaura horarios eliminados. `DatabaseSeeder` crea una cuenta demo mediante factory y no sustituye los seeders explícitos anteriores; evitar `--seed` genérico para cargar el catálogo.
+Desde `mobile`, consultar dispositivo real con `flutter devices` y utilizar el comando habitual de `flutter run`. El emulador Android usa por defecto `http://10.0.2.2:8000/api/v1/`; `API_BASE_URL` permite cambiarla. Mantener los parámetros OAuth existentes. Ver [móvil](mobile/README.md).
 
-## Ejecutar Flutter en Android
+## Importación manual OSM
 
-Desde la raíz, en otra terminal:
+El archivo versionado está en `backend/app/Imports/san_carlos_osm.json`. Desde `backend`:
 
 ```powershell
-cd mobile
-flutter pub get
-flutter doctor
-flutter emulators
-# Si este emulador existe y está apagado:
-flutter emulators --launch Medium_Phone_API_37.0
-flutter devices
-# Usar el ID que muestre flutter devices:
-flutter run -d emulator-5554
+php artisan lugares:importar-osm "app/Imports/san_carlos_osm.json"
+php artisan lugares:importar-osm "app/Imports/san_carlos_osm.json" --guardar
 ```
 
-Configuración predeterminada: `http://10.0.2.2:8000/api/v1/`. `10.0.2.2` apunta al PC desde el emulador Android. El localhost de un teléfono físico es distinto; configurar la IP accesible del PC y el servidor cuando se use uno.
+Primero revisar la simulación y el destino. Solo habilitado en `local`/`testing`; no descargar datos durante el uso de la app. Si ya se cargó, no hace falta repetirlo. Fuente: © OpenStreetMap contributors, ODbL; [procedencia y licencia](docs/LICENCIA_DATOS_OSM.md).
 
-Para otro entorno, incluir `/api/v1/` en la URL:
+## Verificación y límites de despliegue
 
-```powershell
-flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1/
-```
-
-`android/app/src/debug/AndroidManifest.xml` habilita Internet y HTTP sin cifrar para desarrollo. **La build release aún no está preparada:** añadir permiso de Internet al manifiesto principal y usar una API HTTPS antes de publicar. No trasladar indiscriminadamente la excepción HTTP de debug a producción.
-
-Durante `flutter run`: `r` recarga cambios Dart; `R` reinicia la app; `q` detiene la ejecución. Cambios de manifiesto requieren detener y volver a ejecutar.
-
-## Pruebas
-
-Backend: crear `.env.testing` local a partir de la plantilla, configurar `APP_ENV=testing`, conexión PostgreSQL y **DB_DATABASE=ahora_local_test**, con credenciales privadas y APP_KEY local. No sobrescribir un archivo existente.
+Base de desarrollo: `ahora_local`. Base exclusiva y descartable para pruebas: `ahora_local_test`. Configurar `.env.testing` sin URLs que desvíen la conexión; no usar `migrate:fresh` sobre desarrollo.
 
 ```powershell
-# Desde backend, con .env.testing apuntando a la base exclusiva de pruebas:
-php artisan config:clear
+# Desde backend, solo con la base de pruebas confirmada:
 php artisan migrate --env=testing
 php artisan test
-# Una suite concreta:
-php artisan test tests/Feature/LugarApiTest.php
-```
 
-`phpunit.xml` fuerza PostgreSQL y `ahora_local_test` durante los tests; no configura por sí mismo los comandos Artisan de migración. Las pruebas API usan `DatabaseTransactions` y necesitan esquema previamente migrado. No usar `migrate:fresh` en desarrollo ni bases reales para pruebas destructivas.
-
-Flutter, desde `mobile`:
-
-```powershell
+# Desde mobile:
 flutter analyze
 flutter test
 ```
 
-Las pruebas actuales usan `MockClient`: no requieren Laravel ni emulador. Verificar también el flujo real en Android al cambiar integración o navegación.
+[Registro de validación](docs/validacion/2026-11-04-estado-integrado.md). Rendimiento todavía sin medir en teléfono físico/profile: los frames omitidos del emulador no prueban por sí solos un defecto del código ni permiten atribuir la lentitud al PC.
 
-## Diseño y decisiones vigentes del mapa
+Antes de release: permiso Internet en manifiesto principal, API HTTPS, firma y OAuth release, revisión de `/api/user`, recuperación de cuentas y condiciones de proveedor/caché/atribución OSM. El permiso de red está ahora en debug/profile; el emulador no demuestra que release esté preparado.
 
-Referencia: [boceto principal](docs/diseno/bocetomain.jfif) y [decisiones de navegación/mapa](docs/diseno/01-inicio-y-mapa.md).
-
-- Inicio, Mapa, Búsqueda y Chat / Tablón; tarjetas y barra inferior acceden a las mismas secciones.
-- Elegido `flutter_map` por simplicidad. MapLibre fue evaluado y no es la elección vigente. La dependencia y el mapa aún no están instalados/implementados; proveedor de fondo pendiente.
-- Mapa 2D con iconos por categoría (tienda, comida, cajero, etc.). Material inicialmente; referencia visual al radar de GTA SA, sin recursos originales incorporados.
-- Tocar marcador abre tarjeta inferior; deslizar la amplía para mostrar información y horarios, reutilizando modelos y reglas existentes.
-- Datos propios administrados en Laravel. Coordenadas manuales latitud/longitud, seleccionando la entrada y validando ubicación; Google Maps puede servir de referencia para recogerlas, sujeto a sus condiciones de uso.
-- Primero tres locales DEMO; después GPS y marcadores de foros con coordenadas verificadas. Logo y colores definitivos pendientes.
-
-## Próximas entregas, en orden
-
-1. Mapa 2D con `flutter_map`: seleccionar proveedor compatible y documentar atribución/condiciones; mostrar DEMO, iconos y tarjeta ampliable. No presentar solo la primera página del API como catálogo completo: definir carga de marcadores y límites.
-2. Añadir filtros compartidos, GPS con alternativa sin permiso y coordenadas validadas de foros. Mantener útil el mapa sin GPS.
-3. Ampliar pruebas de navegación principal, detalle y horarios según nuevos cambios.
-4. Registro/login/sesión segura Flutter y manejo de vencimiento/revocación; recuperación de contraseña pendiente en backend. Conectar Inicio después de login.
-5. Foros/mensajes, destacados y pantallas administrativas dentro del alcance.
-6. HTTPS, permisos release, firma/despliegue, respaldo, datos reales y evaluación del piloto/tesis.
-
-No medir avance con porcentajes ficticiamente exactos ni confundir API disponible con pantalla terminada. No están probados concurrencia real, cambios de reloj en tramos nocturnos, release ni despliegue.
-
-## Estructura y cierre de tareas
-
-- `backend/`: Laravel, migraciones, seeders y pruebas.
-- `mobile/`: app Flutter Android y pruebas; `README-workspace.md` conserva la nota inicial.
-- `docs/`: requisitos, arquitectura, backlog, contratos y evidencia; antecedentes en `docs/fuentes/`.
-- `AGENTS.md`: convenciones de trabajo; `WORKSPACE.md`: continuidad; `CHANGELOG.md`: cambios.
-
-Antes de un commit: revisar diff y archivos ignorados. Conservar `composer.lock` y `pubspec.lock`; excluir `.env`/`.env.testing`, tokens, claves, dependencias, builds y cachés. No instalar/publicar/hacer push fuera de la autorización de la tarea. Registrar cambios, comprobaciones, limitaciones y siguiente incremento.
+Fuera de la base: pagos reales, delivery, carrito, mensajes privados, seguidores e iOS. No añadir propuestas de usuarios comunes sobre el mapa sin revisar el alcance.
