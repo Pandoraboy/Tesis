@@ -1,3 +1,7 @@
+Corrección visual en validación: agrupación de lugares cercanos por zoom, pines 22/28 px, círculos 32 px y lista para coincidencias/zoom máximo. Usa grilla local y caché de zoom, sin dependencias nuevas. Nueve pruebas preparadas; intento Flutter exit 127 por herramienta ausente. Usuario reportó 62 pruebas aprobadas de la versión de catálogo y captura de 354 lugares saturada. Validar esta corrección y regresión antes de cerrar. Ver docs/validacion/2026-11-04-agrupacion-mapa.md.
+
+Incremento en validación: catálogo en mapa sobre 81f44a2, preparado el 2026-11-04. Recopila páginas, rechaza carga parcial/inconsistente, muestra marcadores y tarjeta/detalle, conserva enfoque desde Búsqueda. Ocho pruebas preparadas, Flutter ausente (exit 127); aplicar y ejecutar procedimiento docs/validacion/2026-11-04-catalogo-mapa.md. Sin backend/dependencias/datos/push. El usuario confirmó que aplicó la documentación anterior.
+
 # Continuidad operativa
 
 Actualizado: 2026-11-04. Base publicada revisada: `81f44a2` (`main`). Esta entrega sincroniza documentación; no cambia código ni hace push.

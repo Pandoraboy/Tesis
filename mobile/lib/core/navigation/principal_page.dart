@@ -63,7 +63,11 @@ class _PrincipalPageState extends State<PrincipalPage> {
 
   Widget _crearPagina(int indice) {
     return switch (indice) {
-      1 => MapaPage(lugarSeleccionado: _lugarEnMapa, tileProvider: widget.mapaTileProvider),
+      1 => MapaPage(
+        lugarSeleccionado: _lugarEnMapa,
+        tileProvider: widget.mapaTileProvider,
+        repository: widget.lugaresRepository,
+      ),
       2 => LugaresPage(
         repository: widget.lugaresRepository,
         categoriasRepository: widget.categoriasRepository,

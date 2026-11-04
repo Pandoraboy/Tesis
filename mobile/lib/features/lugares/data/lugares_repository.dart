@@ -37,6 +37,41 @@ class LugaresRepository {
 
   final ApiClient _apiClient;
 
+  Future<List<Lugar>> listarParaMapa() async {
+    final lugares = <int, Lugar>{};
+    int? totalEsperado;
+    var ultimaPagina = 1;
+    for (var pagina = 1; pagina <= ultimaPagina; pagina++) {
+      final resultado = await listar(pagina: pagina, porPagina: 100);
+      if (resultado.paginaActual != pagina || resultado.ultimaPagina < pagina ||
+          resultado.total < 0) {
+        throw const ApiException('La paginación de lugares no es válida. Intenta actualizar.');
+      }
+      if (totalEsperado == null) {
+        totalEsperado = resultado.total;
+        ultimaPagina = resultado.ultimaPagina;
+        if (ultimaPagina > (totalEsperado == 0 ? 1 : totalEsperado)) {
+          throw const ApiException('La paginación de lugares no es válida. Intenta actualizar.');
+        }
+      } else if (resultado.total != totalEsperado || resultado.ultimaPagina != ultimaPagina) {
+        throw const ApiException('El catálogo cambió durante la carga. Intenta actualizar.');
+      }
+      if (resultado.lugares.isEmpty && resultado.total != 0) {
+        throw const ApiException('La carga de lugares está incompleta. Intenta actualizar.');
+      }
+      for (final lugar in resultado.lugares) {
+        if (lugares.containsKey(lugar.id)) {
+          throw const ApiException('El catálogo cambió durante la carga. Intenta actualizar.');
+        }
+        lugares[lugar.id] = lugar;
+      }
+    }
+    if (lugares.length != totalEsperado) {
+      throw const ApiException('La carga de lugares está incompleta. Intenta actualizar.');
+    }
+    return List<Lugar>.unmodifiable(lugares.values);
+  }
+
   Future<Lugar> crear({required NuevoLugar datos, required String token}) async {
     final json = await _apiClient.postJson(
       'lugares',

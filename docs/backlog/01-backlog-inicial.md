@@ -1,3 +1,13 @@
+## Catálogo de mapa preparado · 2026-11-04
+
+- [x] Código para recopilar todas las páginas y detectar carga incompleta.
+- [x] Código para marcadores, tarjeta/detalle, actualización y manejo de errores.
+- [x] Ocho pruebas nuevas escritas, con HTTP y teselas locales.
+- [ ] Ejecutar analyze/suites y validar Android: Flutter no disponible aquí.
+- [ ] Filtros de mapa y evaluación de solapamientos/rendimiento.
+
+Estado anterior e historial a continuación; no considerar cerradas las verificaciones solo por preparar código.
+
 # Backlog vigente · 2026-11-04
 
 Base revisada: `81f44a2`. [Plan](../PLAN_CONTINUIDAD.md) y [evidencia](../validacion/2026-11-04-estado-integrado.md).

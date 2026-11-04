@@ -1,3 +1,16 @@
+## Legibilidad del mapa · candidato 2026-11-04
+
+- Grupos con contador según distancia visual/zoom; pines individuales más pequeños.
+- Toque acerca o abre selección de lugares coincidentes/al máximo; conserva tarjeta, detalle y enfoque externo.
+- Nueve pruebas preparadas, sin ejecución Flutter aquí. Usuario confirmó 62 pruebas de la versión anterior; esta corrección aún pendiente.
+
+## Catálogo en mapa · candidato 2026-11-04
+
+- Carga paginada completa y validación de total/páginas/IDs; sin mostrar carga parcial ante fallo.
+- Marcadores seleccionables, tarjeta, detalle y actualización conservadora ante error.
+- Preservado enfoque desde Búsqueda; ocho pruebas preparadas, sin ejecución por ausencia de Flutter.
+- Sin cambios backend, esquema o dependencias; sin push.
+
 # Registro de cambios
 
 ## Documentación sincronizada · 2026-11-04

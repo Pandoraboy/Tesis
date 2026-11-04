@@ -1,3 +1,7 @@
+> Corrección candidata 2026-11-04: grupos compactos por zoom, pines pequeños y selección por lista para ubicaciones coincidentes. [Validación pendiente](docs/validacion/2026-11-04-agrupacion-mapa.md). Usuario reportó 62 pruebas aprobadas del catálogo anterior y pidió corregir la saturación visual.
+
+> Incremento candidato 2026-11-04: catálogo completo de marcadores, carga de todas las páginas, selección/tarjeta/detalle y actualización con conservación ante error. [Validación pendiente](docs/validacion/2026-11-04-catalogo-mapa.md). No se ejecutó Flutter aquí.
+
 # Ahora Local · San Carlos
 
 Aplicación Android para consultar lugares y servicios de San Carlos y participar en cuatro foros comunitarios. Backend Laravel REST, PostgreSQL y Flutter Android, con `flutter_map` y fondo OpenStreetMap.

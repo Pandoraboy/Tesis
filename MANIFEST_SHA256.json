@@ -1,0 +1,10 @@
+{
+  "mobile/lib/features/mapa/presentation/mapa_page.dart": "75a512c0d30d250fdc196e54807be58aebfa7678d2e1459cfac97397d8e0d5bc",
+  "mobile/lib/features/mapa/presentation/widgets/lugares_mapa_layer.dart": "d81978a3bcad8ddc8786aeccf15c49c689fda04e17838c218c148206031a5bfc",
+  "mobile/lib/features/mapa/services/agrupador_lugares.dart": "85c690d033be6a83f18ce837a149ec406d37680136897fe16debfeeb381d5d1f",
+  "mobile/test/agrupacion_mapa_test.dart": "f3304e693d69cbdacc95db9baa59dbb5fbe739b04c6439c4c0ec83c75d9f6c52",
+  "docs/validacion/2026-11-04-agrupacion-mapa.md": "5334f51c5fa2f4ff18a571956bb37b7ff8f47bd1695b9df71f8d8d981d7741fa",
+  "README.md": "83cb1cae73d1041bd01d2fba4e93c344dac0e0cfc166c34c2a82a4dac54537e9",
+  "WORKSPACE.md": "874a989d6ce7ef39e674c7bb8c16206d6834cb9bcb9f2b2c837f4c09e3c131cf",
+  "CHANGELOG.md": "b2c2ba7442b17b54aa60ea4e9342b3d3d7c3a815c9c3c90be1b612f8bed7c317"
+}
