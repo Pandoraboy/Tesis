@@ -24,6 +24,9 @@ class SesionGate extends StatefulWidget {
 }
 
 class _SesionGateState extends State<SesionGate> {
+  // Navegar como visitante no crea una cuenta ni una sesión autenticada.
+  bool _visitante = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,36 +44,88 @@ class _SesionGateState extends State<SesionGate> {
           EstadoSesion.inicial || EstadoSesion.comprobando => const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           ),
-          EstadoSesion.sinSesion => LoginPage(sesionController: controller),
-          EstadoSesion.errorRecuperacion => Scaffold(
-            appBar: AppBar(title: const Text('Ahora Local')),
-            body: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      controller.error ?? 'No se pudo recuperar la sesión.',
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: controller.ocupado
-                          ? null
-                          : controller.recuperar,
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
+          EstadoSesion.sinSesion => _visitante
+              ? _crearAreaVisitante(controller)
+              : LoginPage(
+                  sesionController: controller,
+                  onContinuarVisitante: _continuarVisitante,
                 ),
-              ),
-            ),
-          ),
+          EstadoSesion.errorRecuperacion => _visitante
+              ? _crearAreaVisitante(controller)
+              : _crearErrorRecuperacion(controller),
           EstadoSesion.autenticada => _crearAreaAutenticada(controller),
         };
       },
     );
   }
+
+  Widget _crearErrorRecuperacion(SesionController controller) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Ahora Local')),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                controller.error ?? 'No se pudo recuperar la sesión.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: controller.ocupado ? null : controller.recuperar,
+                child: const Text('Reintentar'),
+              ),
+              TextButton(
+                onPressed: controller.ocupado ? null : _continuarVisitante,
+                child: const Text('Continuar sin cuenta'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _continuarVisitante() {
+    if (widget.controller.ocupado) return;
+    setState(() => _visitante = true);
+  }
+
+  Widget _crearAreaVisitante(SesionController controller) {
+    // El navegador se destruye al ir al acceso o al área autenticada:
+    // no quedan detalles del directorio por encima de esas pantallas.
+    return Navigator(
+      key: const ValueKey('visitante'),
+      onGenerateRoute: (settings) => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Ahora Local · Visitante'),
+            actions: [
+              TextButton(
+                onPressed: controller.ocupado
+                    ? null
+                    : () => setState(() => _visitante = false),
+                child: Text(
+                  controller.estado == EstadoSesion.errorRecuperacion
+                      ? 'Reintentar acceso'
+                      : 'Iniciar sesión',
+                ),
+              ),
+            ],
+          ),
+          body: _crearPrincipal(),
+        ),
+      ),
+    );
+  }
+
+  Widget _crearPrincipal() => PrincipalPage(
+    lugaresRepository: widget.lugaresRepository,
+    categoriasRepository: widget.categoriasRepository,
+  );
 
   Widget _crearAreaAutenticada(SesionController controller) {
     // Un navegador separado permite retirar también cualquier detalle
@@ -115,10 +170,7 @@ class _SesionGateState extends State<SesionGate> {
                 ),
               ],
             ),
-            body: PrincipalPage(
-              lugaresRepository: widget.lugaresRepository,
-              categoriasRepository: widget.categoriasRepository,
-            ),
+            body: _crearPrincipal(),
           ),
         );
       },

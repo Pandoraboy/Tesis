@@ -8,8 +8,13 @@ import 'google_register_page.dart';
 import '../data/google_sign_in_service.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({required this.sesionController, super.key});
+  const LoginPage({
+    required this.sesionController,
+    this.onContinuarVisitante,
+    super.key,
+  });
   final SesionController sesionController;
+  final VoidCallback? onContinuarVisitante;
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -378,6 +383,13 @@ class _LoginPageState extends State<LoginPage> {
                                 '¿No tienes cuenta? Crear cuenta',
                               ),
                             ),
+                            if (widget.onContinuarVisitante != null)
+                              TextButton(
+                                onPressed: ocupado
+                                    ? null
+                                    : widget.onContinuarVisitante,
+                                child: const Text('Continuar sin cuenta'),
+                              ),
                           ],
                         ),
                 ),
