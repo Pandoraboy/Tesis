@@ -84,7 +84,7 @@ class _LugarDetallePageState extends State<LugarDetallePage> {
         return;
       }
       setState(() {
-      _resultado = Future.value(actualizado);
+        _resultado = Future.value(actualizado);
       });
       final cambios = widget.cambiosLugares;
       if (cambios != null) {

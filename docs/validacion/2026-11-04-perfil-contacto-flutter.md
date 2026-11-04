@@ -1,3 +1,5 @@
+> Estado posterior: usuario reportó 92 pruebas Flutter aprobadas con este incremento. Recorrido manual pospuesto. Las correcciones posteriores están en 2026-11-04-estabilizacion.md y aún requieren pruebas. Procedimiento original a continuación.
+
 # Perfil Flutter: contacto voluntario
 
 Preparado el 4 de noviembre de 2026, sobre la API de perfil ya instalada por el usuario. Evidencia de la API aportada por el usuario: 12 pruebas aprobadas, 49 aserciones. No se atribuye ese resultado a este entorno.

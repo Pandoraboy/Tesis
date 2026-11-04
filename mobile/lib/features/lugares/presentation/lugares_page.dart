@@ -40,6 +40,7 @@ class _LugaresPageState extends State<LugaresPage> {
   String? _errorCategorias;
 
   int _pagina = 1;
+  int _consulta = 0;
   int? _categoriaId;
   String _buscar = '';
 
@@ -104,7 +105,7 @@ class _LugaresPageState extends State<LugaresPage> {
       return;
     }
     // Mostrar el lugar creado aunque los filtros anteriores lo excluyeran.
-    _limpiarFiltros();
+    _limpiarFiltros(notificarCambio: true);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Se agregó «${lugar.nombre}».')),
     );
@@ -130,12 +131,28 @@ class _LugaresPageState extends State<LugaresPage> {
     widget.onVerEnMapa?.call(lugar);
   }
 
-  Future<PaginaLugares> _consultarLugares() {
-    return widget.repository.listar(
-      pagina: _pagina,
-      buscar: _buscar,
-      categoriaId: _categoriaId,
+  Future<PaginaLugares> _consultarLugares() async {
+    final consulta = ++_consulta;
+    final pagina = _pagina;
+    final buscar = _buscar;
+    final categoriaId = _categoriaId;
+    final resultado = await widget.repository.listar(
+      pagina: pagina,
+      buscar: buscar,
+      categoriaId: categoriaId,
     );
+    // Una edición puede reducir el resultado y eliminar la página actual.
+    // Una respuesta vieja nunca cambia la página de una consulta posterior.
+    if (mounted && consulta == _consulta &&
+        resultado.ultimaPagina >= 1 && pagina > resultado.ultimaPagina) {
+      _pagina = resultado.ultimaPagina;
+      return widget.repository.listar(
+        pagina: _pagina,
+        buscar: buscar,
+        categoriaId: categoriaId,
+      );
+    }
+    return resultado;
   }
 
   void _cargar(int pagina) {
@@ -156,10 +173,19 @@ class _LugaresPageState extends State<LugaresPage> {
     _aplicarFiltros();
   }
 
-  void _limpiarFiltros() {
+  void _limpiarFiltros({bool notificarCambio = false}) {
     _buscarController.clear();
+    _buscar = '';
     _categoriaId = null;
-    _aplicarFiltros();
+    _pagina = 1;
+    FocusScope.of(context).unfocus();
+    final cambios = widget.cambiosLugares;
+    if (notificarCambio && cambios != null) {
+      // Búsqueda y Mapa reciben el mismo aviso: una carga por vista.
+      cambios.value++;
+    } else {
+      _cargar(1);
+    }
   }
 
   Future<void> _cargarCategorias() async {

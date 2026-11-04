@@ -261,6 +261,21 @@ void main() {
     expect(e.patches, 0);
   });
 
+  testWidgets('descartar restaura número y permiso sin enviar PATCH', (tester) async {
+    final e = _Escenario()..telefono = '+56912345678';
+    await _abrir(tester, e);
+    await _escribir(tester, '+56987654321');
+    await _alternar(tester);
+    final descartar = find.text('Descartar cambios');
+    await tester.ensureVisible(descartar);
+    await tester.tap(descartar);
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextFormField>(_numero).controller!.text, '+56912345678');
+    expect(tester.widget<SwitchListTile>(_permiso).value, isFalse);
+    expect(tester.widget<FilledButton>(_guardar).onPressed, isNull);
+    expect(e.patches, 0);
+  });
+
   testWidgets('401 retira el perfil y no anuncia guardado', (tester) async {
     final e = _Escenario()..estadoPatch = 401;
     await _abrir(tester, e);

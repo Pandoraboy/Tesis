@@ -1,3 +1,5 @@
+> Estado posterior: usuario reportó 79 pruebas Flutter aprobadas tras corregir setState y luego 92 con perfil. Recorrido reciente pospuesto. Ver 2026-11-04-estabilizacion.md; el registro original sigue a continuación.
+
 # Editar lugares desde Android · 2026-11-04
 
 ## Resultado preparado

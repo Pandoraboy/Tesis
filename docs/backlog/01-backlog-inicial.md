@@ -1,59 +1,38 @@
-## Edición admin preparada · 2026-11-04
-
-- [x] Código de formulario compartido, precarga y PATCH desde detalle.
-- [x] Refresco entre Búsqueda y Mapa y pruebas nuevas preparadas.
-- [ ] Ejecutar Flutter/analyze/suite y recorrido de edición en Android.
-- [ ] Perfil: contacto voluntario wa.me, número privado por defecto y texto preparado.
-- [ ] Chats Android después de preparar perfil/contacto; sin OpenWA ni API de pago para abrir conversación.
-
-## Diagnostico de rendimiento · 2026-11-04
-
-- [x] Revisar indices existentes y plan general aportado por el usuario (1,196 ms de ejecucion).
-- [x] Preparar medicion de API y planes de filtros/conteos.
-- [ ] Ejecutar en entorno del usuario y analizar resultados; no crear indices/vistas antes de medir su utilidad.
-
-## Catálogo de mapa preparado · 2026-11-04
-
-- [x] Código para recopilar todas las páginas y detectar carga incompleta.
-- [x] Código para marcadores, tarjeta/detalle, actualización y manejo de errores.
-- [x] Ocho pruebas nuevas escritas, con HTTP y teselas locales.
-- [ ] Ejecutar analyze/suites y validar Android: Flutter no disponible aquí.
-- [ ] Filtros de mapa y evaluación de solapamientos/rendimiento.
-
-Estado anterior e historial a continuación; no considerar cerradas las verificaciones solo por preparar código.
-
 # Backlog vigente · 2026-11-04
 
-Base revisada: `81f44a2`. [Plan](../PLAN_CONTINUIDAD.md) y [evidencia](../validacion/2026-11-04-estado-integrado.md).
+Base revisada de00404; estabilización candidata posterior. [Plan](../PLAN_CONTINUIDAD.md), [validación](../validacion/2026-11-04-estabilizacion.md).
 
-## Avances con evidencia del usuario
+## Incorporado
 
-- [x] Entrada visitante y directorio Android.
-- [x] Pruebas del importador y carga inicial: 350 OSM + 3 DEMO.
-- [x] Pruebas y recorrido completo del alta de lugares admin.
-- [x] Recorrido detalle → Ver en el mapa, zoom y marcador en emulador.
-- [ ] Registrar resultado explícito de las cinco pruebas del incremento de mapa y suite consolidada actual.
-- [ ] Confirmar recorrido de vinculación Google al mismo ID de H1.
+- [x] Cuentas locales/Google, visitante y directorio.
+- [x] Importador OSM, carga inicial y procedencia por tipo/ID.
+- [x] Alta/edición administrativa Android y selector de ubicación.
+- [x] Catálogo completo paginado, grupos por zoom, tarjeta/detalle y enfoque.
+- [x] API y formulario de contacto WhatsApp privado, independiente del registro.
+- [x] Usuario reportó 92 pruebas Flutter aprobadas y 12 de PerfilApiTest/49 aserciones.
+- [x] Diagnóstico SQL/API revisado; las mediciones no justificaron índices nuevos.
 
-## Siguiente incremento recomendado: catálogo en mapa
+## Estabilización preparada
 
-- [ ] Cargar todos los lugares pertinentes sin omitir páginas.
-- [ ] Mostrar marcadores y estados de carga/error/vacío.
-- [ ] Abrir tarjeta y detalle al tocar marcador.
-- [ ] Compartir criterios de filtro con Búsqueda sin duplicar reglas.
-- [ ] Probar primera apertura, regreso, selección de otro lugar y zonas rurales.
-- [ ] Medir rendimiento en dispositivo físico/profile si persisten los tirones.
+- [x] Código de aviso de alta a Mapa/Búsqueda sin recarga duplicada.
+- [x] Código de recuperación de página que desaparece al reducirse resultados.
+- [x] Descartar cambios del contacto sin solicitud de escritura.
+- [x] Permiso INTERNET en manifiesto principal Android.
+- [x] Cinco casos de prueba nuevos preparados.
+- [ ] Ejecutar formato, analyze, pruebas específicas y suite Flutter.
+- [ ] Recorrido reciente en emulador: alta/edición, mapa y perfil.
+- [ ] Recorrido Google H1 con mismo ID; suite completa backend actual.
 
-## Después
+## Próximos módulos
 
-- [ ] Chats Android sobre API existente: lectura, publicación y retirada.
-- [ ] Cerrar reglas mínimas de denuncias/timeouts y tickets antes de implementar sus estados.
-- [ ] Roles moderador/propietario y cupos con permisos en servidor.
-- [ ] Tickets internos, resolución atómica y revisión de concurrencia.
-- [ ] Edición/horarios y destacados móviles.
-- [ ] Recuperación, Internet principal, HTTPS, firma/OAuth release, OSM y piloto.
+- [ ] Chats Android: lectura pública, publicación y retirada autenticadas.
+- [ ] Contacto wa.me con consulta autorizada de consentimiento vigente.
+- [ ] Reglas y API de moderador/propietario, cupos, denuncias/timeouts y tickets.
+- [ ] Gestión móvil de horarios/destacados.
+- [ ] Filtros mapa/lista, GPS opcional y medición de rendimiento físico/profile.
+- [ ] HTTPS, firma/OAuth release, prueba de APK, recuperación, respaldo, políticas OSM y piloto.
 
-El visitante no necesita GPS. Usuarios comunes no proponen correcciones del mapa en la base. No añadir pagos, WebSockets ni redes sociales preventivamente.
+Los apartados siguientes son antecedentes históricos; no representan el estado actual ni su orden de trabajo.
 
 ## Registro histórico anterior
 

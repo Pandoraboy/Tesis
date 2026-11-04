@@ -1,40 +1,34 @@
-Incremento en validación: editar lugar Android, sobre catálogo/agrupación actuales. Formulario compartido alta/edición, categoría por ID, selector precargado y PATCH existente. Notificación de cambio refresca Búsqueda/Mapa, incluyendo carga en curso. Ocho pruebas preparadas; intento Flutter exit 127 (no instalado), pendiente ejecución y recorrido. Ver docs/validacion/2026-11-04-editar-lugar.md. Próximo: perfil/contacto voluntario wa.me entre usuarios y luego chats. OpenWA descartado para ese botón; sin costo de API ni envío automático. El diagnóstico SQL de las consultas medidas no justificó índices nuevos; no atribuir toda lentitud al emulador.
-
-Diagnostico de rendimiento preparado: scripts/diagnostico/medir-lugares.ps1 y planes-lugares.sql. Medir API completa, busqueda/categoria y conteos antes de crear indices/vistas. Usuario aporto listado general con ejecucion 1,196 ms y planificacion 9,269 ms; no evidencia cuello SQL en esa consulta. PowerShell/psql no disponibles aqui, sin mediciones nuevas ni cambios de aplicacion/esquema. Esperar resultados generados en su equipo para decidir migracion.
-
-Corrección visual en validación: agrupación de lugares cercanos por zoom, pines 22/28 px, círculos 32 px y lista para coincidencias/zoom máximo. Usa grilla local y caché de zoom, sin dependencias nuevas. Nueve pruebas preparadas; intento Flutter exit 127 por herramienta ausente. Usuario reportó 62 pruebas aprobadas de la versión de catálogo y captura de 354 lugares saturada. Validar esta corrección y regresión antes de cerrar. Ver docs/validacion/2026-11-04-agrupacion-mapa.md.
-
-Incremento en validación: catálogo en mapa sobre 81f44a2, preparado el 2026-11-04. Recopila páginas, rechaza carga parcial/inconsistente, muestra marcadores y tarjeta/detalle, conserva enfoque desde Búsqueda. Ocho pruebas preparadas, Flutter ausente (exit 127); aplicar y ejecutar procedimiento docs/validacion/2026-11-04-catalogo-mapa.md. Sin backend/dependencias/datos/push. El usuario confirmó que aplicó la documentación anterior.
-
 # Continuidad operativa
 
-Actualizado: 2026-11-04. Base publicada revisada: `81f44a2` (`main`). Esta entrega sincroniza documentación; no cambia código ni hace push.
+Fecha: 2026-11-04. Base publicada revisada: `de00404` de main. Cambios de estabilización preparados encima, sin commit ni push.
 
-## Validado por el usuario
+## Estado y evidencia
 
-- Acceso visitante y consulta en Android; reportó pruebas aprobadas.
-- Importador OSM: todas sus pruebas aprobadas, carga de 350 lugares más 3 DEMO. Exportación inspeccionada y filtro Deporte con 18 resultados en emulador.
-- Alta administrativa: pruebas aprobadas y recorrido completo confirmado, incluida ubicación en mapa.
-- Detalle → Ver en el mapa: funcionamiento completo confirmado en emulador, con enfoque y marcador. No hay resultado explícito separado de las cinco pruebas nuevas de mapa; registrar su ejecución si se requiere evidencia exacta del commit.
+Implementados: cuentas locales/Google, visitante, perfil/vínculo, directorio, importación OSM, alta/edición admin, catálogo completo en mapa y grupos por zoom. Perfil de contacto WhatsApp privado con número independiente y permiso voluntario. Chat/Tablón Android sigue provisional; API de cuatro foros disponible.
 
-No confundir estos reportes con ejecuciones del agente. Login Google fue confirmado previamente; H1 de vinculación al mismo ID conserva su comprobación específica pendiente.
+El usuario confirmó 92 pruebas Flutter aprobadas y PerfilApiTest con 12 pruebas/49 aserciones antes de esta estabilización. Los recorridos recientes de edición/perfil en emulador se pospusieron por falta de tiempo. H1 de vincular Google y volver al mismo ID sigue pendiente de evidencia específica. No se dispone de ejecución actual completa del backend.
 
-## Siguiente incremento recomendado
+## Cambios preparados ahora
 
-Mapa del catálogo: cargar lugares sin perder páginas, marcadores identificables, tarjeta al seleccionarlos y acceso al detalle. Conservar el enfoque desde Búsqueda y la navegación visitante/admin ya validada. Después integrar filtros compartidos. No exigir GPS para consultar.
+- Alta de lugar avisa a Búsqueda y Mapa, con una recarga por vista.
+- Listado vuelve a una página válida cuando el resultado se reduce; respuestas anteriores no cambian la página de consultas más nuevas.
+- Perfil ofrece Descartar cambios para restaurar el último contacto confirmado, sin PATCH.
+- INTERNET en Android main; esto no completa la preparación de release.
+- Documentación sincronizada con el código y resultados reportados.
 
-Un incremento a la vez, con pruebas y recorrido Android. El código actual no implementa moderador/propietario, denuncias, timeouts ni tickets. Sus permisos son requisitos acordados, no capacidades disponibles.
+Cinco casos nuevos preparados: cuatro en consistencia_catalogo_test.dart y uno en perfil_contacto_test.dart. Flutter/Dart ausentes aquí; no se ejecutaron formato, analyze, tests ni emulador. Ver [procedimiento y límites](docs/validacion/2026-11-04-estabilizacion.md). No presentar el número esperado de tests como aprobación real.
 
-## Pendientes de decisión y preparación
+## Al retomar
 
-- Reglas mínimas de moderación/denuncias, concurrencia de timeouts y tickets, campos de tickets y recuperación de acceso: ver consolidado.
-- Internet principal, HTTPS, firma/OAuth release, proveedor/caché/atribución OSM, revisión de ruta heredada y medición de rendimiento físico/profile antes del piloto.
-- Chat móvil, destacados y gestión de horarios/edición de lugares en móvil pendientes.
+1. Aplicar el paquete de estabilización sobre de00404, ejecutar formato/analyze y los archivos de prueba indicados, después la suite.
+2. Cuando haya tiempo, comprobar alta con mapa previamente abierto, edición, páginas reducidas y perfil con backend real.
+3. Implementar chats Android sobre API existente: lectura pública; publicación/retirada para cuentas activas. Sin exigir WebSockets.
+4. Integrar contacto WhatsApp consultando en servidor consentimiento vigente y cuenta activa antes de abrir wa.me. Aún no existe endpoint de contacto ajeno.
 
-## Entorno
+Moderador/propietario, cupos, denuncias, timeout y tickets continúan como requisitos futuros. Horarios/destacados móviles, filtros de mapa y GPS quedan pendientes.
 
-Windows y PowerShell del usuario. API de desarrollo 127.0.0.1:8000; emulador 10.0.2.2:8000/api/v1/. PostgreSQL: ahora_local y ahora_local_test (exclusiva/descartable). Conservar .env, credenciales y parámetros Google y lockfiles.
+## Entorno y límites
 
-En la máquina de revisión no hay PHP/Composer/Flutter/Dart. No se ejecutaron suites; revisión estática e inspección de archivos. No instalar dependencias ni modificar datos de desarrollo para producir evidencia. No atribuir al usuario comandos/resultados que no haya reportado.
+Windows/PowerShell del usuario. API local 127.0.0.1:8000; emulador 10.0.2.2:8000/api/v1/. Desarrollo ahora_local; pruebas exclusivas/descartables ahora_local_test. Conservar configuración y lockfiles. No repetir importación ni migraciones para este paquete.
 
-Consultar [README](README.md), [plan](docs/PLAN_CONTINUIDAD.md), [backlog](docs/backlog/01-backlog-inicial.md), [consolidado](docs/requisitos/05-consolidado-base.md) y [evidencia integrada](docs/validacion/2026-11-04-estado-integrado.md).
+Revisión estática en esta máquina sin PHP/Composer/Flutter/Dart. No instalar dependencias o reconstruir datos para producir evidencia. Release: permiso principal preparado; HTTPS, firma/OAuth, prueba de APK y políticas OSM pendientes. No se modificaron datos, backend ni dependencias en esta estabilización.

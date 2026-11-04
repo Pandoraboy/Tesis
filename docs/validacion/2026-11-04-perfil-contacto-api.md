@@ -1,3 +1,5 @@
+> Estado posterior: usuario aportó PerfilApiTest con 12 pruebas y 49 aserciones aprobadas (27,77 s). Sin ejecución aquí ni suite backend completa actual reportada. Procedimiento original a continuación.
+
 # Perfil: contacto voluntario, etapa API
 
 Preparado el 4 de noviembre de 2026. Se conserva el backend de autenticación y el perfil Flutter existente. Esta entrega permite probar la persistencia con Postman antes de conectar el formulario móvil.

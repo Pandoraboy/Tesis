@@ -1,3 +1,16 @@
+# Estabilización preparada · 2026-11-04
+
+Base de código revisada: de00404. Correcciones aún sin validar con Flutter en esta máquina.
+
+- Alta de lugar notifica a Mapa y Búsqueda, con una recarga por sección.
+- Paginación recupera la última página disponible después de reducirse el resultado; las respuestas anteriores no cambian el estado de consultas posteriores.
+- Perfil incorpora Descartar cambios, restaurando el último contacto confirmado sin PATCH.
+- Permiso INTERNET añadido al manifiesto Android principal; release completo sigue pendiente.
+- Cinco casos nuevos preparados y documentación actualizada con los resultados reportados: 92 Flutter; PerfilApiTest 12/49 aserciones.
+- Sin backend, migraciones, dependencias, credenciales ni cambios de datos. Sin commit/push. Flutter/Dart ausentes, ejecución pendiente en el equipo del usuario.
+
+Los registros siguientes conservan el estado que se conocía al preparar cada incremento; para el estado vigente consultar README y WORKSPACE.
+
 ## Edición de lugares Android · candidato 2026-11-04
 
 - Editar lugar visible para admin activo en detalle de lista/mapa; reutiliza formulario con datos precargados.

@@ -164,6 +164,22 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
     }
   }
 
+  void _descartar() {
+    final guardado = _guardado;
+    if (guardado == null || _cargando || _guardando ||
+        widget.controller.ocupado || _porConfirmar) {
+      return;
+    }
+    _form.currentState?.reset();
+    setState(() {
+      _telefono.text = guardado.telefono ?? '';
+      _permitido = guardado.permitido;
+      _error = null;
+      _errorTelefono = null;
+      _aviso = null;
+    });
+  }
+
   void _editar() {
     setState(() {
       _errorTelefono = null;
@@ -234,6 +250,10 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
                   onPressed: ocupado || _porConfirmar || !_cambio ? null : _guardar,
                   icon: const Icon(Icons.save_outlined),
                   label: const Text('Guardar contacto'),
+                ),
+                TextButton(
+                  onPressed: ocupado || _porConfirmar || !_cambio ? null : _descartar,
+                  child: const Text('Descartar cambios'),
                 ),
               ],
               if (_error != null)

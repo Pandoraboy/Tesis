@@ -1,8 +1,12 @@
 # Ahora Local · API Laravel
 
-Laravel REST + PostgreSQL. Estado revisado: 2026-11-04, commit `81f44a2`. [Guía general](../README.md) y [continuidad](../WORKSPACE.md).
+Laravel REST + PostgreSQL. Estado revisado: 2026-11-04, commit `de00404`. [Guía general](../README.md) y [continuidad](../WORKSPACE.md).
 
 Implementados: categorías/lugares/horarios, estado horario America/Santiago, cuentas locales y Google/Sanctum, perfil/vinculación, cuatro foros/mensajes, destacados y administración. Importador OSM local con simulación y origen único. Roles actuales: user/admin; moderador/propietario, denuncias, timeout y tickets siguen pendientes.
+
+## Perfil de contacto
+
+GET/PATCH /api/v1/perfil requiere Sanctum y cuenta activa, opera únicamente sobre el titular y guarda whatsapp_phone/whatsapp_enabled independientes de phone. Por defecto no hay número y el contacto está desactivado. No existe todavía un endpoint de contacto ajeno para chats. Usuario confirmó PerfilApiTest: 12 pruebas, 49 aserciones; no es el resultado de la suite completa del backend. [Contrato y aplicación](../docs/validacion/2026-11-04-perfil-contacto-api.md).
 
 ## Primera instalación
 

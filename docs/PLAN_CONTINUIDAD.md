@@ -1,32 +1,29 @@
 # Plan de continuidad · Ahora Local
 
-Actualizado: 2026-11-04. Base de código revisada: `81f44a2`. [Estado integrado y evidencia](validacion/2026-11-04-estado-integrado.md).
+Fecha: 2026-11-04. Base revisada de main: de00404. [Evidencia](validacion/2026-11-04-estado-integrado.md), [estabilización preparada](validacion/2026-11-04-estabilizacion.md).
 
-| Hito | Avance comprobado o presente | Pendiente |
+| Hito | Implementación/evidencia | Pendiente |
 |---|---|---|
-| H0 · Pruebas | Usuario reportó aprobación de visitante, importador y alta | Registrar ejecución actual consolidada y pruebas específicas de mapa |
-| H1 · Perfil/Google | Código y pruebas presentes; login Google confirmado antes | Recorrido local → vínculo → logout → Google con mismo ID y casos de conflicto |
-| H2 · Visitante/sesión | Entrada pública y regreso al login validados; conSesion usado para alta | Integrar sesión en las siguientes escrituras privadas y tratamiento de ciclo de vida que se requiera |
-| H3 · Mapa/directorio | OSM local importado; alta Android; detalle → marcador/enfoque validado | Catálogo completo de marcadores, paginación, tarjeta/detalle y filtros; luego GPS |
-| H4 · Comunidad | API de cuatro foros/mensajes disponible | Lectura/publicación/retirada Android; después denuncias y timeout con permisos de servidor |
-| H5 · Gestión | Alta de lugares admin Android y API de gestión existentes | Edición, horarios, destacados móviles; moderador/propietario, cupos y tickets |
-| H6 · Piloto | Alcance base definido y datos iniciales disponibles | Recuperación, HTTPS, Internet principal, firma/OAuth release, OSM, respaldo y evaluación |
+| H0 · Pruebas | Usuario reportó 92 Flutter aprobadas y 12 pruebas/49 aserciones de PerfilApiTest | Ejecutar correcciones nuevas y suite backend actual; recorrido manual reciente |
+| H1 · Cuenta | Login/registro local/Google, perfil y vínculo; contacto WhatsApp privado | Recorrido de vínculo al mismo ID y recuperación |
+| H2 · Sesión | Visitante, navegación separada y escrituras con sesión compartida | Mantener permisos de servidor al integrar comunidad |
+| H3 · Mapa/directorio | Importación, catálogo completo, grupos, tarjeta/detalle y enfoque | Validar ajuste del alta/paginación; filtros mapa, GPS y rendimiento físico |
+| H4 · Comunidad | API de cuatro foros/mensajes disponible | Pantallas Android y contacto WhatsApp con permiso vigente |
+| H5 · Gestión | Alta/edición Android, API de horarios y destacados | Horarios/destacados móviles; moderador/propietario, cupos y tickets |
+| H6 · Piloto | Base de producto y datos disponibles; permiso Internet principal preparado | HTTPS, firma/OAuth release, APK, recuperación, respaldo y evaluación |
 
-## Orden siguiente
+## Orden
 
-1. Completar el mapa del catálogo conservando navegación y consultas públicas existentes. Resolver todas las páginas; reutilizar modelos/repositorios y el detalle.
-2. Añadir selección y tarjeta por marcador, y filtros coherentes con Búsqueda. Probar error, vacío y lugares rurales.
-3. Integrar la interfaz de foros sobre la API existente. No crear otro chat o introducir WebSockets como requisito preventivo.
-4. Implementar jerarquía y moderación/tickets por etapas, después de cerrar sus reglas mínimas. Validar permisos primero en backend.
+1. Validar estabilización sin repetir catálogo, edición o perfil.
+2. Integrar foros Android: lectura pública, publicación y retirada sobre API existente.
+3. Añadir contacto externo voluntario. El número no se incorpora al listado público de mensajes; comprobar estado/consentimiento actual en servidor antes de exponerlo al solicitante autorizado.
+4. Implementar jerarquía, denuncias/timeouts y tickets por etapas con permisos en backend.
+5. Completar mejoras de mapa y preparar piloto con evidencia real.
 
-El orden es una recomendación técnica, no una obligación que desplace instrucciones futuras del usuario. No ampliar el alcance a propuestas del mapa por usuarios comunes, pagos, delivery o iOS.
+Un incremento verificable a la vez. No ampliar a pagos, delivery, redes sociales, iOS o propuestas de usuarios comunes sobre el mapa. La preferencia de contacto no equivale a verificación de propiedad del número.
 
-## Reglas de cierre
+## Cierre
 
-Pruebas específicas, regresión pertinente, recorrido Android y evidencia con origen de cada resultado. Una revisión estática o un archivo de pruebas no demuestra ejecución. No cerrar H1 por el funcionamiento de otros módulos. No declarar el mapa terminado por enfocar un solo lugar.
+Distinguir código preparado, pruebas aprobadas por el usuario y ejecución del agente. El recorrido Android no se sustituye por mocks; un resultado previo no demuestra una corrección posterior. Pruebas PostgreSQL solo en ahora_local_test. Las 92 pruebas corresponden al código anterior a esta estabilización.
 
-## Límites y decisiones abiertas
-
-Los roles implementados siguen siendo user/admin. El propietario con superpermisos y cinco administradores adicionales es un acuerdo futuro; la asignación SQL puntual de admin en desarrollo no implementa esa jerarquía. Pendientes funcionales en [consolidado](requisitos/05-consolidado-base.md).
-
-Pruebas PostgreSQL solo en ahora_local_test; desarrollo en ahora_local. No reinstalar dependencias ni reiniciar bases para continuar sin necesidad. Mantener esquema ejecutable en migraciones, autenticación existente, flutter_map y estado horario America/Santiago en Laravel.
+No cambiar paquetes, esquema ni credenciales sin necesidad. Mantener flutter_map y estado horario America/Santiago en Laravel. Consultar el [consolidado](requisitos/05-consolidado-base.md) para reglas futuras.

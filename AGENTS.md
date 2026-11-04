@@ -11,10 +11,11 @@ Las instrucciones actuales del usuario tienen prioridad. Después siguen las dec
 
 ## Estado que no debe perderse
 
-Base publicada revisada: 81f44a2 (2026-11-04). Backend y Flutter ya incluyen login/registro local y Google, perfil mínimo/vínculo, visitante, directorio y alta de lugares admin. Mapa flutter_map con OSM y marcador del lugar seleccionado desde detalle, enfoque con zoom 18. El usuario confirmó pruebas/recorridos de visitante, importación y alta, y recorrido de mapa en emulador. No repetir estas implementaciones. La prueba específica de vincular y volver al mismo ID sigue pendiente de evidencia; ver docs/PLAN_CONTINUIDAD.md y docs/validacion/2026-11-04-estado-integrado.md.
+Base publicada revisada: de00404 (2026-11-04). Implementados: login/registro local/Google, visitante, perfil/vínculo, directorio, alta/edición admin, catálogo completo del mapa con grupos por zoom y tarjeta/detalle. Contacto WhatsApp privado: número independiente, consentimiento y formulario; chats/apertura WhatsApp aún pendientes. No repetir esos módulos. Usuario reportó 92 pruebas Flutter aprobadas y 12 de PerfilApiTest con 49 aserciones antes del ajuste de estabilización. Recorrido reciente de edición/perfil pospuesto; H1 de vínculo al mismo ID sigue pendiente de evidencia.
 
-Siguiente incremento recomendado: catálogo completo de marcadores con paginación, tarjeta y detalle. Chat Android, roles moderador/propietario, timeouts, denuncias y tickets no implementados. Los requisitos acordados constan en docs/requisitos/05-consolidado-base.md; no confundirlos con permisos actuales user/admin. No sustituir flutter_map por otro motor.
+Estabilización preparada sobre esa base: aviso compartido también al alta, recuperación de páginas que desaparecen, Descartar cambios de contacto, permiso INTERNET principal y documentación. Cinco pruebas nuevas preparadas, sin Flutter/Dart aquí. Aplicar y validar antes de continuar. Ver docs/validacion/2026-11-04-estabilizacion.md.
 
+Siguiente módulo: chats Android sobre API existente y luego contacto wa.me con permiso vigente comprobado en servidor. Moderador/propietario, timeouts, denuncias, cupos y tickets siguen sin implementar. Los requisitos futuros constan en docs/requisitos/05-consolidado-base.md. No sustituir flutter_map.
 Foros acordados: Plaza de Armas, Cementerio, Estación y Alameda. Leer README para alcance completo. No agregar pagos, delivery, catálogo de productos individuales, iOS ni funcionalidades sociales ajenas al alcance.
 
 ## Modularidad y DRY obligatorios
