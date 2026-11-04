@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+
+import '../session/sesion_controller.dart';
 
 import '../../features/categorias/data/categorias_repository.dart';
 import '../../features/inicio/presentation/inicio_page.dart';
 import '../../features/lugares/data/lugares_repository.dart';
+import '../../features/lugares/models/lugar.dart';
 import '../../features/lugares/presentation/lugares_page.dart';
 import '../../features/mapa/presentation/mapa_page.dart';
 
@@ -10,11 +14,16 @@ class PrincipalPage extends StatefulWidget {
   const PrincipalPage({
     required this.lugaresRepository,
     required this.categoriasRepository,
+    this.sesionController,
+    this.mapaTileProvider,
     super.key,
   });
 
   final LugaresRepository lugaresRepository;
   final CategoriasRepository categoriasRepository;
+  final SesionController? sesionController;
+  // Permite validar navegación y cámara sin descargar teselas en las pruebas.
+  final TileProvider? mapaTileProvider;
 
   @override
   State<PrincipalPage> createState() => _PrincipalPageState();
@@ -22,6 +31,7 @@ class PrincipalPage extends StatefulWidget {
 
 class _PrincipalPageState extends State<PrincipalPage> {
   int _seccion = 0;
+  Lugar? _lugarEnMapa;
 
   // Cada sección se crea al abrirla y conserva su estado.
   late final List<Widget?> _paginas;
@@ -53,10 +63,12 @@ class _PrincipalPageState extends State<PrincipalPage> {
 
   Widget _crearPagina(int indice) {
     return switch (indice) {
-      1 => const MapaPage(),
+      1 => MapaPage(lugarSeleccionado: _lugarEnMapa, tileProvider: widget.mapaTileProvider),
       2 => LugaresPage(
         repository: widget.lugaresRepository,
         categoriasRepository: widget.categoriasRepository,
+        sesionController: widget.sesionController,
+        onVerEnMapa: _verLugarEnMapa,
       ),
       3 => const _SeccionPendiente(
         titulo: 'Chat / Tablón',
@@ -65,6 +77,18 @@ class _PrincipalPageState extends State<PrincipalPage> {
       ),
       _ => throw ArgumentError.value(indice, 'indice'),
     };
+  }
+
+  void _verLugarEnMapa(Lugar lugar) {
+    if (!lugar.tieneUbicacionValida) {
+      return;
+    }
+    setState(() {
+      _lugarEnMapa = lugar;
+      // Mismo tipo y posición en IndexedStack: conserva el State del mapa.
+      _paginas[1] = _crearPagina(1);
+      _seccion = 1;
+    });
   }
 
   @override

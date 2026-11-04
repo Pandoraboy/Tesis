@@ -14,6 +14,7 @@ class LugaresFiltros extends StatelessWidget {
     required this.onCategoriaChanged,
     required this.onReintentarCategorias,
     this.errorCategorias,
+    this.onAgregar,
   });
 
   final TextEditingController buscarController;
@@ -25,6 +26,7 @@ class LugaresFiltros extends StatelessWidget {
   final VoidCallback onLimpiar;
   final ValueChanged<int?> onCategoriaChanged;
   final VoidCallback onReintentarCategorias;
+  final VoidCallback? onAgregar;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,17 @@ class LugaresFiltros extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (onAgregar != null) ...[
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.icon(
+                onPressed: onAgregar,
+                icon: const Icon(Icons.add_location_alt_outlined),
+                label: const Text('Agregar lugar'),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           Row(
             children: [
               Expanded(

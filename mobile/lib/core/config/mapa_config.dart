@@ -5,6 +5,7 @@ class MapaConfig {
 
   static const centroSanCarlos = LatLng(-36.424, -71.958);
   static const zoomInicial = 15.0;
+  static const zoomLugar = 18.0;
 
   static const urlTiles = String.fromEnvironment(
     'MAP_TILE_URL',

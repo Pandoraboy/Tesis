@@ -1,5 +1,6 @@
 import '../../../core/network/api_client.dart';
 import '../models/lugar.dart';
+import '../models/nuevo_lugar.dart';
 
 class PaginaLugares {
   const PaginaLugares({
@@ -35,6 +36,21 @@ class LugaresRepository {
   const LugaresRepository(this._apiClient);
 
   final ApiClient _apiClient;
+
+  Future<Lugar> crear({required NuevoLugar datos, required String token}) async {
+    final json = await _apiClient.postJson(
+      'lugares',
+      body: datos.toJson(),
+      token: token,
+    );
+    try {
+      return Lugar.fromJson(json['data'] as Map<String, dynamic>);
+    } on FormatException {
+      throw const ApiException('No se pudo leer el lugar creado. Revisa la lista antes de volver a enviarlo.');
+    } on TypeError {
+      throw const ApiException('No se pudo leer el lugar creado. Revisa la lista antes de volver a enviarlo.');
+    }
+  }
 
   Future<Lugar> obtener(int id) async {
     final json = await _apiClient.getJson('lugares/$id');

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/session/sesion_controller.dart';
 import '../../categorias/data/categorias_repository.dart';
 import '../../categorias/models/categoria_lugar.dart';
 import '../data/lugares_repository.dart';
 import 'lugar_detalle_page.dart';
+import 'lugar_crear_page.dart';
+import '../models/lugar.dart';
 import 'widgets/lugar_card.dart';
 import 'widgets/lugares_filtros.dart';
 
@@ -13,10 +16,14 @@ class LugaresPage extends StatefulWidget {
     super.key,
     required this.repository,
     required this.categoriasRepository,
+    this.sesionController,
+    this.onVerEnMapa,
   });
 
   final LugaresRepository repository;
   final CategoriasRepository categoriasRepository;
+  final SesionController? sesionController;
+  final ValueChanged<Lugar>? onVerEnMapa;
 
   @override
   State<LugaresPage> createState() => _LugaresPageState();
@@ -37,14 +44,73 @@ class _LugaresPageState extends State<LugaresPage> {
   @override
   void initState() {
     super.initState();
+    widget.sesionController?.addListener(_cambioSesion);
     _resultado = _consultarLugares();
     _cargarCategorias();
   }
 
   @override
   void dispose() {
+    widget.sesionController?.removeListener(_cambioSesion);
     _buscarController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant LugaresPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sesionController != widget.sesionController) {
+      oldWidget.sesionController?.removeListener(_cambioSesion);
+      widget.sesionController?.addListener(_cambioSesion);
+    }
+  }
+
+  void _cambioSesion() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _agregarLugar() async {
+    final sesion = widget.sesionController;
+    if (sesion == null || !sesion.puedeAdministrar || sesion.ocupado) {
+      return;
+    }
+    final lugar = await Navigator.of(context).push<Lugar>(
+      MaterialPageRoute<Lugar>(
+        builder: (_) => LugarCrearPage(
+          repository: widget.repository,
+          categoriasRepository: widget.categoriasRepository,
+          sesionController: sesion,
+          categoriaInicialId: _categoriaId,
+        ),
+      ),
+    );
+    if (!mounted || lugar == null) {
+      return;
+    }
+    // Mostrar el lugar creado aunque los filtros anteriores lo excluyeran.
+    _limpiarFiltros();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Se agregó «${lugar.nombre}».')),
+    );
+    await _abrirDetalle(lugar.id);
+  }
+
+  Future<void> _abrirDetalle(int lugarId) async {
+    final lugar = await Navigator.of(context).push<Lugar>(
+      MaterialPageRoute<Lugar>(
+        builder: (_) => LugarDetallePage(
+          lugarId: lugarId,
+          repository: widget.repository,
+          permiteVerEnMapa: widget.onVerEnMapa != null,
+        ),
+      ),
+    );
+    if (!mounted || lugar == null) {
+      return;
+    }
+    widget.onVerEnMapa?.call(lugar);
   }
 
   Future<PaginaLugares> _consultarLugares() {
@@ -126,6 +192,9 @@ class _LugaresPageState extends State<LugaresPage> {
       body: Column(
         children: [
           LugaresFiltros(
+            onAgregar: widget.sesionController?.puedeAdministrar == true
+                ? _agregarLugar
+                : null,
             buscarController: _buscarController,
             categorias: _categorias,
             categoriaId: _categoriaId,
@@ -213,16 +282,7 @@ class _LugaresPageState extends State<LugaresPage> {
 
               return LugarCard(
                 lugar: lugar,
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => LugarDetallePage(
-                        lugarId: lugar.id,
-                        repository: widget.repository,
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => _abrirDetalle(lugar.id),
               );
             },
           ),

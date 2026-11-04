@@ -46,6 +46,11 @@ class Lugar {
   final String? telefono;
   final List<HorarioLugar> horarios;
 
+  bool get tieneUbicacionValida =>
+      latitud.isFinite && longitud.isFinite &&
+      latitud >= -90 && latitud <= 90 &&
+      longitud >= -180 && longitud <= 180;
+
   factory Lugar.fromJson(Map<String, dynamic> json) {
     final categoria = json['categoria'] as Map<String, dynamic>;
     final horariosJson = json['horarios'] as List<dynamic>? ?? [];

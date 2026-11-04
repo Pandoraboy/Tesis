@@ -11,10 +11,12 @@ class LugarDetallePage extends StatefulWidget {
     super.key,
     required this.lugarId,
     required this.repository,
+    this.permiteVerEnMapa = false,
   });
 
   final int lugarId;
   final LugaresRepository repository;
+  final bool permiteVerEnMapa;
 
   @override
   State<LugarDetallePage> createState() => _LugarDetallePageState();
@@ -87,6 +89,18 @@ class _LugarDetallePageState extends State<LugarDetallePage> {
             padding: const EdgeInsets.all(12),
             children: [
               LugarCard(lugar: lugar),
+              if (widget.permiteVerEnMapa) ...[
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: lugar.tieneUbicacionValida
+                      ? () => Navigator.of(context).pop(lugar)
+                      : null,
+                  icon: const Icon(Icons.map_outlined),
+                  label: const Text('Ver en el mapa'),
+                ),
+                if (!lugar.tieneUbicacionValida)
+                  const Text('Ubicación no disponible.'),
+              ],
               if (descripcion != null && descripcion.isNotEmpty) ...[
                 const SizedBox(height: 20),
                 Text(

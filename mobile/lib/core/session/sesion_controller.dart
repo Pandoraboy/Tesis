@@ -32,6 +32,41 @@ class SesionController extends ChangeNotifier {
   String? get errorCode => _errorCode;
   bool get ocupado => _ocupado;
   bool get googlePorConfirmar => _googlePorConfirmar;
+  bool get puedeAdministrar =>
+      _estado == EstadoSesion.autenticada &&
+      _cuenta?.active == true &&
+      _cuenta?.esAdmin == true;
+
+  // La credencial permanece en la sesión; las pantallas solicitan la operación.
+  Future<T> conSesion<T>(Future<T> Function(String token) accion) async {
+    final credencial = _credencial;
+    if (_ocupado) {
+      throw const ApiException('Espera a que termine la operación actual.');
+    }
+    if (_estado != EstadoSesion.autenticada ||
+        _cuenta?.active != true ||
+        credencial == null) {
+      throw const ApiException('Inicia sesión para continuar.', statusCode: 401);
+    }
+    _ocupado = true;
+    _notificar();
+    try {
+      if (credencial.vencida) {
+        await _invalidarSesion();
+        throw const ApiException('Tu sesión venció. Inicia sesión nuevamente.', statusCode: 401);
+      }
+      return await accion(credencial.token);
+    } on ApiException catch (error) {
+      if (error.statusCode == 401 && _estado == EstadoSesion.autenticada) {
+        await _invalidarSesion();
+      }
+      // Un 403 también puede significar que el rol ya no permite la acción.
+      rethrow;
+    } finally {
+      _ocupado = false;
+      _notificar();
+    }
+  }
 
   void _notificar() {
     if (!_disposed) notifyListeners();

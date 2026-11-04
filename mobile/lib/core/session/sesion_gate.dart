@@ -122,9 +122,10 @@ class _SesionGateState extends State<SesionGate> {
     );
   }
 
-  Widget _crearPrincipal() => PrincipalPage(
+  Widget _crearPrincipal({SesionController? sesion}) => PrincipalPage(
     lugaresRepository: widget.lugaresRepository,
     categoriasRepository: widget.categoriasRepository,
+    sesionController: sesion,
   );
 
   Widget _crearAreaAutenticada(SesionController controller) {
@@ -170,7 +171,7 @@ class _SesionGateState extends State<SesionGate> {
                 ),
               ],
             ),
-            body: _crearPrincipal(),
+            body: _crearPrincipal(sesion: controller),
           ),
         );
       },
