@@ -27,7 +27,7 @@ class InicioPage extends StatelessWidget {
           const SizedBox(height: 28),
           AccesoInicioCard(
             titulo: 'Mapa Local',
-            descripcion: 'Explora los negocios de San Carlos.',
+            descripcion: 'Explora los lugares de San Carlos.',
             icono: Icons.map_outlined,
             destacado: true,
             onTap: onAbrirMapa,
@@ -44,7 +44,7 @@ class InicioPage extends StatelessWidget {
                 ),
                 AccesoInicioCard(
                   titulo: 'Búsqueda',
-                  descripcion: 'Encuentra negocios por nombre o categoría.',
+                  descripcion: 'Encuentra lugares por nombre o categoría.',
                   icono: Icons.search,
                   onTap: onAbrirBusqueda,
                 ),

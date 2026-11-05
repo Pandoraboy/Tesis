@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/validar_formulario.dart';
+
 import '../../../core/network/api_client.dart';
+import '../../../core/widgets/salida_con_cambios.dart';
 import '../data/auth_repository.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -25,6 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Map<String, List<String>> _errores = const {};
   String? _error;
   bool _enviando = false;
+  bool _confirmado = false;
 
   @override
   void dispose() {
@@ -42,7 +46,9 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _limpiarError(String campo) {
-    if (!_errores.containsKey(campo) && _error == null) return;
+    if (!_errores.containsKey(campo) && _error == null) {
+      return;
+    }
 
     setState(() {
       _errores = {..._errores}..remove(campo);
@@ -51,14 +57,18 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _registrar() async {
-    if (_enviando) return;
+    if (_enviando) {
+      return;
+    }
 
     setState(() {
       _errores = const {};
       _error = null;
     });
 
-    if (!_formKey.currentState!.validate()) return;
+    if (!validarYMostrarError(_formKey)) {
+      return;
+    }
 
     FocusScope.of(context).unfocus();
     setState(() => _enviando = true);
@@ -72,12 +82,17 @@ class _RegisterPageState extends State<RegisterPage> {
         passwordConfirmation: _confirmation.text,
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       // Devuelve el nombre confirmado por Laravel; no inicia sesión.
+      _confirmado = true;
       Navigator.of(context).pop(cuenta.username);
     } on ApiException catch (error) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _errores = error.validationErrors;
@@ -86,7 +101,9 @@ class _RegisterPageState extends State<RegisterPage> {
             : error.message;
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _error = 'No se pudo completar el registro. Intenta nuevamente.';
@@ -100,8 +117,24 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: !_enviando,
+    return SalidaConCambios(
+      ocupado: _enviando,
+      cambios: Listenable.merge([
+        _username,
+        _email,
+        _phone,
+        _password,
+        _confirmation,
+      ]),
+      tieneCambios: () =>
+          !_confirmado &&
+          [
+            _username,
+            _email,
+            _phone,
+            _password,
+            _confirmation,
+          ].any((campo) => campo.text.isNotEmpty),
       child: Scaffold(
         appBar: AppBar(title: const Text('Crear cuenta')),
         body: SafeArea(

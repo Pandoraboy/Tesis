@@ -1,34 +1,22 @@
-# Continuidad operativa
+# Continuidad: calidad de vida en validación
 
-Fecha: 2026-11-04. Base publicada revisada: `de00404` de main. Cambios de estabilización preparados encima, sin commit ni push.
+Fecha 2026-11-04. Base publicada revisada de00404, más estabilización que el usuario aplicó y reportó con 97 pruebas Flutter aprobadas. PerfilApiTest: 12 pruebas/49 aserciones previamente reportadas. Recorrido reciente y suite backend completa no confirmados.
 
-## Estado y evidencia
+Actualización QoL preparada después: Atrás Android, confirmación de descarte en formularios, comprobación de escrituras inciertas, conservación del contenido al refrescar, reanudación de pantalla visible, cierre local opcional tras fallo remoto, cabecera única, filtros/resultados desplazables, contexto de consulta, mapa táctil/leyenda/errores de fondo y copia de datos.
 
-Implementados: cuentas locales/Google, visitante, perfil/vínculo, directorio, importación OSM, alta/edición admin, catálogo completo en mapa y grupos por zoom. Perfil de contacto WhatsApp privado con número independiente y permiso voluntario. Chat/Tablón Android sigue provisional; API de cuatro foros disponible.
-
-El usuario confirmó 92 pruebas Flutter aprobadas y PerfilApiTest con 12 pruebas/49 aserciones antes de esta estabilización. Los recorridos recientes de edición/perfil en emulador se pospusieron por falta de tiempo. H1 de vincular Google y volver al mismo ID sigue pendiente de evidencia específica. No se dispone de ejecución actual completa del backend.
-
-## Cambios preparados ahora
-
-- Alta de lugar avisa a Búsqueda y Mapa, con una recarga por vista.
-- Listado vuelve a una página válida cuando el resultado se reduce; respuestas anteriores no cambian la página de consultas más nuevas.
-- Perfil ofrece Descartar cambios para restaurar el último contacto confirmado, sin PATCH.
-- INTERNET en Android main; esto no completa la preparación de release.
-- Documentación sincronizada con el código y resultados reportados.
-
-Cinco casos nuevos preparados: cuatro en consistencia_catalogo_test.dart y uno en perfil_contacto_test.dart. Flutter/Dart ausentes aquí; no se ejecutaron formato, analyze, tests ni emulador. Ver [procedimiento y límites](docs/validacion/2026-11-04-estabilizacion.md). No presentar el número esperado de tests como aprobación real.
+16 casos nuevos integrados. Validación Linux aislada con Flutter 3.47.7/Dart 3.13.5: formato, lockfile preservado, analyze sin incidencias y 113 pruebas aprobadas. Backend y emulador no ejecutados. [Evidencia](docs/validacion/2026-11-04-ejecucion-qol.md). Procedimiento, correspondencia Q01–Q14 y límites: [validación QoL](docs/validacion/2026-11-04-calidad-de-vida.md).
 
 ## Al retomar
 
-1. Aplicar el paquete de estabilización sobre de00404, ejecutar formato/analyze y los archivos de prueba indicados, después la suite.
-2. Cuando haya tiempo, comprobar alta con mapa previamente abierto, edición, páginas reducidas y perfil con backend real.
-3. Implementar chats Android sobre API existente: lectura pública; publicación/retirada para cuentas activas. Sin exigir WebSockets.
-4. Integrar contacto WhatsApp consultando en servidor consentimiento vigente y cuenta activa antes de abrir wa.me. Aún no existe endpoint de contacto ajeno.
+1. Aplicar paquete acumulativo sobre la versión ya estabilizada.
+2. Las comprobaciones Flutter ya aprobaron en Linux; al integrar localmente comprobar analyze y flutter test con la configuración del proyecto.
+3. Recorrido Android con backend real: Atrás, borradores, refresco fallido, teclado/texto grande, perfil y cierre local sin red.
+4. Confirmar H1 de vínculo Google al mismo ID. Después continuar chats Android sobre API existente y luego contacto wa.me con permiso vigente comprobado en servidor.
 
-Moderador/propietario, cupos, denuncias, timeout y tickets continúan como requisitos futuros. Horarios/destacados móviles, filtros de mapa y GPS quedan pendientes.
+No repetir catálogo, edición o perfil. Cuentas locales/Google, visitante, directorio, importación OSM, alta/edición admin, mapa completo/grupos y contacto privado ya están implementados. Chats móviles y contacto ajeno/apertura WhatsApp aún pendientes. Moderador/propietario, cupos, denuncias, timeouts y tickets son requisitos futuros.
 
-## Entorno y límites
+## Límites
 
-Windows/PowerShell del usuario. API local 127.0.0.1:8000; emulador 10.0.2.2:8000/api/v1/. Desarrollo ahora_local; pruebas exclusivas/descartables ahora_local_test. Conservar configuración y lockfiles. No repetir importación ni migraciones para este paquete.
+No hay idempotencia para altas ni concurrencia por versiones; el reenvío exige comprobación humana pero no garantiza ausencia de duplicados. No hay caché persistente ni modo offline. Renovar al reanudar no implica recalcular horarios en Flutter ni refresco continuo. API HTTPS, firma/OAuth y prueba de release siguen pendientes; INTERNET principal incluido.
 
-Revisión estática en esta máquina sin PHP/Composer/Flutter/Dart. No instalar dependencias o reconstruir datos para producir evidencia. Release: permiso principal preparado; HTTPS, firma/OAuth, prueba de APK y políticas OSM pendientes. No se modificaron datos, backend ni dependencias en esta estabilización.
+Sin backend funcional, migraciones, dependencias, credenciales o datos modificados. Sin commit/push. Conservar envs, lockfiles y parámetros Google/API. Desarrollo ahora_local; pruebas exclusivas/descartables ahora_local_test.

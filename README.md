@@ -2,7 +2,7 @@
 
 Aplicación Android para consultar lugares de San Carlos y participar en cuatro foros comunitarios. Laravel REST, PostgreSQL y Flutter Android con flutter_map y fondo OpenStreetMap.
 
-Estado: 4 de noviembre de 2026. Base publicada revisada: `de00404`. Esta entrega prepara correcciones posteriores a esa base; consultar su [validación](docs/validacion/2026-11-04-estabilizacion.md).
+Estado: 4 de noviembre de 2026. Base publicada revisada: `de00404`. Estabilización aplicada y validada por el usuario; nueva [actualización de calidad de vida preparada](docs/validacion/2026-11-04-calidad-de-vida.md), validada con 113 pruebas Flutter y analyze sin incidencias; recorrido Android pendiente.
 
 ## Módulos
 
@@ -18,11 +18,11 @@ Estado: 4 de noviembre de 2026. Base publicada revisada: `de00404`. Esta entrega
 | Destacados | API de solicitud, revisión y prioridad por vigencia | Interfaz Android; sin pagos |
 | Moderación ampliada | Requisitos acordados | Moderador/propietario, cupos, denuncias, timeouts y tickets aún sin implementar |
 
-Resultados reportados por el usuario antes de estas correcciones: **92 pruebas Flutter aprobadas** y **12 pruebas de PerfilApiTest con 49 aserciones**. No se reportó en esta etapa una ejecución completa actual del backend ni el recorrido reciente de edición/perfil en emulador. Aquí no hay PHP/Flutter; no se ejecutaron suites. Las correcciones nuevas tienen pruebas preparadas y pendientes.
+Resultados reportados por el usuario antes de estas correcciones: **97 pruebas Flutter aprobadas** y **12 pruebas de PerfilApiTest con 49 aserciones**. No se reportó en esta etapa una ejecución completa actual del backend ni el recorrido reciente de edición/perfil en emulador. La actualización de calidad de vida añade 16 casos y fue ejecutada en Linux aislado con Flutter 3.47.7/Dart 3.13.5: **113 aprobadas y analyze sin incidencias**. [Evidencia y límites](docs/validacion/2026-11-04-ejecucion-qol.md). No se ejecutaron backend ni Android real en esa validación.
 
 ## Continuidad
 
-Leer [WORKSPACE](WORKSPACE.md), [AGENTS](AGENTS.md), [plan](docs/PLAN_CONTINUIDAD.md), [backlog](docs/backlog/01-backlog-inicial.md) y [requisitos](docs/requisitos/05-consolidado-base.md). El próximo módulo funcional es la interfaz de los cuatro foros, después de validar la estabilización actual. No repetir catálogo, edición ni perfil.
+Leer [WORKSPACE](WORKSPACE.md), [AGENTS](AGENTS.md), [plan](docs/PLAN_CONTINUIDAD.md), [backlog](docs/backlog/01-backlog-inicial.md) y [requisitos](docs/requisitos/05-consolidado-base.md). Las pantallas ahora preparan protección de borradores, Atrás del sistema, conservación del contenido ante errores, cierre local explícito y lectura más clara. El próximo módulo funcional es la interfaz de los cuatro foros, después de validar la actualización de calidad de vida actual. No repetir catálogo, edición ni perfil.
 
 Roles implementados: user y admin. El visitante consulta; el usuario activo participa mediante las operaciones API existentes; el administrador activo gestiona lugares. Los controles visuales se acompañan de autorización en Laravel. Los permisos futuros no son funciones disponibles.
 

@@ -1,3 +1,20 @@
+# Calidad de vida ejecutada y corregida · 2026-11-04
+
+- Flutter 3.47.7 / Dart 3.13.5 en Linux aislado: 113 pruebas aprobadas y analyze sin incidencias; lockfile intacto.
+- Corregidos errores asíncronos al refrescar lista/ficha y desborde del horario con texto grande; fixtures y pruebas de paginación adaptados sin quitar aserciones.
+- Evidencia y comparación con seis aplicaciones en docs/validacion. Recorrido Android/backend real pendiente; sin cambios funcionales backend ni push.
+
+# Calidad de vida preparada · 2026-11-04
+
+- Formularios de lugar, perfil y registro protegidos al salir con cambios; Atrás del sistema delegado al navegador de sesión.
+- Guardado incierto bloquea reenvío inmediato: GET de edición o revisión explícita de alta. Sin idempotencia backend.
+- Lista/ficha conservan contenido de la misma consulta ante errores; 404 contextual; protección contra respuesta anterior a una edición.
+- Reanudación/activación tras un minuto comprueba pantalla visible; cierre local explícito tras fallo remoto y explicación de sesión vencida.
+- Cabecera única, filtros/lista desplazables, posición por consulta, texto pendiente de aplicar y vacío filtrado.
+- Marcadores con área táctil 48 y pines 22/28, leyenda/semántica y error/reintento separado del fondo; copia de dirección/ubicación/teléfono.
+- 16 casos nuevos preparados; caso anterior de cancelar edición adaptado a confirmar descarte. Sin ejecución por Flutter/Dart ausentes.
+- Usuario reportó 97 pruebas de la estabilización anterior; no validan este código posterior. Sin backend funcional, esquema, paquetes ni push.
+
 # Estabilización preparada · 2026-11-04
 
 Base de código revisada: de00404. Correcciones aún sin validar con Flutter en esta máquina.

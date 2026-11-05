@@ -16,6 +16,7 @@ class PrincipalPage extends StatefulWidget {
     required this.categoriasRepository,
     this.sesionController,
     this.mapaTileProvider,
+    this.accionesCuenta = const [],
     super.key,
   });
 
@@ -24,6 +25,7 @@ class PrincipalPage extends StatefulWidget {
   final SesionController? sesionController;
   // Permite validar navegación y cámara sin descargar teselas en las pruebas.
   final TileProvider? mapaTileProvider;
+  final List<Widget> accionesCuenta;
 
   @override
   State<PrincipalPage> createState() => _PrincipalPageState();
@@ -60,11 +62,18 @@ class _PrincipalPageState extends State<PrincipalPage> {
   }
 
   void _seleccionar(int indice) {
-    if (indice == _seccion) return;
+    if (indice == _seccion) {
+      return;
+    }
 
     setState(() {
       _paginas[indice] ??= _crearPagina(indice);
       _seccion = indice;
+      for (var i = 1; i < _paginas.length; i++) {
+        if (_paginas[i] != null) {
+          _paginas[i] = _crearPagina(i);
+        }
+      }
     });
   }
 
@@ -77,6 +86,8 @@ class _PrincipalPageState extends State<PrincipalPage> {
         sesionController: widget.sesionController,
         categoriasRepository: widget.categoriasRepository,
         cambiosLugares: _cambiosLugares,
+        accionesCuenta: widget.accionesCuenta,
+        activa: _seccion == 1,
       ),
       2 => LugaresPage(
         repository: widget.lugaresRepository,
@@ -84,8 +95,11 @@ class _PrincipalPageState extends State<PrincipalPage> {
         sesionController: widget.sesionController,
         onVerEnMapa: _verLugarEnMapa,
         cambiosLugares: _cambiosLugares,
+        accionesCuenta: widget.accionesCuenta,
+        activa: _seccion == 2,
       ),
-      3 => const _SeccionPendiente(
+      3 => _SeccionPendiente(
+        accionesCuenta: widget.accionesCuenta,
         titulo: 'Chat / Tablón',
         icono: Icons.forum_outlined,
         descripcion: 'Plaza de Armas, Cementerio, Estación y Alameda.',
@@ -103,39 +117,61 @@ class _PrincipalPageState extends State<PrincipalPage> {
       // Mismo tipo y posición en IndexedStack: conserva el State del mapa.
       _paginas[1] = _crearPagina(1);
       _seccion = 1;
+      for (var i = 1; i < _paginas.length; i++) {
+        if (_paginas[i] != null) {
+          _paginas[i] = _crearPagina(i);
+        }
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _seccion,
-        children: [
-          for (final pagina in _paginas) pagina ?? const SizedBox.shrink(),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _seccion,
-        onDestinationSelected: _seleccionar,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.map_outlined),
-            selectedIcon: Icon(Icons.map),
-            label: 'Mapa',
-          ),
-          NavigationDestination(icon: Icon(Icons.search), label: 'Búsqueda'),
-          NavigationDestination(
-            icon: Icon(Icons.forum_outlined),
-            selectedIcon: Icon(Icons.forum),
-            label: 'Chat / Tablón',
-          ),
-        ],
+    return PopScope<void>(
+      canPop: _seccion == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _seccion != 0) {
+          _seleccionar(0);
+        }
+      },
+      child: Scaffold(
+        appBar: _seccion == 0
+            ? AppBar(
+                title: Text(
+                  widget.sesionController?.cuenta?.username ??
+                      'Ahora Local · Visitante',
+                ),
+                actions: widget.accionesCuenta,
+              )
+            : null,
+        body: IndexedStack(
+          index: _seccion,
+          children: [
+            for (final pagina in _paginas) pagina ?? const SizedBox.shrink(),
+          ],
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _seccion,
+          onDestinationSelected: _seleccionar,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Inicio',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.map_outlined),
+              selectedIcon: Icon(Icons.map),
+              label: 'Mapa',
+            ),
+            NavigationDestination(icon: Icon(Icons.search), label: 'Búsqueda'),
+            NavigationDestination(
+              icon: Icon(Icons.forum_outlined),
+              selectedIcon: Icon(Icons.forum),
+              label: 'Chat / Tablón',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -146,16 +182,18 @@ class _SeccionPendiente extends StatelessWidget {
     required this.titulo,
     required this.icono,
     required this.descripcion,
+    this.accionesCuenta = const [],
   });
 
   final String titulo;
   final IconData icono;
   final String descripcion;
+  final List<Widget> accionesCuenta;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(titulo)),
+      appBar: AppBar(title: Text(titulo), actions: accionesCuenta),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

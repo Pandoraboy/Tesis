@@ -129,8 +129,10 @@ void main() {
               },
               'access_token': 'credencial-de-prueba',
               'token_type': 'Bearer',
-              'expires_at': DateTime.now().toUtc()
-                  .add(const Duration(days: 1)).toIso8601String(),
+              'expires_at': DateTime.now()
+                  .toUtc()
+                  .add(const Duration(days: 1))
+                  .toIso8601String(),
             },
           }),
           200,
@@ -141,7 +143,10 @@ void main() {
     await tester.tap(find.text('Iniciar sesión'));
     await tester.pumpAndSettle();
     expect(find.text('Ahora Local · Visitante'), findsNothing);
-    expect(await controller.login(username: 'persona', password: 'prueba'), isTrue);
+    expect(
+      await controller.login(username: 'persona', password: 'prueba'),
+      isTrue,
+    );
     await tester.pumpAndSettle();
     expect(find.byTooltip('Mi cuenta'), findsOneWidget);
     expect(find.text('persona'), findsOneWidget);
@@ -152,31 +157,34 @@ void main() {
     expect(storage.credencial, isNull);
   });
 
-  testWidgets('fallo de recuperación permite consulta pública sin borrar sesión', (
+  testWidgets(
+    'fallo de recuperación permite consulta pública sin borrar sesión',
+    (tester) async {
+      final credencial = CredencialGuardada(
+        token: 'sesion-guardada',
+        expiresAt: DateTime.now().toUtc().add(const Duration(days: 1)),
+      );
+      final storage = _StorageVisitante()..credencial = credencial;
+      await _abrir(
+        tester,
+        storage,
+        MockClient((_) async => throw http.ClientException('Sin red')),
+      );
+      expect(find.text('Reintentar'), findsOneWidget);
+      await _continuarSinCuenta(tester);
+      expect(find.text('Ahora Local · Visitante'), findsOneWidget);
+      expect(storage.credencial, same(credencial));
+      expect(storage.escrituras, 0);
+      await tester.tap(find.text('Reintentar acceso'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reintentar'), findsOneWidget);
+      expect(find.byTooltip('Mi cuenta'), findsNothing);
+    },
+  );
+
+  testWidgets('sesión guardada válida mantiene acceso autenticado', (
     tester,
   ) async {
-    final credencial = CredencialGuardada(
-      token: 'sesion-guardada',
-      expiresAt: DateTime.now().toUtc().add(const Duration(days: 1)),
-    );
-    final storage = _StorageVisitante()..credencial = credencial;
-    await _abrir(
-      tester,
-      storage,
-      MockClient((_) async => throw http.ClientException('Sin red')),
-    );
-    expect(find.text('Reintentar'), findsOneWidget);
-    await _continuarSinCuenta(tester);
-    expect(find.text('Ahora Local · Visitante'), findsOneWidget);
-    expect(storage.credencial, same(credencial));
-    expect(storage.escrituras, 0);
-    await tester.tap(find.text('Reintentar acceso'));
-    await tester.pumpAndSettle();
-    expect(find.text('Reintentar'), findsOneWidget);
-    expect(find.byTooltip('Mi cuenta'), findsNothing);
-  });
-
-  testWidgets('sesión guardada válida mantiene acceso autenticado', (tester) async {
     final storage = _StorageVisitante()
       ..credencial = CredencialGuardada(
         token: 'sesion-guardada',
@@ -196,5 +204,63 @@ void main() {
     expect(find.byTooltip('Mi cuenta'), findsOneWidget);
     expect(find.text('Continuar sin cuenta'), findsNothing);
     expect(find.text('Ahora Local · Visitante'), findsNothing);
+  });
+  testWidgets('Atrás del sistema vuelve del detalle en modo visitante', (
+    tester,
+  ) async {
+    final lugar = {
+      'id': 7,
+      'nombre': 'Lugar público',
+      'categoria': {'id': 8, 'nombre': 'Comercio'},
+      'direccion': 'Prat 123',
+      'latitud': -36.424,
+      'longitud': -71.958,
+      'estado_horario': 'sin_horarios',
+      'horarios': [],
+    };
+    await _abrir(
+      tester,
+      _StorageVisitante(),
+      MockClient((request) async {
+        if (request.url.path.endsWith('/categorias')) {
+          return http.Response(
+            jsonEncode({
+              'data': [
+                {'id': 8, 'nombre': 'Comercio'},
+              ],
+            }),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }
+        if (request.url.path.endsWith('/7')) {
+          return http.Response(
+            jsonEncode({'data': lugar}),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }
+        return http.Response(
+          jsonEncode({
+            'data': [lugar],
+            'meta': {'current_page': 1, 'last_page': 1, 'total': 1},
+          }),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }),
+    );
+    await _continuarSinCuenta(tester);
+    await tester.tap(find.text('Búsqueda').last);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Lugar público'));
+    await tester.tap(find.text('Lugar público'));
+    await tester.pumpAndSettle();
+    expect(find.text('Detalle del lugar'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Detalle del lugar'), findsNothing);
+    expect(find.text('Lugar público'), findsOneWidget);
+    expect(find.text('Iniciar sesión'), findsOneWidget);
   });
 }

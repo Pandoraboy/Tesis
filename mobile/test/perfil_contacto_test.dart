@@ -24,8 +24,11 @@ class _Storage extends SesionStorage {
   Future<void> borrar() async {}
 }
 
-http.Response _json(Object data, [int status = 200]) =>
-    http.Response(jsonEncode(data), status, headers: {'content-type': 'application/json'});
+http.Response _json(Object data, [int status = 200]) => http.Response(
+  jsonEncode(data),
+  status,
+  headers: {'content-type': 'application/json'},
+);
 
 class _Escenario {
   String? telefono;
@@ -43,10 +46,15 @@ class _Escenario {
       if (falloCuenta) {
         throw http.ClientException('Cuenta sin conexión.');
       }
-      return _json({'data': {
-        'id': 1, 'username': 'persona', 'role': 'user', 'active': true,
-        'google_linked': false,
-      }});
+      return _json({
+        'data': {
+          'id': 1,
+          'username': 'persona',
+          'role': 'user',
+          'active': true,
+          'google_linked': false,
+        },
+      });
     }
     expect(request.url.path, '/api/v1/perfil');
     if (request.method == 'PATCH') {
@@ -57,7 +65,11 @@ class _Escenario {
         await espera!.future;
       }
       if (estadoPatch == 422) {
-        return _json({'errors': {'whatsapp_phone': ['Número rechazado por servidor.']}}, 422);
+        return _json({
+          'errors': {
+            'whatsapp_phone': ['Número rechazado por servidor.'],
+          },
+        }, 422);
       }
       if (estadoPatch != 200) {
         return _json({}, estadoPatch);
@@ -74,14 +86,21 @@ class _Escenario {
         throw http.ClientException('Sin conexión.');
       }
     }
-    return _json({'data': {
-      'id': 1, 'username': 'persona',
-      'whatsapp_phone': telefono, 'whatsapp_enabled': permitido,
-    }});
+    return _json({
+      'data': {
+        'id': 1,
+        'username': 'persona',
+        'whatsapp_phone': telefono,
+        'whatsapp_enabled': permitido,
+      },
+    });
   });
   late final api = ApiClient(client: client);
   late final repository = PerfilRepository(api);
-  late final sesion = SesionController(repository: AuthRepository(api), storage: _Storage());
+  late final sesion = SesionController(
+    repository: AuthRepository(api),
+    storage: _Storage(),
+  );
 }
 
 final _numero = find.byKey(const ValueKey('perfil-whatsapp-numero'));
@@ -99,9 +118,11 @@ Future<void> _abrir(WidgetTester tester, _Escenario e) async {
   addTearDown(e.client.close);
   addTearDown(e.sesion.dispose);
   await e.sesion.recuperar();
-  await tester.pumpWidget(MaterialApp(home: PerfilPage(
-    controller: e.sesion, perfilRepository: e.repository,
-  )));
+  await tester.pumpWidget(
+    MaterialApp(
+      home: PerfilPage(controller: e.sesion, perfilRepository: e.repository),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -132,21 +153,36 @@ void main() {
 
   test('repositorio rechaza otro titular y campos ausentes', () async {
     var otro = true;
-    final client = MockClient((_) async => _json({'data': otro
-        ? {'id': 2, 'whatsapp_phone': null, 'whatsapp_enabled': false}
-        : {'id': 1, 'whatsapp_enabled': false}}));
+    final client = MockClient(
+      (_) async => _json({
+        'data': otro
+            ? {'id': 2, 'whatsapp_phone': null, 'whatsapp_enabled': false}
+            : {'id': 1, 'whatsapp_enabled': false},
+      }),
+    );
     addTearDown(client.close);
     final repo = PerfilRepository(ApiClient(client: client));
-    await expectLater(repo.obtener(token: 'test', id: 1), throwsA(isA<ApiException>()));
+    await expectLater(
+      repo.obtener(token: 'test', id: 1),
+      throwsA(isA<ApiException>()),
+    );
     otro = false;
-    await expectLater(repo.obtener(token: 'test', id: 1), throwsA(isA<ApiException>()));
+    await expectLater(
+      repo.obtener(token: 'test', id: 1),
+      throwsA(isA<ApiException>()),
+    );
   });
 
   testWidgets('precarga número y permiso del titular', (tester) async {
-    final e = _Escenario()..telefono = '+56912345678'..permitido = true;
+    final e = _Escenario()
+      ..telefono = '+56912345678'
+      ..permitido = true;
     await _abrir(tester, e);
     expect(e.lecturas, 1);
-    expect(tester.widget<TextFormField>(_numero).controller!.text, '+56912345678');
+    expect(
+      tester.widget<TextFormField>(_numero).controller!.text,
+      '+56912345678',
+    );
     expect(tester.widget<SwitchListTile>(_permiso).value, isTrue);
     expect(tester.widget<FilledButton>(_guardar).onPressed, isNull);
   });
@@ -165,7 +201,9 @@ void main() {
   });
 
   testWidgets('desactiva sin borrar y luego borra', (tester) async {
-    final e = _Escenario()..telefono = '+56912345678'..permitido = true;
+    final e = _Escenario()
+      ..telefono = '+56912345678'
+      ..permitido = true;
     await _abrir(tester, e);
     await _alternar(tester);
     await _enviar(tester);
@@ -182,10 +220,16 @@ void main() {
     await _abrir(tester, e);
     await _alternar(tester);
     await _enviar(tester);
-    expect(find.text('Agrega un número para permitir el contacto.'), findsOneWidget);
+    expect(
+      find.text('Agrega un número para permitir el contacto.'),
+      findsOneWidget,
+    );
     await _escribir(tester, '912345678');
     await _enviar(tester);
-    expect(find.text('Usa código de país, por ejemplo +56912345678.'), findsOneWidget);
+    expect(
+      find.text('Usa código de país, por ejemplo +56912345678.'),
+      findsOneWidget,
+    );
     expect(e.patches, 0);
   });
 
@@ -195,7 +239,10 @@ void main() {
     await _escribir(tester, '+56912345678');
     await _enviar(tester);
     expect(find.text('Número rechazado por servidor.'), findsOneWidget);
-    expect(tester.widget<TextFormField>(_numero).controller!.text, '+56912345678');
+    expect(
+      tester.widget<TextFormField>(_numero).controller!.text,
+      '+56912345678',
+    );
     expect(find.text('Contacto guardado.'), findsNothing);
     e.estadoPatch = 200;
     await _escribir(tester, '+56987654321');
@@ -204,48 +251,68 @@ void main() {
     expect(e.patches, 2);
   });
 
-  testWidgets('consulta fallida ofrece reintento y no muestra formulario vacío', (tester) async {
-    final e = _Escenario()..falloLectura = true;
-    await _abrir(tester, e);
-    expect(_numero, findsNothing);
-    e.falloLectura = false;
-    final reintento = find.text('Reintentar contacto');
-    await tester.ensureVisible(reintento);
-    await tester.tap(reintento);
-    await tester.pumpAndSettle();
-    expect(_numero, findsOneWidget);
-    expect(e.lecturas, 2);
-  });
+  testWidgets(
+    'consulta fallida ofrece reintento y no muestra formulario vacío',
+    (tester) async {
+      final e = _Escenario()..falloLectura = true;
+      await _abrir(tester, e);
+      expect(_numero, findsNothing);
+      e.falloLectura = false;
+      final reintento = find.text('Reintentar contacto');
+      await tester.ensureVisible(reintento);
+      await tester.tap(reintento);
+      await tester.pumpAndSettle();
+      expect(_numero, findsOneWidget);
+      expect(e.lecturas, 2);
+    },
+  );
 
-  testWidgets('respuesta perdida consulta sin repetir PATCH ni perder borrador', (tester) async {
-    final e = _Escenario()..perderRespuesta = true;
-    await _abrir(tester, e);
-    await _escribir(tester, '+56912345678');
-    await _enviar(tester);
-    expect(find.text('Contacto guardado.'), findsNothing);
-    expect(tester.widget<TextFormField>(_numero).controller!.text, '+56912345678');
-    expect(tester.widget<FilledButton>(_guardar).onPressed, isNull);
-    final comprobar = find.text('Comprobar guardado');
-    await tester.ensureVisible(comprobar);
-    await tester.tap(comprobar);
-    await tester.pumpAndSettle();
-    expect(e.patches, 1);
-    expect(e.lecturas, 2);
-    expect(find.text('El servidor confirmó tus datos de contacto.'), findsOneWidget);
-  });
+  testWidgets(
+    'respuesta perdida consulta sin repetir PATCH ni perder borrador',
+    (tester) async {
+      final e = _Escenario()..perderRespuesta = true;
+      await _abrir(tester, e);
+      await _escribir(tester, '+56912345678');
+      await _enviar(tester);
+      expect(find.text('Contacto guardado.'), findsNothing);
+      expect(
+        tester.widget<TextFormField>(_numero).controller!.text,
+        '+56912345678',
+      );
+      expect(tester.widget<FilledButton>(_guardar).onPressed, isNull);
+      final comprobar = find.text('Comprobar guardado');
+      await tester.ensureVisible(comprobar);
+      await tester.tap(comprobar);
+      await tester.pumpAndSettle();
+      expect(e.patches, 1);
+      expect(e.lecturas, 2);
+      expect(
+        find.text('El servidor confirmó tus datos de contacto.'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('rechazo 403 conserva datos sin anunciar éxito', (tester) async {
     final e = _Escenario()..estadoPatch = 403;
     await _abrir(tester, e);
     await _escribir(tester, '+56912345678');
     await _enviar(tester);
-    expect(find.text('No tienes permiso para realizar esta acción.'), findsOneWidget);
+    expect(
+      find.text('No tienes permiso para realizar esta acción.'),
+      findsOneWidget,
+    );
     expect(find.text('Contacto guardado.'), findsNothing);
-    expect(tester.widget<TextFormField>(_numero).controller!.text, '+56912345678');
+    expect(
+      tester.widget<TextFormField>(_numero).controller!.text,
+      '+56912345678',
+    );
     expect(e.telefono, isNull);
   });
 
-  testWidgets('actualizar cuenta fallido conserva el borrador de contacto', (tester) async {
+  testWidgets('actualizar cuenta fallido conserva el borrador de contacto', (
+    tester,
+  ) async {
     final e = _Escenario();
     await _abrir(tester, e);
     await _escribir(tester, '+56912345678');
@@ -255,13 +322,18 @@ void main() {
     await tester.ensureVisible(actualizar);
     await tester.tap(actualizar);
     await tester.pumpAndSettle();
-    expect(tester.widget<TextFormField>(_numero).controller!.text, '+56912345678');
+    expect(
+      tester.widget<TextFormField>(_numero).controller!.text,
+      '+56912345678',
+    );
     expect(tester.widget<SwitchListTile>(_permiso).value, isTrue);
     expect(e.lecturas, 1);
     expect(e.patches, 0);
   });
 
-  testWidgets('descartar restaura número y permiso sin enviar PATCH', (tester) async {
+  testWidgets('descartar restaura número y permiso sin enviar PATCH', (
+    tester,
+  ) async {
     final e = _Escenario()..telefono = '+56912345678';
     await _abrir(tester, e);
     await _escribir(tester, '+56987654321');
@@ -270,7 +342,10 @@ void main() {
     await tester.ensureVisible(descartar);
     await tester.tap(descartar);
     await tester.pumpAndSettle();
-    expect(tester.widget<TextFormField>(_numero).controller!.text, '+56912345678');
+    expect(
+      tester.widget<TextFormField>(_numero).controller!.text,
+      '+56912345678',
+    );
     expect(tester.widget<SwitchListTile>(_permiso).value, isFalse);
     expect(tester.widget<FilledButton>(_guardar).onPressed, isNull);
     expect(e.patches, 0);
@@ -287,7 +362,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('bloquea doble guardado y no actualiza estado tras salir', (tester) async {
+  testWidgets('bloquea doble guardado y no actualiza estado tras salir', (
+    tester,
+  ) async {
     final e = _Escenario()..espera = Completer<void>();
     await _abrir(tester, e);
     await _escribir(tester, '+56912345678');

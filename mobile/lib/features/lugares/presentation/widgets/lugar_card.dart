@@ -35,11 +35,13 @@ class LugarCard extends StatelessWidget {
                 children: [
                   Icon(Icons.access_time, size: 18, color: colorEstado),
                   const SizedBox(width: 6),
-                  Text(
-                    lugar.estadoHorario.etiqueta,
-                    style: TextStyle(
-                      color: colorEstado,
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      lugar.estadoHorario.etiqueta,
+                      style: TextStyle(
+                        color: colorEstado,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -50,7 +52,7 @@ class LugarCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.location_on_outlined, size: 18),
                   const SizedBox(width: 6),
-                  Expanded(child: Text(lugar.direccion)),
+                  Expanded(child: Text(lugar.direccionVisible)),
                 ],
               ),
             ],

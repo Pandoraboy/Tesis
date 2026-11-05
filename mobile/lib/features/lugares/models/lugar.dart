@@ -48,10 +48,19 @@ class Lugar {
   final List<HorarioLugar> horarios;
   final int? categoriaId;
 
+  bool get direccionInformada =>
+      direccion.trim().isNotEmpty &&
+      direccion.trim() != 'Dirección no informada en OpenStreetMap';
+  String get direccionVisible =>
+      direccionInformada ? direccion : 'Dirección pendiente';
+
   bool get tieneUbicacionValida =>
-      latitud.isFinite && longitud.isFinite &&
-      latitud >= -90 && latitud <= 90 &&
-      longitud >= -180 && longitud <= 180;
+      latitud.isFinite &&
+      longitud.isFinite &&
+      latitud >= -90 &&
+      latitud <= 90 &&
+      longitud >= -180 &&
+      longitud <= 180;
 
   factory Lugar.fromJson(Map<String, dynamic> json) {
     final categoria = json['categoria'] as Map<String, dynamic>;

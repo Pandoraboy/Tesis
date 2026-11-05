@@ -1,1 +1,13 @@
-Estabilizacion sobre de00404: copiar carpetas y documentos sobre el proyecto actual. Seguir docs/validacion/2026-11-04-estabilizacion.md. Corrige refresco del mapa al crear lugares y pagina vacia tras reducir resultados; agrega Descartar cambios de contacto e INTERNET en Android main. No migraciones ni dependencias nuevas. Cinco casos de prueba nuevos preparados, pendientes en su equipo; Flutter no disponible aqui. Sin commit/push. Conservar envs, credenciales y lockfiles.
+AHORA LOCAL - CALIDAD DE VIDA CORREGIDA Y PROBADA - 2026-11-04
+
+Paquete acumulativo sobre de00404: copiar carpetas/archivos sobre el proyecto.
+Incluye estabilización previa, calidad de vida y correcciones de ejecución.
+113 pruebas Flutter aprobadas; flutter analyze sin incidencias en Linux aislado.
+No reemplaza .env ni lockfiles. Sin dependencias nuevas ni migraciones.
+No incluye SDK, cachés ni secretos. Sin commit/push.
+Backend real, emulador, OAuth y release siguen pendientes de recorrido.
+
+Leer docs/validacion/2026-11-04-ejecucion-qol.md y
+     docs/validacion/2026-11-04-calidad-de-vida.md.
+Comparación y propuestas futuras: docs/validacion/2026-11-04-comparativa-mapas-chat.md.
+MANIFEST.sha256 contiene las huellas de los archivos del proyecto entregados.

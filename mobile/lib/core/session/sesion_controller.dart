@@ -46,19 +46,29 @@ class SesionController extends ChangeNotifier {
     if (_estado != EstadoSesion.autenticada ||
         _cuenta?.active != true ||
         credencial == null) {
-      throw const ApiException('Inicia sesión para continuar.', statusCode: 401);
+      throw const ApiException(
+        'Inicia sesión para continuar.',
+        statusCode: 401,
+      );
     }
     _ocupado = true;
     _notificar();
     try {
       if (credencial.vencida) {
-        await _invalidarSesion();
-        throw const ApiException('Tu sesión venció. Inicia sesión nuevamente.', statusCode: 401);
+        await _invalidarSesion(
+          motivo: 'Tu sesión venció. Inicia sesión nuevamente.',
+        );
+        throw const ApiException(
+          'Tu sesión venció. Inicia sesión nuevamente.',
+          statusCode: 401,
+        );
       }
       return await accion(credencial.token);
     } on ApiException catch (error) {
       if (error.statusCode == 401 && _estado == EstadoSesion.autenticada) {
-        await _invalidarSesion();
+        await _invalidarSesion(
+          motivo: 'Tu sesión venció. Inicia sesión nuevamente.',
+        );
       }
       // Un 403 también puede significar que el rol ya no permite la acción.
       rethrow;
@@ -69,11 +79,15 @@ class SesionController extends ChangeNotifier {
   }
 
   void _notificar() {
-    if (!_disposed) notifyListeners();
+    if (!_disposed) {
+      notifyListeners();
+    }
   }
 
   Future<void> recuperar() async {
-    if (_ocupado || _estado == EstadoSesion.autenticada) return;
+    if (_ocupado || _estado == EstadoSesion.autenticada) {
+      return;
+    }
     _ocupado = true;
     _error = null;
     _errorCode = null;
@@ -88,6 +102,7 @@ class SesionController extends ChangeNotifier {
       if (credencial.vencida) {
         await storage.borrar();
         _limpiarMemoria();
+        _error = 'Tu sesión venció. Inicia sesión nuevamente.';
         return;
       }
       final cuenta = await repository.me(credencial.token);
@@ -131,7 +146,9 @@ class SesionController extends ChangeNotifier {
   }
 
   Future<bool> _iniciarSesion(Future<Sesion> Function() autenticar) async {
-    if (_ocupado || _estado != EstadoSesion.sinSesion) return false;
+    if (_ocupado || _estado != EstadoSesion.sinSesion) {
+      return false;
+    }
     _ocupado = true;
     _error = null;
     _errorCode = null;
@@ -183,7 +200,9 @@ class SesionController extends ChangeNotifier {
     _notificar();
     try {
       if (credencial.vencida) {
-        await _invalidarSesion();
+        await _invalidarSesion(
+          motivo: 'Tu sesión venció. Inicia sesión nuevamente.',
+        );
         return false;
       }
       _cuenta = await _consultarPerfil(credencial.token);
@@ -225,14 +244,20 @@ class SesionController extends ChangeNotifier {
     var confirmada = false;
     try {
       if (credencial.vencida) {
-        await _invalidarSesion();
+        await _invalidarSesion(
+          motivo: 'Tu sesión venció. Inicia sesión nuevamente.',
+        );
         return false;
       }
       final idToken = await seleccionarGoogle();
-      if (idToken == null || _disposed) return false;
+      if (idToken == null || _disposed) {
+        return false;
+      }
       // El selector puede permanecer abierto hasta después del vencimiento.
       if (credencial.vencida) {
-        await _invalidarSesion();
+        await _invalidarSesion(
+          motivo: 'Tu sesión venció. Inicia sesión nuevamente.',
+        );
         return false;
       }
       enviada = true;
@@ -310,17 +335,22 @@ class SesionController extends ChangeNotifier {
 
   Future<void> _falloConsultaPerfil(ApiException error) async {
     if (error.statusCode == 401 || error.statusCode == 403) {
-      await _invalidarSesion();
+      await _invalidarSesion(
+        motivo: error.statusCode == 401
+            ? 'Tu sesión venció. Inicia sesión nuevamente.'
+            : 'La cuenta está desactivada.',
+      );
       return;
     }
     _error = error.message;
     _errorCode = error.code;
   }
 
-  Future<void> _invalidarSesion() async {
+  Future<void> _invalidarSesion({String? motivo}) async {
     try {
       await storage.borrar();
       _limpiarMemoria();
+      _error = motivo;
     } catch (_) {
       // Retirar siempre el área privada aunque falle el almacenamiento.
       _falloRecuperacion(
@@ -330,9 +360,13 @@ class SesionController extends ChangeNotifier {
   }
 
   Future<bool> logout() async {
-    if (_ocupado || _estado != EstadoSesion.autenticada) return false;
+    if (_ocupado || _estado != EstadoSesion.autenticada) {
+      return false;
+    }
     final credencial = _credencial;
-    if (credencial == null) return false;
+    if (credencial == null) {
+      return false;
+    }
     _ocupado = true;
     _error = null;
     _errorCode = null;
@@ -341,7 +375,9 @@ class SesionController extends ChangeNotifier {
       try {
         await repository.logout(credencial.token);
       } on ApiException catch (error) {
-        if (error.statusCode != 401) rethrow;
+        if (error.statusCode != 401) {
+          rethrow;
+        }
       }
       await storage.borrar();
       _limpiarMemoria();
@@ -350,6 +386,26 @@ class SesionController extends ChangeNotifier {
       _error = error.message;
       _errorCode = error.code;
       return false;
+    } catch (_) {
+      _error = 'No se pudo eliminar la sesión local. Intenta nuevamente.';
+      return false;
+    } finally {
+      _ocupado = false;
+      _notificar();
+    }
+  }
+
+  Future<bool> cerrarEnDispositivo() async {
+    if (_ocupado || _estado != EstadoSesion.autenticada) {
+      return false;
+    }
+    _ocupado = true;
+    _error = null;
+    _notificar();
+    try {
+      await storage.borrar();
+      _limpiarMemoria();
+      return true;
     } catch (_) {
       _error = 'No se pudo eliminar la sesión local. Intenta nuevamente.';
       return false;

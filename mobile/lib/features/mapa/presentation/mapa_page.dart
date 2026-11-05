@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/config/mapa_config.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/widgets/actualizar_al_reanudar.dart';
 import '../../../core/session/sesion_controller.dart';
 import '../../categorias/data/categorias_repository.dart';
 import '../../lugares/data/lugares_repository.dart';
@@ -14,8 +15,17 @@ import 'widgets/lugar_mapa_tarjeta.dart';
 import 'widgets/lugares_mapa_layer.dart';
 
 class MapaPage extends StatefulWidget {
-  const MapaPage({super.key, this.lugarSeleccionado, this.tileProvider, this.repository,
-    this.sesionController, this.categoriasRepository, this.cambiosLugares});
+  const MapaPage({
+    super.key,
+    this.lugarSeleccionado,
+    this.tileProvider,
+    this.repository,
+    this.sesionController,
+    this.categoriasRepository,
+    this.cambiosLugares,
+    this.accionesCuenta = const [],
+    this.activa = true,
+  });
 
   final Lugar? lugarSeleccionado;
   final TileProvider? tileProvider;
@@ -23,6 +33,8 @@ class MapaPage extends StatefulWidget {
   final SesionController? sesionController;
   final CategoriasRepository? categoriasRepository;
   final ValueNotifier<int>? cambiosLugares;
+  final List<Widget> accionesCuenta;
+  final bool activa;
 
   @override
   State<MapaPage> createState() => _MapaPageState();
@@ -38,6 +50,10 @@ class _MapaPageState extends State<MapaPage> {
   List<Lugar> _lugares = const [];
   Lugar? _seleccion;
   bool _recargaPendiente = false;
+  bool _errorTeselas = false;
+  bool _avisoTeselasProgramado = false;
+  int _versionTeselas = 0;
+  DateTime? _consultado;
 
   LatLng? get _puntoSeleccionado {
     final lugar = _seleccion;
@@ -47,9 +63,12 @@ class _MapaPageState extends State<MapaPage> {
   }
 
   List<Lugar> get _marcables {
-    final lugares = _lugares.where((lugar) => lugar.tieneUbicacionValida).toList();
+    final lugares = _lugares
+        .where((lugar) => lugar.tieneUbicacionValida)
+        .toList();
     final seleccionado = _seleccion;
-    if (seleccionado != null && seleccionado.tieneUbicacionValida &&
+    if (seleccionado != null &&
+        seleccionado.tieneUbicacionValida &&
         !lugares.any((lugar) => lugar.id == seleccionado.id)) {
       lugares.add(seleccionado);
     }
@@ -91,15 +110,20 @@ class _MapaPageState extends State<MapaPage> {
       var moverSeleccion = false;
       setState(() {
         _lugares = lugares;
+        _consultado = DateTime.now();
         _cargaCompleta = true;
         // La actualización confirma qué lugares siguen publicados.
         final seleccionId = _seleccion?.id;
         if (seleccionId != null) {
           final anterior = _seleccion!;
-          final coincidencias = lugares.where((lugar) => lugar.id == seleccionId);
+          final coincidencias = lugares.where(
+            (lugar) => lugar.id == seleccionId,
+          );
           _seleccion = coincidencias.isEmpty ? null : coincidencias.first;
-          moverSeleccion = _seleccion != null &&
-              (_seleccion!.latitud != anterior.latitud || _seleccion!.longitud != anterior.longitud);
+          moverSeleccion =
+              _seleccion != null &&
+              (_seleccion!.latitud != anterior.latitud ||
+                  _seleccion!.longitud != anterior.longitud);
         }
         _cargando = false;
       });
@@ -112,7 +136,9 @@ class _MapaPageState extends State<MapaPage> {
       }
       setState(() {
         _cargando = false;
-        _error = error is ApiException ? error.message : 'No se pudieron cargar los lugares.';
+        _error = error is ApiException
+            ? error.message
+            : 'No se pudieron cargar los lugares.';
       });
     } finally {
       if (mounted && consulta == _consulta && _recargaPendiente) {
@@ -147,12 +173,16 @@ class _MapaPageState extends State<MapaPage> {
 
   Future<void> _abrirGrupo(GrupoLugares grupo, double zoom) async {
     final ancla = grupo.ancla;
-    final coinciden = grupo.lugares.every((lugar) =>
-        (lugar.latitud - ancla.latitud).abs() < 0.0000001 &&
-        (lugar.longitud - ancla.longitud).abs() < 0.0000001);
+    final coinciden = grupo.lugares.every(
+      (lugar) =>
+          (lugar.latitud - ancla.latitud).abs() < 0.0000001 &&
+          (lugar.longitud - ancla.longitud).abs() < 0.0000001,
+    );
     if (zoom < 18.75 && !coinciden) {
-      _mapController.move(LatLng(ancla.latitud, ancla.longitud),
-          (zoom + 1.5).clamp(5.0, 19.0).toDouble());
+      _mapController.move(
+        LatLng(ancla.latitud, ancla.longitud),
+        (zoom + 1.5).clamp(5.0, 19.0).toDouble(),
+      );
       return;
     }
     final elegido = await showModalBottomSheet<Lugar>(
@@ -161,29 +191,37 @@ class _MapaPageState extends State<MapaPage> {
       useSafeArea: true,
       showDragHandle: true,
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.5, minChildSize: 0.3, maxChildSize: 0.85,
+        initialChildSize: 0.5,
+        minChildSize: 0.3,
+        maxChildSize: 0.85,
         expand: false,
-        builder: (context, controller) => Column(children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('Selecciona un lugar (${grupo.lugares.length})',
-                style: Theme.of(context).textTheme.titleMedium),
-          ),
-          Expanded(child: ListView.separated(
-            controller: controller,
-            itemCount: grupo.lugares.length,
-            separatorBuilder: (_, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final lugar = grupo.lugares[index];
-              return ListTile(
-                key: ValueKey('opcion-grupo-${lugar.id}'),
-                title: Text(lugar.nombre),
-                subtitle: Text(lugar.categoriaNombre),
-                onTap: () => Navigator.of(context).pop(lugar),
-              );
-            },
-          )),
-        ]),
+        builder: (context, controller) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Selecciona un lugar (${grupo.lugares.length})',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            Expanded(
+              child: ListView.separated(
+                controller: controller,
+                itemCount: grupo.lugares.length,
+                separatorBuilder: (_, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final lugar = grupo.lugares[index];
+                  return ListTile(
+                    key: ValueKey('opcion-grupo-${lugar.id}'),
+                    title: Text(lugar.nombre),
+                    subtitle: Text(lugar.categoriaNombre),
+                    onTap: () => Navigator.of(context).pop(lugar),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
     if (mounted && elegido != null) {
@@ -217,14 +255,17 @@ class _MapaPageState extends State<MapaPage> {
     if (lugar == null || widget.repository == null) {
       return;
     }
-    Navigator.of(context).push<void>(MaterialPageRoute<void>(
-      builder: (_) => LugarDetallePage(
-        lugarId: lugar.id, repository: widget.repository!,
-        sesionController: widget.sesionController,
-        categoriasRepository: widget.categoriasRepository,
-        cambiosLugares: widget.cambiosLugares,
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => LugarDetallePage(
+          lugarId: lugar.id,
+          repository: widget.repository!,
+          sesionController: widget.sesionController,
+          categoriasRepository: widget.categoriasRepository,
+          cambiosLugares: widget.cambiosLugares,
+        ),
       ),
-    ));
+    );
   }
 
   @override
@@ -235,28 +276,87 @@ class _MapaPageState extends State<MapaPage> {
     super.dispose();
   }
 
+  void _falloFondo(int version) {
+    if (!mounted ||
+        version != _versionTeselas ||
+        _errorTeselas ||
+        _avisoTeselasProgramado) {
+      return;
+    }
+    _avisoTeselasProgramado = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _avisoTeselasProgramado = false;
+      if (mounted && version == _versionTeselas) {
+        setState(() {
+          _errorTeselas = true;
+        });
+      }
+    });
+    WidgetsBinding.instance.scheduleFrame();
+  }
+
+  void _reintentarFondo() {
+    setState(() {
+      _errorTeselas = false;
+      _versionTeselas++;
+    });
+  }
+
   Widget _estadoCatalogo(int cantidad) {
-    final invalidos = _lugares.where((lugar) => !lugar.tieneUbicacionValida).length;
+    final invalidos = _lugares
+        .where((lugar) => !lugar.tieneUbicacionValida)
+        .length;
     return Material(
       color: Theme.of(context).colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: _cargando
-            ? const Row(children: [
-                SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-                SizedBox(width: 12),
-                Expanded(child: Text('Cargando lugares…')),
-              ])
+            ? const Row(
+                children: [
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(child: Text('Cargando lugares…')),
+                ],
+              )
             : _error != null
-                ? Row(children: [
-                    Expanded(child: Text(_cargaCompleta
-                        ? 'No se pudo actualizar. Se conserva la última carga. $_error'
-                        : _error!)),
-                    TextButton(onPressed: _cargar, child: const Text('Reintentar')),
-                  ])
-                : Text(cantidad == 0
-                    ? 'No hay lugares con ubicación disponibles.'
-                    : '$cantidad lugares en el mapa${invalidos == 0 ? '' : ' · $invalidos sin ubicación válida'}'),
+            ? Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _cargaCompleta
+                          ? 'No se pudo actualizar. Se conserva la última carga. $_error'
+                          : _error!,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _cargar,
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cantidad == 0
+                        ? 'No hay lugares con ubicación disponibles.'
+                        : '$cantidad lugares en el mapa${invalidos == 0 ? '' : ' · $invalidos sin ubicación válida'}',
+                  ),
+                  if (cantidad > 1)
+                    const Text(
+                      'Los números agrupan lugares. Tócalos para acercarte.',
+                    ),
+                  if (_consultado != null)
+                    Text(
+                      'Última consulta: ${_consultado!.hour.toString().padLeft(2, '0')}:${_consultado!.minute.toString().padLeft(2, '0')}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                ],
+              ),
       ),
     );
   }
@@ -264,94 +364,141 @@ class _MapaPageState extends State<MapaPage> {
   @override
   Widget build(BuildContext context) {
     final marcables = _marcables;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mapa Local'),
-        actions: [
-          if (widget.repository != null)
-            IconButton(
-              tooltip: 'Actualizar mapa',
-              onPressed: _cargando ? null : _cargar,
-              icon: const Icon(Icons.refresh),
-            ),
-          if (_puntoSeleccionado != null)
-            IconButton(
-              tooltip: 'Centrar en el lugar',
-              onPressed: _centrarLugar,
-              icon: const Icon(Icons.location_searching),
-            ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _puntoSeleccionado ?? MapaConfig.centroSanCarlos,
-              initialZoom: _puntoSeleccionado == null ? MapaConfig.zoomInicial : MapaConfig.zoomLugar,
-              minZoom: 5,
-              maxZoom: 19,
-              onMapReady: () {
-                _mapaListo = true;
-                _programarEnfoque();
-              },
-              interactionOptions: const InteractionOptions(
-                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+    final versionFondo = _versionTeselas;
+    return ActualizarAlReanudar(
+      activa: widget.activa && (ModalRoute.of(context)?.isCurrent ?? true),
+      onActualizar: _actualizarPorCambio,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Mapa Local'),
+          actions: [
+            ...widget.accionesCuenta,
+            if (widget.repository != null)
+              IconButton(
+                tooltip: 'Actualizar mapa',
+                onPressed: _cargando ? null : _cargar,
+                icon: const Icon(Icons.refresh),
               ),
+            if (_puntoSeleccionado != null)
+              IconButton(
+                tooltip: 'Centrar en el lugar',
+                onPressed: _centrarLugar,
+                icon: const Icon(Icons.location_searching),
+              ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _puntoSeleccionado ?? MapaConfig.centroSanCarlos,
+                initialZoom: _puntoSeleccionado == null
+                    ? MapaConfig.zoomInicial
+                    : MapaConfig.zoomLugar,
+                minZoom: 5,
+                maxZoom: 19,
+                onMapReady: () {
+                  _mapaListo = true;
+                  _programarEnfoque();
+                },
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                ),
+              ),
+              children: [
+                TileLayer(
+                  key: ValueKey('fondo-$_versionTeselas'),
+                  errorTileCallback: (tile, error, stackTrace) =>
+                      _falloFondo(versionFondo),
+                  tileProvider: widget.tileProvider,
+                  urlTemplate: MapaConfig.urlTiles,
+                  userAgentPackageName: MapaConfig.identificadorApp,
+                  maxNativeZoom: 19,
+                ),
+                LugaresMapaLayer(
+                  lugares: marcables,
+                  seleccionadoId: _seleccion?.id,
+                  onSeleccionar: _seleccionar,
+                  onAbrirGrupo: _abrirGrupo,
+                ),
+              ],
             ),
-            children: [
-              TileLayer(
-                tileProvider: widget.tileProvider,
-                urlTemplate: MapaConfig.urlTiles,
-                userAgentPackageName: MapaConfig.identificadorApp,
-                maxNativeZoom: 19,
+            if (widget.repository != null)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                child: Column(
+                  children: [
+                    _estadoCatalogo(marcables.length),
+                    if (_errorTeselas)
+                      Material(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Row(
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  'No se pudo cargar parte del fondo del mapa. Los lugares se consultan por separado.',
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: _reintentarFondo,
+                                child: const Text('Reintentar fondo'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              LugaresMapaLayer(
-                lugares: marcables,
-                seleccionadoId: _seleccion?.id,
-                onSeleccionar: _seleccionar,
-                onAbrirGrupo: _abrirGrupo,
+            if (_puntoSeleccionado != null)
+              Positioned(
+                left: 12,
+                right: 76,
+                bottom: 48,
+                child: SafeArea(
+                  top: false,
+                  child: LugarMapaTarjeta(
+                    lugar: _seleccion!,
+                    onCerrar: () => setState(() => _seleccion = null),
+                    onDetalle: widget.repository == null ? null : _abrirDetalle,
+                  ),
+                ),
               ),
-            ],
-          ),
-          if (widget.repository != null)
-            Positioned(left: 0, right: 0, top: 0, child: _estadoCatalogo(marcables.length)),
-          if (_puntoSeleccionado != null)
             Positioned(
-              left: 12, right: 76, bottom: 48,
+              right: 16,
+              bottom: 52,
+              child: FloatingActionButton.small(
+                heroTag: 'centrarSanCarlos',
+                tooltip: 'Centrar en San Carlos',
+                onPressed: _centrarSanCarlos,
+                child: const Icon(Icons.center_focus_strong),
+              ),
+            ),
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
               child: SafeArea(
                 top: false,
-                child: LugarMapaTarjeta(
-                  lugar: _seleccion!,
-                  onCerrar: () => setState(() => _seleccion = null),
-                  onDetalle: widget.repository == null ? null : _abrirDetalle,
+                child: Material(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: Text(
+                      MapaConfig.atribucion,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black87, fontSize: 12),
+                    ),
+                  ),
                 ),
               ),
             ),
-          Positioned(
-            right: 16, bottom: 52,
-            child: FloatingActionButton.small(
-              heroTag: 'centrarSanCarlos',
-              tooltip: 'Centrar en San Carlos',
-              onPressed: _centrarSanCarlos,
-              child: const Icon(Icons.center_focus_strong),
-            ),
-          ),
-          const Positioned(
-            left: 0, right: 0, bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: Material(
-                color: Colors.white,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  child: Text(MapaConfig.atribucion, textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.black87, fontSize: 12)),
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/validar_formulario.dart';
+
 import '../../../../core/network/api_client.dart';
 import '../../../../core/session/sesion_controller.dart';
 import '../../data/perfil_repository.dart';
@@ -9,11 +11,13 @@ class ContactoPerfilForm extends StatefulWidget {
   const ContactoPerfilForm({
     required this.controller,
     required this.repository,
+    this.modificado,
     super.key,
   });
 
   final SesionController controller;
   final PerfilRepository repository;
+  final ValueNotifier<bool>? modificado;
 
   @override
   State<ContactoPerfilForm> createState() => _ContactoPerfilFormState();
@@ -34,9 +38,10 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
   String? _errorTelefono;
   String? _aviso;
 
-  bool get _cambio => _guardado != null &&
+  bool get _cambio =>
+      _guardado != null &&
       (_guardado!.telefono != ContactoPerfil.normalizar(_telefono.text) ||
-       _guardado!.permitido != _permitido);
+          _guardado!.permitido != _permitido);
 
   @override
   void initState() {
@@ -72,8 +77,9 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
       _aviso = null;
     });
     try {
-      final contacto = await widget.controller.conSesion((token) =>
-          widget.repository.obtener(token: token, id: id));
+      final contacto = await widget.controller.conSesion(
+        (token) => widget.repository.obtener(token: token, id: id),
+      );
       if (!mounted) {
         return;
       }
@@ -91,26 +97,38 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
       });
     } on ApiException catch (error) {
       if (mounted) {
-        setState(() { _error = error.message; });
+        setState(() {
+          _error = error.message;
+        });
       }
     } catch (_) {
       if (mounted) {
-        setState(() { _error = 'No se pudo consultar el contacto.'; });
+        setState(() {
+          _error = 'No se pudo consultar el contacto.';
+        });
       }
     } finally {
       if (mounted) {
-        setState(() { _cargando = false; });
+        setState(() {
+          _cargando = false;
+        });
+        _notificarCambios();
       }
     }
   }
 
   Future<void> _guardar() async {
-    if (_guardando || _cargando || _porConfirmar ||
-        widget.controller.ocupado || !_cambio) {
+    if (_guardando ||
+        _cargando ||
+        _porConfirmar ||
+        widget.controller.ocupado ||
+        !_cambio) {
       return;
     }
-    setState(() { _errorTelefono = null; });
-    if (!_form.currentState!.validate()) {
+    setState(() {
+      _errorTelefono = null;
+    });
+    if (!validarYMostrarError(_form)) {
       return;
     }
     final id = widget.controller.cuenta?.id;
@@ -123,12 +141,14 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
       _aviso = null;
     });
     try {
-      final contacto = await widget.controller.conSesion((token) =>
-          widget.repository.guardar(
-            token: token, id: id,
-            telefono: ContactoPerfil.normalizar(_telefono.text),
-            permitido: _permitido,
-          ));
+      final contacto = await widget.controller.conSesion(
+        (token) => widget.repository.guardar(
+          token: token,
+          id: id,
+          telefono: ContactoPerfil.normalizar(_telefono.text),
+          permitido: _permitido,
+        ),
+      );
       if (!mounted) {
         return;
       }
@@ -141,9 +161,11 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
     } on ApiException catch (error) {
       if (mounted) {
         setState(() {
-          _errorTelefono = error.validationErrors['whatsapp_phone']?.firstOrNull;
+          _errorTelefono =
+              error.validationErrors['whatsapp_phone']?.firstOrNull;
           // Sin respuesta concluyente, consultar antes de permitir reenviar.
-          _porConfirmar = error.statusCode == null ||
+          _porConfirmar =
+              error.statusCode == null ||
               (error.statusCode != null && error.statusCode! >= 500);
           _error = _porConfirmar
               ? 'No se confirmó el guardado. Pulsa Comprobar guardado antes de reenviar.'
@@ -159,15 +181,21 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
       }
     } finally {
       if (mounted) {
-        setState(() { _guardando = false; });
+        setState(() {
+          _guardando = false;
+        });
+        _notificarCambios();
       }
     }
   }
 
   void _descartar() {
     final guardado = _guardado;
-    if (guardado == null || _cargando || _guardando ||
-        widget.controller.ocupado || _porConfirmar) {
+    if (guardado == null ||
+        _cargando ||
+        _guardando ||
+        widget.controller.ocupado ||
+        _porConfirmar) {
       return;
     }
     _form.currentState?.reset();
@@ -178,6 +206,11 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
       _errorTelefono = null;
       _aviso = null;
     });
+    _notificarCambios();
+  }
+
+  void _notificarCambios() {
+    widget.modificado?.value = _cambio;
   }
 
   void _editar() {
@@ -185,6 +218,7 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
       _errorTelefono = null;
       _aviso = null;
     });
+    _notificarCambios();
   }
 
   @override
@@ -199,11 +233,16 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Contacto por WhatsApp', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Contacto por WhatsApp',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
-              const Text('Puedes agregar un número distinto al de registro. '
-                  'Al habilitar el contacto, autorizas que otros participantes '
-                  'puedan usarlo para hablarte por WhatsApp.'),
+              const Text(
+                'Puedes agregar un número distinto al de registro. '
+                'Al habilitar el contacto, autorizas que otros participantes '
+                'puedan usarlo para hablarte por WhatsApp.',
+              ),
               const SizedBox(height: 12),
               if (ocupado) const LinearProgressIndicator(),
               if (_guardado != null) ...[
@@ -216,7 +255,8 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
                   decoration: InputDecoration(
                     labelText: 'Número de WhatsApp',
                     hintText: '+56912345678',
-                    helperText: 'Incluye + y código de país. Vacío para borrar.',
+                    helperText:
+                        'Incluye + y código de país. Vacío para borrar.',
                     helperMaxLines: 2,
                     errorText: _errorTelefono,
                   ),
@@ -226,7 +266,8 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
                     if (_permitido && numero == null) {
                       return 'Agrega un número para permitir el contacto.';
                     }
-                    if (numero != null && !ContactoPerfil.numeroValido(numero)) {
+                    if (numero != null &&
+                        !ContactoPerfil.numeroValido(numero)) {
                       return 'Usa código de país, por ejemplo +56912345678.';
                     }
                     return null;
@@ -236,42 +277,64 @@ class _ContactoPerfilFormState extends State<ContactoPerfilForm>
                   key: const ValueKey('perfil-whatsapp-permitir'),
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Permitir contacto por WhatsApp'),
-                  subtitle: const Text('Desactivado: conservas el número para ti.'),
+                  subtitle: const Text(
+                    'Desactivado: conservas el número para ti.',
+                  ),
                   value: _permitido,
-                  onChanged: ocupado || _porConfirmar ? null : (valor) {
-                    setState(() {
-                      _permitido = valor;
-                      _errorTelefono = null;
-                      _aviso = null;
-                    });
-                  },
+                  onChanged: ocupado || _porConfirmar
+                      ? null
+                      : (valor) {
+                          setState(() {
+                            _permitido = valor;
+                            _errorTelefono = null;
+                            _aviso = null;
+                          });
+                          _notificarCambios();
+                        },
                 ),
                 FilledButton.icon(
-                  onPressed: ocupado || _porConfirmar || !_cambio ? null : _guardar,
+                  onPressed: ocupado || _porConfirmar || !_cambio
+                      ? null
+                      : _guardar,
                   icon: const Icon(Icons.save_outlined),
                   label: const Text('Guardar contacto'),
                 ),
                 TextButton(
-                  onPressed: ocupado || _porConfirmar || !_cambio ? null : _descartar,
+                  onPressed: ocupado || _porConfirmar || !_cambio
+                      ? null
+                      : _descartar,
                   child: const Text('Descartar cambios'),
                 ),
               ],
               if (_error != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Semantics(liveRegion: true, child: Text(_error!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error))),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      _error!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
                 ),
               if (_aviso != null)
                 Semantics(liveRegion: true, child: Text(_aviso!)),
               if (_porConfirmar || (_guardado == null && !_cargando))
                 OutlinedButton(
                   onPressed: ocupado ? null : _cargar,
-                  child: Text(_porConfirmar ? 'Comprobar guardado' : 'Reintentar contacto'),
+                  child: Text(
+                    _porConfirmar
+                        ? 'Comprobar guardado'
+                        : 'Reintentar contacto',
+                  ),
                 ),
               const SizedBox(height: 8),
-              const Text('El acceso desde los chats se incorporará en la siguiente etapa. '
-                  'El número no se publica en esta versión.'),
+              const Text(
+                'El acceso desde los chats se incorporará en la siguiente etapa. '
+                'El número no se publica en esta versión.',
+              ),
               const SizedBox(height: 24),
             ],
           ),

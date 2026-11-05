@@ -7,6 +7,7 @@ import '../../features/categorias/data/categorias_repository.dart';
 import '../../features/lugares/data/lugares_repository.dart';
 import '../navigation/principal_page.dart';
 import 'sesion_controller.dart';
+import 'cerrar_sesion.dart';
 
 class SesionGate extends StatefulWidget {
   const SesionGate({
@@ -29,6 +30,9 @@ class SesionGate extends StatefulWidget {
 class _SesionGateState extends State<SesionGate> {
   // Navegar como visitante no crea una cuenta ni una sesión autenticada.
   bool _visitante = false;
+  final _navVisitante = GlobalKey<NavigatorState>();
+  var _navAutenticada = GlobalKey<NavigatorState>();
+  int? _cuentaNavegada;
 
   @override
   void initState() {
@@ -47,15 +51,17 @@ class _SesionGateState extends State<SesionGate> {
           EstadoSesion.inicial || EstadoSesion.comprobando => const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           ),
-          EstadoSesion.sinSesion => _visitante
-              ? _crearAreaVisitante(controller)
-              : LoginPage(
-                  sesionController: controller,
-                  onContinuarVisitante: _continuarVisitante,
-                ),
-          EstadoSesion.errorRecuperacion => _visitante
-              ? _crearAreaVisitante(controller)
-              : _crearErrorRecuperacion(controller),
+          EstadoSesion.sinSesion =>
+            _visitante
+                ? _crearAreaVisitante(controller)
+                : LoginPage(
+                    sesionController: controller,
+                    onContinuarVisitante: _continuarVisitante,
+                  ),
+          EstadoSesion.errorRecuperacion =>
+            _visitante
+                ? _crearAreaVisitante(controller)
+                : _crearErrorRecuperacion(controller),
           EstadoSesion.autenticada => _crearAreaAutenticada(controller),
         };
       },
@@ -92,95 +98,103 @@ class _SesionGateState extends State<SesionGate> {
   }
 
   void _continuarVisitante() {
-    if (widget.controller.ocupado) return;
+    if (widget.controller.ocupado) {
+      return;
+    }
     setState(() => _visitante = true);
   }
 
   Widget _crearAreaVisitante(SesionController controller) {
-    // El navegador se destruye al ir al acceso o al área autenticada:
-    // no quedan detalles del directorio por encima de esas pantallas.
-    return Navigator(
-      key: const ValueKey('visitante'),
-      onGenerateRoute: (settings) => MaterialPageRoute<void>(
-        settings: settings,
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Ahora Local · Visitante'),
-            actions: [
-              TextButton(
-                onPressed: controller.ocupado
-                    ? null
-                    : () => setState(() => _visitante = false),
-                child: Text(
-                  controller.estado == EstadoSesion.errorRecuperacion
-                      ? 'Reintentar acceso'
-                      : 'Iniciar sesión',
+    return NavigatorPopHandler<Object?>(
+      onPopWithResult: (_) {
+        _navVisitante.currentState?.maybePop();
+      },
+      child: Navigator(
+        key: _navVisitante,
+        onGenerateRoute: (settings) => MaterialPageRoute<void>(
+          settings: settings,
+          builder: (context) => _crearPrincipal(
+            acciones: [
+              ListenableBuilder(
+                listenable: controller,
+                builder: (_, child) => TextButton(
+                  onPressed: controller.ocupado
+                      ? null
+                      : () => setState(() {
+                          _visitante = false;
+                        }),
+                  child: Text(
+                    controller.estado == EstadoSesion.errorRecuperacion
+                        ? 'Reintentar acceso'
+                        : 'Iniciar sesión',
+                  ),
                 ),
               ),
             ],
           ),
-          body: _crearPrincipal(),
         ),
       ),
     );
   }
 
-  Widget _crearPrincipal({SesionController? sesion}) => PrincipalPage(
+  Widget _crearPrincipal({
+    SesionController? sesion,
+    List<Widget> acciones = const [],
+  }) => PrincipalPage(
     lugaresRepository: widget.lugaresRepository,
     categoriasRepository: widget.categoriasRepository,
     sesionController: sesion,
+    accionesCuenta: acciones,
   );
 
   Widget _crearAreaAutenticada(SesionController controller) {
-    // Un navegador separado permite retirar también cualquier detalle
-    // abierto cuando desaparece la sesión autenticada.
-    return Navigator(
-      key: ValueKey(controller.cuenta!.id),
-      onGenerateRoute: (settings) {
-        return MaterialPageRoute<void>(
+    final id = controller.cuenta!.id;
+    if (_cuentaNavegada != id) {
+      _cuentaNavegada = id;
+      _navAutenticada = GlobalKey<NavigatorState>();
+    }
+    return NavigatorPopHandler<Object?>(
+      onPopWithResult: (_) {
+        _navAutenticada.currentState?.maybePop();
+      },
+      child: Navigator(
+        key: _navAutenticada,
+        onGenerateRoute: (settings) => MaterialPageRoute<void>(
           settings: settings,
-          builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: Text(controller.cuenta!.username),
-              actions: [
-                IconButton(
+          builder: (context) => _crearPrincipal(
+            sesion: controller,
+            acciones: [
+              ListenableBuilder(
+                listenable: controller,
+                builder: (_, child) => IconButton(
                   tooltip: 'Mi cuenta',
-                  onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (_) => PerfilPage(
-                        controller: controller,
-                        perfilRepository: widget.perfilRepository,
-                      ),
-                    ),
-                  ),
+                  onPressed: controller.ocupado
+                      ? null
+                      : () => Navigator.of(context).push<void>(
+                          MaterialPageRoute<void>(
+                            builder: (_) => PerfilPage(
+                              controller: controller,
+                              perfilRepository: widget.perfilRepository,
+                            ),
+                          ),
+                        ),
                   icon: const Icon(Icons.account_circle_outlined),
                 ),
-                IconButton(
+              ),
+              ListenableBuilder(
+                listenable: controller,
+                builder: (_, child) => IconButton(
                   tooltip: 'Cerrar sesión',
                   onPressed: controller.ocupado
                       ? null
-                      : () async {
-                          final salio = await controller.logout();
-
-                          if (!context.mounted || salio) return;
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                controller.error ??
-                                    'No se pudo cerrar la sesión.',
-                              ),
-                            ),
-                          );
-                        },
+                      : () => cerrarSesionDesde(context, controller),
                   icon: const Icon(Icons.logout),
                 ),
-              ],
-            ),
-            body: _crearPrincipal(sesion: controller),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

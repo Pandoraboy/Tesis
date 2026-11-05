@@ -1,3 +1,5 @@
+> Actualización posterior: usuario confirmó 97 pruebas Flutter aprobadas tras estabilización. La actualización QoL posterior añade 16 casos preparados aún sin ejecutar; ver 2026-11-04-calidad-de-vida.md. La evidencia histórica siguiente conserva el estado al revisar de00404.
+
 # Estado integrado · 2026-11-04
 
 Base publicada revisada: de00404 de main. Revisión estática, sin PHP/Flutter aquí. Correcciones de estabilización preparadas encima de esa base.

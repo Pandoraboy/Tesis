@@ -23,22 +23,31 @@ class _Storage extends SesionStorage {
 }
 
 class _Teselas extends TileProvider {
-  final _imagen = MemoryImage(base64Decode(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=',
-  ));
+  final _imagen = MemoryImage(
+    base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=',
+    ),
+  );
   @override
-  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) => _imagen;
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
+      _imagen;
 }
 
 Map<String, dynamic> _lugar(int id) => {
-  'id': id, 'nombre': 'Local $id',
+  'id': id,
+  'nombre': 'Local $id',
   'categoria': {'id': 8, 'nombre': 'Comercio'},
-  'direccion': 'Dirección de prueba', 'latitud': -36.424,
-  'longitud': -71.958, 'estado_horario': 'sin_horarios', 'horarios': [],
+  'direccion': 'Dirección de prueba',
+  'latitud': -36.424,
+  'longitud': -71.958,
+  'estado_horario': 'sin_horarios',
+  'horarios': [],
 };
 
 http.Response _json(Object data, [int status = 200]) => http.Response(
-  jsonEncode(data), status, headers: {'content-type': 'application/json'},
+  jsonEncode(data),
+  status,
+  headers: {'content-type': 'application/json'},
 );
 
 class _Escenario {
@@ -46,12 +55,21 @@ class _Escenario {
     catalogo = [for (var id = 1; id <= cantidad; id++) _lugar(id)];
     client = MockClient((request) async {
       if (request.url.path.endsWith('/auth/me')) {
-        return _json({'data': {
-          'id': 4, 'username': 'admin', 'role': 'admin', 'active': true,
-        }});
+        return _json({
+          'data': {
+            'id': 4,
+            'username': 'admin',
+            'role': 'admin',
+            'active': true,
+          },
+        });
       }
       if (request.url.path.endsWith('/categorias')) {
-        return _json({'data': [{'id': 8, 'nombre': 'Comercio'}]});
+        return _json({
+          'data': [
+            {'id': 8, 'nombre': 'Comercio'},
+          ],
+        });
       }
       if (request.method == 'POST') {
         expect(request.headers['Authorization'], 'Bearer catalogo-prueba');
@@ -63,7 +81,9 @@ class _Escenario {
       }
       if (!request.url.path.endsWith('/lugares')) {
         final id = int.parse(request.url.pathSegments.last);
-        return _json({'data': catalogo.firstWhere((lugar) => lugar['id'] == id)});
+        return _json({
+          'data': catalogo.firstWhere((lugar) => lugar['id'] == id),
+        });
       }
       final pagina = int.parse(request.url.queryParameters['page']!);
       final limite = int.parse(request.url.queryParameters['per_page']!);
@@ -72,14 +92,24 @@ class _Escenario {
       } else {
         paginasBusqueda.add(pagina);
       }
-      final ultima = ((catalogo.length + limite - 1) ~/ limite).clamp(1, 100000);
+      final ultima = ((catalogo.length + limite - 1) ~/ limite).clamp(
+        1,
+        100000,
+      );
       return _json({
         'data': catalogo.skip((pagina - 1) * limite).take(limite).toList(),
-        'meta': {'current_page': pagina, 'last_page': ultima, 'total': catalogo.length},
+        'meta': {
+          'current_page': pagina,
+          'last_page': ultima,
+          'total': catalogo.length,
+        },
       });
     });
     api = ApiClient(client: client);
-    sesion = SesionController(repository: AuthRepository(api), storage: _Storage());
+    sesion = SesionController(
+      repository: AuthRepository(api),
+      storage: _Storage(),
+    );
     addTearDown(client.close);
     addTearDown(sesion.dispose);
   }
@@ -95,12 +125,16 @@ class _Escenario {
 
 Future<void> _principal(WidgetTester tester, _Escenario e) async {
   await e.sesion.recuperar();
-  await tester.pumpWidget(MaterialApp(home: PrincipalPage(
-    lugaresRepository: LugaresRepository(e.api),
-    categoriasRepository: CategoriasRepository(e.api),
-    sesionController: e.sesion,
-    mapaTileProvider: _Teselas(),
-  )));
+  await tester.pumpWidget(
+    MaterialApp(
+      home: PrincipalPage(
+        lugaresRepository: LugaresRepository(e.api),
+        categoriasRepository: CategoriasRepository(e.api),
+        sesionController: e.sesion,
+        mapaTileProvider: _Teselas(),
+      ),
+    ),
+  );
   await tester.pumpAndSettle();
   await tester.tap(find.text('Mapa').last);
   await tester.pumpAndSettle();
@@ -116,7 +150,9 @@ Future<void> _escribir(WidgetTester tester, String campo, String texto) async {
 }
 
 void main() {
-  testWidgets('alta refresca mapa abierto y búsqueda una sola vez', (tester) async {
+  testWidgets('alta refresca mapa abierto y búsqueda una sola vez', (
+    tester,
+  ) async {
     final e = _Escenario();
     await _principal(tester, e);
     await tester.tap(find.text('Agregar lugar'));
@@ -144,7 +180,9 @@ void main() {
     expect(find.text('2 lugares en el mapa'), findsOneWidget);
   });
 
-  testWidgets('cancelar alta no refresca catálogo ni envía POST', (tester) async {
+  testWidgets('cancelar alta no refresca catálogo ni envía POST', (
+    tester,
+  ) async {
     final e = _Escenario();
     await _principal(tester, e);
     await tester.tap(find.text('Agregar lugar'));
@@ -156,15 +194,23 @@ void main() {
     expect(e.paginasBusqueda, [1]);
   });
 
-  testWidgets('página desaparecida vuelve a última página disponible', (tester) async {
+  testWidgets('página desaparecida vuelve a última página disponible', (
+    tester,
+  ) async {
     final e = _Escenario(cantidad: 21);
     final cambios = ValueNotifier<int>(0);
     addTearDown(cambios.dispose);
-    await tester.pumpWidget(MaterialApp(home: LugaresPage(
-      repository: LugaresRepository(e.api),
-      categoriasRepository: CategoriasRepository(e.api),
-      cambiosLugares: cambios,
-    )));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LugaresPage(
+          repository: LugaresRepository(e.api),
+          categoriasRepository: CategoriasRepository(e.api),
+          cambiosLugares: cambios,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byTooltip('Página siguiente'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Página siguiente'));
     await tester.pumpAndSettle();
@@ -178,15 +224,23 @@ void main() {
     expect(find.text('Local 1'), findsOneWidget);
   });
 
-  testWidgets('catálogo que queda vacío se recupera sin bucle de consultas', (tester) async {
+  testWidgets('catálogo que queda vacío se recupera sin bucle de consultas', (
+    tester,
+  ) async {
     final e = _Escenario(cantidad: 21);
     final cambios = ValueNotifier<int>(0);
     addTearDown(cambios.dispose);
-    await tester.pumpWidget(MaterialApp(home: LugaresPage(
-      repository: LugaresRepository(e.api),
-      categoriasRepository: CategoriasRepository(e.api),
-      cambiosLugares: cambios,
-    )));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LugaresPage(
+          repository: LugaresRepository(e.api),
+          categoriasRepository: CategoriasRepository(e.api),
+          cambiosLugares: cambios,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byTooltip('Página siguiente'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Página siguiente'));
     await tester.pumpAndSettle();

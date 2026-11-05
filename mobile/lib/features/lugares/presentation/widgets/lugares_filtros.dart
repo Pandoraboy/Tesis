@@ -15,6 +15,7 @@ class LugaresFiltros extends StatelessWidget {
     required this.onReintentarCategorias,
     this.errorCategorias,
     this.onAgregar,
+    this.busquedaAplicada = '',
   });
 
   final TextEditingController buscarController;
@@ -27,6 +28,7 @@ class LugaresFiltros extends StatelessWidget {
   final ValueChanged<int?> onCategoriaChanged;
   final VoidCallback onReintentarCategorias;
   final VoidCallback? onAgregar;
+  final String busquedaAplicada;
 
   @override
   Widget build(BuildContext context) {
@@ -49,17 +51,24 @@ class LugaresFiltros extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: buscarController,
-                  textInputAction: TextInputAction.search,
-                  maxLength: 150,
-                  onSubmitted: (_) => onBuscar(),
-                  decoration: const InputDecoration(
-                    labelText: 'Buscar negocio',
-                    hintText: 'Nombre del lugar',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                    counterText: '',
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: buscarController,
+                  builder: (_, value, child) => TextField(
+                    controller: buscarController,
+                    textInputAction: TextInputAction.search,
+                    maxLength: 150,
+                    onSubmitted: (_) => onBuscar(),
+                    decoration: InputDecoration(
+                      helperText: value.text.trim() != busquedaAplicada
+                          ? 'Pulsa Buscar para aplicar el texto.'
+                          : null,
+                      helperMaxLines: 2,
+                      labelText: 'Buscar lugares',
+                      hintText: 'Nombre del lugar',
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(),
+                      counterText: '',
+                    ),
                   ),
                 ),
               ),

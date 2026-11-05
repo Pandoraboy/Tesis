@@ -1,3 +1,15 @@
+## Calidad de vida preparada · 2026-11-04
+
+- [x] Usuario reportó 97 pruebas Flutter aprobadas con estabilización anterior.
+- [x] Código preparado de protección de borradores/Atrás, escrituras inciertas y contenido conservado.
+- [x] Código preparado de reanudación, cierre local y claridad/espacio/copia/mapa.
+- [x] 16 pruebas nuevas preparadas, con adaptación del caso anterior de cancelación.
+- [ ] Ejecutar formato/analyze, pruebas específicas y suite; recorrido Android con red, teclado y gestos.
+- [ ] H1 Google al mismo ID y suite completa backend actual.
+- [ ] Chats Android, después de validar QoL.
+
+Detalle vigente en [QoL](../validacion/2026-11-04-calidad-de-vida.md). Apartados siguientes conservan el historial de preparación anterior; sus pendientes de estabilización fueron superados por el reporte de 97 pruebas, salvo recorrido manual.
+
 # Backlog vigente · 2026-11-04
 
 Base revisada de00404; estabilización candidata posterior. [Plan](../PLAN_CONTINUIDAD.md), [validación](../validacion/2026-11-04-estabilizacion.md).

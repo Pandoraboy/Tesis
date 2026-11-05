@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/validar_formulario.dart';
+
 import '../../../core/network/api_client.dart';
+import '../../../core/widgets/salida_con_cambios.dart';
 import '../data/auth_repository.dart';
 
 class GoogleRegisterPage extends StatefulWidget {
@@ -21,6 +24,7 @@ class _GoogleRegisterPageState extends State<GoogleRegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _username = TextEditingController();
   bool _enviando = false;
+  bool _confirmado = false;
   String? _error;
   String? _errorUsername;
 
@@ -31,12 +35,16 @@ class _GoogleRegisterPageState extends State<GoogleRegisterPage> {
   }
 
   Future<void> _registrar() async {
-    if (_enviando) return;
+    if (_enviando) {
+      return;
+    }
     setState(() {
       _error = null;
       _errorUsername = null;
     });
-    if (!_formKey.currentState!.validate()) return;
+    if (!validarYMostrarError(_formKey)) {
+      return;
+    }
     FocusScope.of(context).unfocus();
     setState(() => _enviando = true);
     try {
@@ -44,10 +52,15 @@ class _GoogleRegisterPageState extends State<GoogleRegisterPage> {
         username: _username.text,
         idToken: widget.idToken,
       );
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
+      _confirmado = true;
       Navigator.of(context).pop(true);
     } on ApiException catch (error) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _errorUsername = error.validationErrors['username']?.join('\n');
         _error = error.code == 'google_verified_email_required'
@@ -59,17 +72,23 @@ class _GoogleRegisterPageState extends State<GoogleRegisterPage> {
             : error.message;
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() => _error = 'No se pudo completar el registro.');
     } finally {
-      if (mounted) setState(() => _enviando = false);
+      if (mounted) {
+        setState(() => _enviando = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: !_enviando,
+    return SalidaConCambios(
+      ocupado: _enviando,
+      cambios: _username,
+      tieneCambios: () => !_confirmado && _username.text.isNotEmpty,
       child: Scaffold(
         appBar: AppBar(title: const Text('Crear cuenta con Google')),
         body: SafeArea(
