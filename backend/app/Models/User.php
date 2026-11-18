@@ -32,6 +32,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'active' => 'boolean',
             'whatsapp_enabled' => 'boolean',
+            'chat_timeout_until' => 'datetime',
         ];
     }
     public function mensajes(): HasMany

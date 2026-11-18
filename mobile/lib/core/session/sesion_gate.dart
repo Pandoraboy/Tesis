@@ -5,6 +5,7 @@ import '../../features/perfil/presentation/perfil_page.dart';
 import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/categorias/data/categorias_repository.dart';
 import '../../features/lugares/data/lugares_repository.dart';
+import '../../features/foros/data/foros_repository.dart';
 import '../navigation/principal_page.dart';
 import 'sesion_controller.dart';
 import 'cerrar_sesion.dart';
@@ -14,6 +15,7 @@ class SesionGate extends StatefulWidget {
     required this.controller,
     required this.lugaresRepository,
     required this.categoriasRepository,
+    this.forosRepository,
     this.perfilRepository,
     super.key,
   });
@@ -21,6 +23,7 @@ class SesionGate extends StatefulWidget {
   final SesionController controller;
   final LugaresRepository lugaresRepository;
   final CategoriasRepository categoriasRepository;
+  final ForosRepository? forosRepository;
   final PerfilRepository? perfilRepository;
 
   @override
@@ -143,6 +146,7 @@ class _SesionGateState extends State<SesionGate> {
   }) => PrincipalPage(
     lugaresRepository: widget.lugaresRepository,
     categoriasRepository: widget.categoriasRepository,
+    forosRepository: widget.forosRepository,
     sesionController: sesion,
     accionesCuenta: acciones,
   );

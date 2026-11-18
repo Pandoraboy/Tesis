@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\Admin\DestacadoController as AdminDestacadoController;
 use App\Http\Controllers\Api\Admin\ForoController as AdminForoController;
 use App\Http\Controllers\Api\Admin\UsuarioController;
+use App\Http\Controllers\Api\Admin\ChatModeracionController;
 use App\Http\Middleware\EnsureActiveAdmin;
 use App\Http\Middleware\EnsureActiveUser;
 use Illuminate\Http\Request;
@@ -84,6 +85,11 @@ Route::prefix('v1')->group(function () {
             [MensajeController::class, 'store']
         )->middleware('throttle:10,1');
 
+        Route::patch(
+            'mensajes/{mensaje}',
+            [MensajeController::class, 'update']
+        )->middleware('throttle:10,1');
+
         // El controlador permite retirar al autor o al administrador.
         Route::delete(
             'mensajes/{mensaje}',
@@ -107,6 +113,10 @@ Route::prefix('v1')->group(function () {
         'auth:sanctum',
         EnsureActiveAdmin::class,
     ])->group(function () {
+        Route::post('admin/usuarios/{user}/chat-timeout', [ChatModeracionController::class, 'aplicar'])
+            ->middleware('throttle:10,1');
+        Route::delete('admin/usuarios/{user}/chat-timeout', [ChatModeracionController::class, 'levantar'])
+            ->middleware('throttle:10,1');
         // Administración de los cuatro foros.
         Route::get(
             'admin/foros',

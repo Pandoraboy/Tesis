@@ -1,5 +1,30 @@
 # Calidad de vida ejecutada y corregida · 2026-11-04
 
+## [Sin publicar] · Moderación básica y espera entre mensajes — 2026-11-18
+
+- API: mínimo cinco segundos entre publicaciones del mismo usuario en todos los foros, con bloqueo transaccional y respuesta 429 con segundos restantes.
+- Admin: suspende publicaciones por 10 minutos, 1 hora, 24 horas o 7 días y levanta suspensión con motivo obligatorio. La restricción solo afecta publicar; vence automáticamente según fecha.
+- Nuevas migraciones agregan vencimiento en usuarios y bitácora de sanciones con responsable, motivo y fecha. No modificar migraciones aplicadas.
+- Flutter: opciones de suspensión y levantamiento en mensajes para admin, espera visible tras publicar y errores de servidor legibles.
+- Pruebas de cooldown, permisos, aplicación y levantamiento de sanciones preparadas. Sin ejecutar por falta de herramientas y DB de pruebas en este entorno.
+- Denuncias, rol moderador y cola de revisión siguen pendientes; moderación de este incremento reservada a admin existente.
+
+
+## [Sin publicar] · Corrección y retiro temporal de mensajes — 2026-11-18
+
+- Laravel: autor retira mensajes propios hasta los tres minutos originales; después recibe 409. Admin puede moderar sin ese límite. Edición PATCH solo por el autor de mensaje visible, con validación del contenido.
+- Flutter: menú contextual de edición y retiro, indicador de editado, refresco de disponibilidad, editor con validación y conservación del contenido si falla el guardado.
+- Pruebas agregadas de plazo, autoría, moderación y edición. Validación en ejecución local pendiente; no se modificaron migraciones ni datos.
+
+
+## [Sin publicar] · Integración inicial de foros Android — 2026-11-18
+
+- Nueva pestaña funcional de los cuatro foros, con consulta pública de mensajes, actualización y paginación.
+- Publicación para cuentas activas mediante la sesión existente y retiro propio o administrativo con confirmación; autorización final en Laravel.
+- Repositorio/modelos Flutter y dos pruebas nuevas preparadas. No se ejecutaron porque Flutter/Dart no están instalados en este entorno.
+- Sin cambios de esquema, seeders, datos, backend, dependencias ni push. Moderación avanzada, denuncias y timeout pendientes.
+
+
 - Flutter 3.47.7 / Dart 3.13.5 en Linux aislado: 113 pruebas aprobadas y analyze sin incidencias; lockfile intacto.
 - Corregidos errores asíncronos al refrescar lista/ficha y desborde del horario con texto grande; fixtures y pruebas de paginación adaptados sin quitar aserciones.
 - Evidencia y comparación con seis aplicaciones en docs/validacion. Recorrido Android/backend real pendiente; sin cambios funcionales backend ni push.

@@ -227,6 +227,134 @@ class MensajeApiTest extends TestCase
         $this->assertTrue($mensaje->fresh()->activo);
     }
 
+    public function test_autor_puede_retirar_antes_de_tres_minutos_pero_no_despues(): void
+    {
+        $foro = $this->foro();
+        $autor = $this->usuario();
+        Sanctum::actingAs($autor);
+
+        $primero = $this->mensaje($foro, $autor);
+        $segundo = $this->mensaje($foro, $autor);
+
+        $this->travel(2)->minutes();
+        $this->deleteJson("/api/v1/mensajes/{$primero->id}")->assertNoContent();
+
+        $this->travel(1)->minutes();
+        $this->deleteJson("/api/v1/mensajes/{$segundo->id}")
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'mensaje_plazo_vencido');
+
+        $this->assertTrue($segundo->fresh()->activo);
+        $this->travelBack();
+    }
+
+    public function test_solo_autor_edita_su_mensaje_visible(): void
+    {
+        $foro = $this->foro();
+        $autor = $this->usuario();
+        $mensaje = $this->mensaje($foro, $autor);
+        $otro = $this->usuario();
+
+        Sanctum::actingAs($otro);
+        $this->patchJson("/api/v1/mensajes/{$mensaje->id}", [
+            'contenido' => 'Intento ajeno',
+        ])->assertForbidden();
+
+        Sanctum::actingAs($autor);
+        $this->patchJson("/api/v1/mensajes/{$mensaje->id}", [
+            'contenido' => '  Texto corregido  ',
+        ])->assertOk()->assertJsonPath('data.contenido', 'Texto corregido');
+
+        $this->patchJson("/api/v1/mensajes/{$mensaje->id}", [
+            'contenido' => ' ',
+        ])->assertUnprocessable();
+
+        $this->assertSame('Texto corregido', $mensaje->fresh()->contenido);
+
+        $mensaje->activo = false;
+        $mensaje->save();
+        $this->patchJson("/api/v1/mensajes/{$mensaje->id}", [
+            'contenido' => 'No visible',
+        ])->assertNotFound();
+    }
+
+    public function test_admin_puede_moderar_despues_de_tres_minutos(): void
+    {
+        $foro = $this->foro();
+        $mensaje = $this->mensaje($foro, $this->usuario());
+        Sanctum::actingAs($this->usuario('admin'));
+
+        $this->travel(4)->minutes();
+        $this->deleteJson("/api/v1/mensajes/{$mensaje->id}")->assertNoContent();
+        $this->assertFalse($mensaje->fresh()->activo);
+        $this->travelBack();
+    }
+
+    public function test_debe_esperar_cinco_segundos_entre_foros(): void
+    {
+        $foroUno = $this->foro();
+        $foroDos = $this->foro();
+        $autor = $this->usuario();
+        Sanctum::actingAs($autor);
+
+        $this->postJson($this->url($foroUno), ['contenido' => 'Primero'])->assertCreated();
+        $this->postJson($this->url($foroDos), ['contenido' => 'Muy pronto'])
+            ->assertStatus(429)
+            ->assertJsonPath('code', 'chat_espera');
+
+        $this->travel(5)->seconds();
+        $this->postJson($this->url($foroDos), ['contenido' => 'Después'])->assertCreated();
+        $this->assertSame(2, Mensaje::where('user_id', $autor->id)->count());
+        $this->travelBack();
+    }
+
+    public function test_admin_aplica_y_levanta_timeout_con_motivo(): void
+    {
+        $foro = $this->foro();
+        $autor = $this->usuario();
+        $admin = $this->usuario('admin');
+        $url = "/api/v1/admin/usuarios/{$autor->id}/chat-timeout";
+
+        Sanctum::actingAs($admin);
+        $this->postJson($url, ['minutos' => 10, 'motivo' => 'Publicaciones repetidas'])
+            ->assertOk();
+        $this->assertNotNull($autor->fresh()->chat_timeout_until);
+
+        Sanctum::actingAs($autor);
+        $this->postJson($this->url($foro), ['contenido' => 'No puedo publicar'])
+            ->assertForbidden()
+            ->assertJsonPath('code', 'chat_timeout');
+
+        Sanctum::actingAs($admin);
+        $this->deleteJson($url, ['motivo' => 'Se revisó la situación'])->assertOk();
+        $this->assertNull($autor->fresh()->chat_timeout_until);
+
+        Sanctum::actingAs($autor);
+        $this->postJson($this->url($foro), ['contenido' => 'Ahora sí'])->assertCreated();
+
+        $this->assertSame(2, \Illuminate\Support\Facades\DB::table('chat_moderaciones')
+            ->where('usuario_id', $autor->id)->count());
+    }
+
+    public function test_usuario_no_puede_sancionar_y_admin_no_puede_sancionar_admin(): void
+    {
+        $usuario = $this->usuario();
+        $admin = $this->usuario('admin');
+
+        Sanctum::actingAs($usuario);
+        $this->postJson("/api/v1/admin/usuarios/{$usuario->id}/chat-timeout", [
+            'minutos' => 10, 'motivo' => 'Sin permisos',
+        ])->assertForbidden();
+
+        Sanctum::actingAs($admin);
+        $this->postJson("/api/v1/admin/usuarios/{$admin->id}/chat-timeout", [
+            'minutos' => 10, 'motivo' => 'Intento inválido',
+        ])->assertForbidden();
+        $this->postJson("/api/v1/admin/usuarios/{$usuario->id}/chat-timeout", [
+            'minutos' => 5, 'motivo' => 'Duración no admitida',
+        ])->assertUnprocessable();
+    }
+
     public function test_admin_activo_modera_incluso_en_foro_inactivo(): void
     {
         $foro = $this->foro(false);

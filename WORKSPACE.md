@@ -1,5 +1,20 @@
 # Continuidad: calidad de vida en validación
 
+## Moderación básica y ritmo de publicación — 2026-11-18
+
+Incremento candidato: límite de 5 segundos por usuario entre los cuatro chats implementado en API (429 `chat_espera`), y suspensión temporal administrada por `admin` con duración 10/60/1440/10080 minutos y motivo obligatorio; levantar suspensión queda registrado. Dos migraciones nuevas: `chat_timeout_until` en `users` y `chat_moderaciones`. Aplicar en entorno de prueba antes de pruebas backend, y después en desarrollo con respaldo. **No ejecutar tests con migraciones o base de datos productiva.** UI Flutter integra ambas acciones y espera visible. Pendientes: rol `moderador`, denuncias y su revisión. El usuario informó pruebas previas correctas, pero este incremento aún no ha sido ejecutado.
+
+
+## Foros: edición y límite de retiro — 2026-11-18
+
+Incremento local añadido sobre los foros: PATCH de edición exclusivamente para el autor mientras el mensaje esté visible; retirada del autor limitada a 3 minutos desde `created_at` en Laravel, sin límite para la moderación admin. Menú de opciones de mensaje en Android e indicador de contenido editado. Pruebas nuevas en backend y Flutter, todavía pendientes de ejecución con dependencias y base de prueba. Integrar **backend y mobile juntos**, pues el backend anterior permite retirar sin límite y carece de PATCH.
+
+
+## Integración local en curso · 2026-11-18
+
+La pestaña provisional de foros fue reemplazada por la interfaz Flutter para leer los cuatro foros y sus mensajes, publicar con sesión activa y retirar mensajes propios/admin. Se reutilizaron endpoints existentes, sin modificar la base de datos. Pruebas Flutter nuevas preparadas, ejecución pendiente por falta de SDK en este entorno. Validar con `flutter analyze` y `flutter test test/foros_test.dart` desde `mobile/`, después realizar recorrido Android con backend real. Siguen pendientes moderación avanzada, denuncias y timeout; posteriormente mapa/filtros y categorías reales.
+
+
 Fecha 2026-11-04. Base publicada revisada de00404, más estabilización que el usuario aplicó y reportó con 97 pruebas Flutter aprobadas. PerfilApiTest: 12 pruebas/49 aserciones previamente reportadas. Recorrido reciente y suite backend completa no confirmados.
 
 Actualización QoL preparada después: Atrás Android, confirmación de descarte en formularios, comprobación de escrituras inciertas, conservación del contenido al refrescar, reanudación de pantalla visible, cierre local opcional tras fallo remoto, cabecera única, filtros/resultados desplazables, contexto de consulta, mapa táctil/leyenda/errores de fondo y copia de datos.

@@ -9,6 +9,7 @@ import 'features/auth/data/auth_repository.dart';
 import 'features/perfil/data/perfil_repository.dart';
 import 'features/categorias/data/categorias_repository.dart';
 import 'features/lugares/data/lugares_repository.dart';
+import 'features/foros/data/foros_repository.dart';
 import 'core/theme/app_theme.dart';
 
 void main() {
@@ -29,6 +30,7 @@ class _MyAppState extends State<MyApp> {
   late final CategoriasRepository _categoriasRepository;
   late final SesionController _sesionController;
   late final PerfilRepository _perfilRepository;
+  late final ForosRepository _forosRepository;
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _MyAppState extends State<MyApp> {
     _perfilRepository = PerfilRepository(apiClient);
     _lugaresRepository = LugaresRepository(apiClient);
     _categoriasRepository = CategoriasRepository(apiClient);
+    _forosRepository = ForosRepository(apiClient);
 
     _sesionController = SesionController(
       repository: AuthRepository(apiClient),
@@ -65,6 +68,7 @@ class _MyAppState extends State<MyApp> {
         perfilRepository: _perfilRepository,
         lugaresRepository: _lugaresRepository,
         categoriasRepository: _categoriasRepository,
+        forosRepository: _forosRepository,
       ),
     );
   }

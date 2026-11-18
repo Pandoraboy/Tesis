@@ -53,6 +53,9 @@ class ApiClient {
     required String token,
   }) => _request('PATCH', path, body: body, token: token);
 
+  Future<Map<String, dynamic>> deleteJson(String path, {required String token, Map<String, dynamic>? body}) =>
+      _request('DELETE', path, token: token, body: body);
+
   Future<Map<String, dynamic>> _request(
     String method,
     String path, {
@@ -79,7 +82,11 @@ class ApiClient {
       if (response.statusCode < 200 || response.statusCode >= 300) {
         final datos = _leerError(response);
         throw ApiException(
-          _mensajeError(response.statusCode),
+          switch (datos['code']) {
+            'chat_espera' => 'Espera ${datos['retry_after'] ?? 5} segundos antes de publicar otro mensaje.',
+            'chat_timeout' => 'Tu cuenta tiene una suspensión temporal para escribir en los foros.',
+            _ => _mensajeError(response.statusCode),
+          },
           statusCode: response.statusCode,
           code: datos['code'] is String ? datos['code'] as String : null,
           validationErrors: _leerErroresValidacion(response.statusCode, datos),

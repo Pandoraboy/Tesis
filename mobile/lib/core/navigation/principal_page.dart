@@ -9,12 +9,15 @@ import '../../features/lugares/data/lugares_repository.dart';
 import '../../features/lugares/models/lugar.dart';
 import '../../features/lugares/presentation/lugares_page.dart';
 import '../../features/mapa/presentation/mapa_page.dart';
+import '../../features/foros/data/foros_repository.dart';
+import '../../features/foros/presentation/foros_page.dart';
 
 class PrincipalPage extends StatefulWidget {
   const PrincipalPage({
     required this.lugaresRepository,
     required this.categoriasRepository,
     this.sesionController,
+    this.forosRepository,
     this.mapaTileProvider,
     this.accionesCuenta = const [],
     super.key,
@@ -23,6 +26,7 @@ class PrincipalPage extends StatefulWidget {
   final LugaresRepository lugaresRepository;
   final CategoriasRepository categoriasRepository;
   final SesionController? sesionController;
+  final ForosRepository? forosRepository;
   // Permite validar navegación y cámara sin descargar teselas en las pruebas.
   final TileProvider? mapaTileProvider;
   final List<Widget> accionesCuenta;
@@ -98,12 +102,13 @@ class _PrincipalPageState extends State<PrincipalPage> {
         accionesCuenta: widget.accionesCuenta,
         activa: _seccion == 2,
       ),
-      3 => _SeccionPendiente(
-        accionesCuenta: widget.accionesCuenta,
-        titulo: 'Chat / Tablón',
-        icono: Icons.forum_outlined,
-        descripcion: 'Plaza de Armas, Cementerio, Estación y Alameda.',
-      ),
+      3 => widget.forosRepository == null
+          ? const Center(child: Text('Foros no disponibles.'))
+          : ForosPage(
+              repository: widget.forosRepository!,
+              sesionController: widget.sesionController,
+              accionesCuenta: widget.accionesCuenta,
+            ),
       _ => throw ArgumentError.value(indice, 'indice'),
     };
   }
@@ -168,56 +173,9 @@ class _PrincipalPageState extends State<PrincipalPage> {
             NavigationDestination(
               icon: Icon(Icons.forum_outlined),
               selectedIcon: Icon(Icons.forum),
-              label: 'Chat / Tablón',
+              label: 'Foros',
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SeccionPendiente extends StatelessWidget {
-  const _SeccionPendiente({
-    required this.titulo,
-    required this.icono,
-    required this.descripcion,
-    this.accionesCuenta = const [],
-  });
-
-  final String titulo;
-  final IconData icono;
-  final String descripcion;
-  final List<Widget> accionesCuenta;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(titulo), actions: accionesCuenta),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icono,
-                size: 64,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                descripcion,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Esta sección todavía está en desarrollo.',
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
         ),
       ),
     );
