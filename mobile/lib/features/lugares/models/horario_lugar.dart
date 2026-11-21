@@ -1,10 +1,13 @@
 class HorarioLugar {
   const HorarioLugar({
+    this.id,
     required this.diaSemana,
     required this.horaApertura,
     required this.horaCierre,
     required this.cierraDiaSiguiente,
   });
+
+  final int? id;
 
   final int diaSemana;
   final String horaApertura;
@@ -41,6 +44,7 @@ class HorarioLugar {
     }
 
     return HorarioLugar(
+      id: (json['id'] as num?)?.toInt(),
       diaSemana: dia,
       horaApertura: _leerHora(json['hora_apertura'] as String),
       horaCierre: _leerHora(json['hora_cierre'] as String),

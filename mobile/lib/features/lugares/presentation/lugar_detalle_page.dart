@@ -9,8 +9,8 @@ import '../../categorias/data/categorias_repository.dart';
 import '../data/lugares_repository.dart';
 import '../models/horario_lugar.dart';
 import '../models/lugar.dart';
-import 'widgets/lugar_card.dart';
 import 'lugar_crear_page.dart';
+import 'horarios_gestion_page.dart';
 
 class LugarDetallePage extends StatefulWidget {
   const LugarDetallePage({
@@ -111,6 +111,31 @@ class _LugarDetallePageState extends State<LugarDetallePage> {
       if (mounted) {
         setState(() => _abriendoEdicion = false);
       }
+    }
+  }
+
+  Future<void> _gestionarHorarios(Lugar lugar) async {
+    final sesion = widget.sesionController;
+    if (sesion == null || !sesion.puedeAdministrar || sesion.ocupado) {
+      return;
+    }
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => HorariosGestionPage(
+          lugar: lugar,
+          repository: widget.repository,
+          sesionController: sesion,
+        ),
+      ),
+    );
+    if (!mounted) {
+      return;
+    }
+    // Los horarios modifican el estado calculado por Laravel: consultar de nuevo.
+    _cargar();
+    final cambios = widget.cambiosLugares;
+    if (cambios != null) {
+      cambios.value++;
     }
   }
 
@@ -251,92 +276,298 @@ class _LugarDetallePageState extends State<LugarDetallePage> {
   Widget _contenido(Lugar lugar) {
     final descripcion = lugar.descripcion?.trim();
     final telefono = lugar.telefono?.trim();
+    final tema = Theme.of(context);
+    final esAdmin = widget.sesionController?.puedeAdministrar == true;
+    final colorEstado = switch (lugar.estadoHorario) {
+      EstadoHorario.abierto => const Color(0xFF137F4A),
+      EstadoHorario.cerrado => const Color(0xFFB42318),
+      EstadoHorario.sinHorarios => const Color(0xFF475467),
+    };
     return ListView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        LugarCard(lugar: lugar),
-        Wrap(
-          spacing: 8,
-          children: [
-            if (lugar.direccionInformada)
-              TextButton.icon(
-                onPressed: () => _copiar('Dirección', lugar.direccion),
-                icon: const Icon(Icons.copy_outlined),
-                label: const Text('Copiar dirección'),
-              ),
-            if (lugar.tieneUbicacionValida)
-              TextButton.icon(
-                onPressed: () =>
-                    _copiar('Ubicación', '${lugar.latitud}, ${lugar.longitud}'),
-                icon: const Icon(Icons.copy_outlined),
-                label: const Text('Copiar ubicación'),
-              ),
-          ],
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0B1F3A), Color(0xFF1570EF)],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.storefront_outlined,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                    const Spacer(),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 7,
+                        ),
+                        child: Text(
+                          lugar.categoriaNombre,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  lugar.nombre,
+                  style: tema.textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.location_on_outlined,
+                      size: 18,
+                      color: Colors.white70,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        lugar.direccionVisible,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        if (widget.sesionController?.puedeAdministrar == true &&
-            widget.categoriasRepository != null) ...[
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _abriendoEdicion || widget.sesionController!.ocupado
-                ? null
-                : () => _editarLugar(lugar),
-            icon: const Icon(Icons.edit_outlined),
-            label: const Text('Editar lugar'),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: colorEstado.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
           ),
-        ],
-        if (widget.permiteVerEnMapa) ...[
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: lugar.tieneUbicacionValida
-                ? () => Navigator.of(context).pop(lugar)
-                : null,
-            icon: const Icon(Icons.map_outlined),
-            label: const Text('Ver en el mapa'),
-          ),
-          if (!lugar.tieneUbicacionValida)
-            const Text('Ubicación no disponible.'),
-        ],
-        if (descripcion != null && descripcion.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          Text('Qué ofrece', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Text(descripcion),
-        ],
-        if (telefono != null && telefono.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          Text('Teléfono', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Row(
+          child: Row(
             children: [
-              Expanded(child: SelectableText(telefono)),
-              IconButton(
-                tooltip: 'Copiar teléfono',
-                onPressed: () => _copiar('Información', telefono),
-                icon: const Icon(Icons.copy_outlined),
+              Icon(Icons.schedule, color: colorEstado),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  lugar.estadoHorario.etiqueta,
+                  style: TextStyle(
+                    color: colorEstado,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Text(
+                'Hora local de San Carlos',
+                style: TextStyle(fontSize: 11),
               ),
             ],
           ),
-        ],
-        const SizedBox(height: 20),
-        Text('Horarios', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 4),
-        const Text('Hora local de San Carlos, Chile.'),
-        const SizedBox(height: 12),
-        if (lugar.horarios.isEmpty)
-          const Text('Este lugar todavía no tiene horarios registrados.')
-        else
-          for (var dia = 1; dia <= 7; dia++)
-            _HorarioDia(
-              nombre: HorarioLugar.nombresDias[dia - 1],
-              tramos: lugar.horarios
-                  .where((horario) => horario.diaSemana == dia)
-                  .map((horario) => horario.etiqueta)
-                  .toList(),
+        ),
+        const SizedBox(height: 16),
+        if (esAdmin) ...[
+          _SeccionDetalle(
+            titulo: 'Administración',
+            icono: Icons.admin_panel_settings_outlined,
+            child: Column(
+              children: [
+                if (widget.categoriasRepository != null)
+                  ListTile(
+                    leading: const Icon(Icons.edit_outlined),
+                    title: const Text('Editar lugar'),
+                    onTap: _abriendoEdicion || widget.sesionController!.ocupado
+                        ? null
+                        : () => _editarLugar(lugar),
+                  ),
+                ListTile(
+                  leading: const Icon(Icons.schedule_outlined),
+                  title: const Text('Gestionar horarios'),
+                  subtitle: const Text('Agregar, editar o eliminar tramos'),
+                  onTap: () => _gestionarHorarios(lugar),
+                ),
+              ],
             ),
-        const SizedBox(height: 20),
+          ),
+          const SizedBox(height: 16),
+        ],
+        Row(
+          children: [
+            Expanded(
+              child: _AccionRapida(
+                icono: Icons.map_outlined,
+                titulo: widget.permiteVerEnMapa
+                    ? 'Ver en el mapa'
+                    : 'Copiar ubicación',
+                onTap: !lugar.tieneUbicacionValida
+                    ? null
+                    : widget.permiteVerEnMapa
+                    ? () => Navigator.of(context).pop(lugar)
+                    : () => _copiar(
+                        'Ubicación',
+                        '${lugar.latitud}, ${lugar.longitud}',
+                      ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _AccionRapida(
+                icono: Icons.phone_outlined,
+                titulo: 'Contacto',
+                onTap: telefono == null || telefono.isEmpty
+                    ? null
+                    : () => _copiar('Teléfono', telefono),
+              ),
+            ),
+          ],
+        ),
+        if (widget.permiteVerEnMapa && !lugar.tieneUbicacionValida)
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text('Ubicación no disponible.'),
+          ),
+        if (lugar.direccionInformada) ...[
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: () => _copiar('Dirección', lugar.direccion),
+            icon: const Icon(Icons.copy_outlined, size: 18),
+            label: const Text('Copiar dirección'),
+          ),
+        ],
+        if (descripcion != null && descripcion.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _SeccionDetalle(
+            titulo: 'Acerca de este lugar',
+            icono: Icons.info_outline,
+            child: Text(descripcion),
+          ),
+        ],
+        if (telefono != null && telefono.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _SeccionDetalle(
+            titulo: 'Información de contacto',
+            icono: Icons.call_outlined,
+            child: SelectableText(telefono),
+          ),
+        ],
+        const SizedBox(height: 14),
+        _SeccionDetalle(
+          titulo: 'Horarios de atención',
+          icono: Icons.calendar_month_outlined,
+          child: Column(
+            children: [
+              if (lugar.horarios.isEmpty)
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Este lugar todavía no informa horarios.'),
+                )
+              else
+                for (var dia = 1; dia <= 7; dia++)
+                  _HorarioDia(
+                    nombre: HorarioLugar.nombresDias[dia - 1],
+                    tramos: lugar.horarios
+                        .where((horario) => horario.diaSemana == dia)
+                        .map((horario) => horario.etiqueta)
+                        .toList(),
+                  ),
+            ],
+          ),
+        ),
       ],
     );
   }
+}
+
+class _AccionRapida extends StatelessWidget {
+  const _AccionRapida({
+    required this.icono,
+    required this.titulo,
+    required this.onTap,
+  });
+  final IconData icono;
+  final String titulo;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => FilledButton(
+    onPressed: onTap,
+    style: FilledButton.styleFrom(
+      padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icono),
+        const SizedBox(height: 5),
+        Text(titulo, textAlign: TextAlign.center),
+      ],
+    ),
+  );
+}
+
+class _SeccionDetalle extends StatelessWidget {
+  const _SeccionDetalle({
+    required this.titulo,
+    required this.icono,
+    required this.child,
+  });
+  final String titulo;
+  final IconData icono;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icono, size: 20, color: const Color(0xFF1570EF)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                titulo,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Material(color: Colors.transparent, child: child),
+      ],
+    ),
+  );
 }
 
 class _HorarioDia extends StatelessWidget {
@@ -348,16 +579,22 @@ class _HorarioDia extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(nombre, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Text(
-            tramos.isEmpty
-                ? 'Sin apertura registrada para este día'
-                : tramos.join('\n'),
+          SizedBox(
+            width: 90,
+            child: Text(
+              nombre,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              tramos.isEmpty ? 'Sin horario informado' : tramos.join('\n'),
+            ),
           ),
         ],
       ),

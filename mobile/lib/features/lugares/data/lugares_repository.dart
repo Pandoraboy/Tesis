@@ -1,6 +1,7 @@
 import '../../../core/network/api_client.dart';
 import '../models/lugar.dart';
 import '../models/nuevo_lugar.dart';
+import '../models/horario_lugar.dart';
 
 class PaginaLugares {
   const PaginaLugares({
@@ -36,6 +37,49 @@ class LugaresRepository {
   const LugaresRepository(this._apiClient);
 
   final ApiClient _apiClient;
+
+  Future<HorarioLugar> guardarHorario({
+    required int lugarId,
+    int? horarioId,
+    required int dia,
+    required String apertura,
+    required String cierre,
+    required bool siguienteDia,
+    required String token,
+  }) async {
+    final datos = <String, dynamic>{
+      'dia_semana': dia,
+      'hora_apertura': apertura,
+      'hora_cierre': cierre,
+      'cierra_dia_siguiente': siguienteDia,
+    };
+    final json = horarioId == null
+        ? await _apiClient.postJson(
+            'lugares/$lugarId/horarios',
+            body: datos,
+            token: token,
+          )
+        : await _apiClient.patchJson(
+            'lugares/$lugarId/horarios/$horarioId',
+            body: datos,
+            token: token,
+          );
+    try {
+      return HorarioLugar.fromJson(json['data'] as Map<String, dynamic>);
+    } on Object catch (_) {
+      throw const ApiException(
+        'El horario pudo guardarse. Actualiza el lugar antes de reenviarlo.',
+      );
+    }
+  }
+
+  Future<void> eliminarHorario({
+    required int lugarId,
+    required int horarioId,
+    required String token,
+  }) => _apiClient
+      .deleteJson('lugares/$lugarId/horarios/$horarioId', token: token)
+      .then((_) {});
 
   Future<Lugar> actualizar({
     required int id,

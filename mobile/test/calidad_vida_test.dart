@@ -413,7 +413,11 @@ void main() {
     await tester.ensureVisible(find.text('Local original'));
     await tester.tap(find.text('Local original'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Copiar dirección'));
+    await tester.scrollUntilVisible(
+      find.text('Copiar dirección'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.tap(find.text('Copiar dirección'));
     await tester.pumpAndSettle();
     expect(copiado, 'Prat 123');

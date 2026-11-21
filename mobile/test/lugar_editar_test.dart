@@ -173,6 +173,7 @@ Future<void> _detalle(
 }
 
 Future<void> _editar(WidgetTester tester) async {
+  await tester.ensureVisible(find.text('Editar lugar'));
   await tester.tap(find.text('Editar lugar'));
   await tester.pumpAndSettle();
 }
@@ -247,6 +248,11 @@ void main() {
     await tester.tap(find.text('Descartar y salir'));
     await tester.pumpAndSettle();
     expect(e.patches, isEmpty);
+    await tester.scrollUntilVisible(
+      find.text('Local original'),
+      -200,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('Local original'), findsOneWidget);
   });
 
