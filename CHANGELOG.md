@@ -1,5 +1,12 @@
 # Calidad de vida ejecutada y corregida · 2026-11-04
 
+## [Sin publicar] · Foros: conservar lectura ante fallo de actualización — 2026-11-21
+
+- Flutter mantiene los mensajes visibles si falla el GET de actualización; informa el error y permite reintentar.
+- Un caso widget cubre fallo temporal y recuperación en el siguiente intento.
+- Usuario informó 124 pruebas Flutter aprobadas antes de este ajuste; la prueba nueva y el recorrido en emulador siguen pendientes de ejecutar.
+- Sin cambios de API, backend, PostgreSQL, dependencias ni credenciales.
+
 ## [Sin publicar] · Moderación básica y espera entre mensajes — 2026-11-18
 
 - API: mínimo cinco segundos entre publicaciones del mismo usuario en todos los foros, con bloqueo transaccional y respuesta 429 con segundos restantes.

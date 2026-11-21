@@ -157,16 +157,25 @@ class _ConversacionPageState extends State<_ConversacionPage> {
   }
 
   Future<void> _actualizar() async {
-    setState(() {
-      _paginaAdicional = null;
-      _mensajes.clear();
-      _carga = widget.repository.mensajes(widget.foro.id);
-      _error = null;
-    });
     try {
-      await _carga;
-    } catch (_) {
-      /* FutureBuilder muestra el error. */
+      final actualizada = await widget.repository.mensajes(widget.foro.id);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _carga = Future.value(actualizada);
+        _paginaAdicional = null;
+        _hayMasAdicional = false;
+        _mensajes.clear();
+        _error = null;
+      });
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _error =
+              'No se pudo actualizar el foro. Se conservan los mensajes anteriores. $error',
+        );
+      }
     }
   }
 

@@ -17,6 +17,65 @@ http.Response jsonRespuesta(Map<String, dynamic> json, [int status = 200]) =>
     );
 
 void main() {
+  testWidgets(
+    'error al refrescar conserva mensajes visibles y permite reintento',
+    (tester) async {
+      var consultas = 0;
+      final cliente = MockClient((request) async {
+        if (request.url.path.endsWith('/foros')) {
+          return jsonRespuesta({
+            'data': [
+              {'id': 1, 'nombre': 'Plaza de Armas', 'descripcion': null},
+            ],
+          });
+        }
+        consultas++;
+        if (consultas == 2) {
+          return jsonRespuesta({'message': 'Error interno'}, 500);
+        }
+        return jsonRespuesta({
+          'data': [
+            {
+              'id': 8,
+              'contenido': consultas == 1
+                  ? 'Mensaje anterior'
+                  : 'Mensaje nuevo',
+              'autor': {'id': 7, 'username': 'vecino'},
+              'created_at': '2026-11-18T12:00:00Z',
+            },
+          ],
+          'meta': {'current_page': 1, 'last_page': 1},
+        });
+      });
+      addTearDown(cliente.close);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ForosPage(
+            repository: ForosRepository(ApiClient(client: cliente)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Plaza de Armas'));
+      await tester.pumpAndSettle();
+      expect(find.text('Mensaje anterior'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Actualizar mensajes'));
+      await tester.pumpAndSettle();
+      expect(find.text('Mensaje anterior'), findsOneWidget);
+      expect(
+        find.textContaining('Se conservan los mensajes anteriores'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byTooltip('Actualizar mensajes'));
+      await tester.pumpAndSettle();
+      expect(find.text('Mensaje nuevo'), findsOneWidget);
+      expect(find.text('Mensaje anterior'), findsNothing);
+      expect(consultas, 3);
+    },
+  );
+
   testWidgets('un visitante lee los foros y mensajes sin publicar', (
     tester,
   ) async {

@@ -1,3 +1,9 @@
+## Continuidad de foros · 2026-11-21
+
+- [x] `main` revisado (`2cda7df`): los cuatro foros ya disponen de lectura, publicación, edición y retiro en Flutter; existen también denuncias y moderación básica.
+- [x] Preparada corrección de refresco: si la consulta falla, conservar los mensajes visibles y permitir otro intento.
+- [ ] Ejecutar `flutter analyze` y `flutter test test/foros_test.dart` con el caso de regresión nuevo, y recorrer los cuatro foros en Android con backend real.
+
 ## Calidad de vida preparada · 2026-11-04
 
 - [x] Usuario reportó 97 pruebas Flutter aprobadas con estabilización anterior.
