@@ -106,7 +106,7 @@ void main() {
     final peticiones = <String>[];
     final cliente = MockClient((request) async {
       expect(request.headers['authorization'], 'Bearer admin-token');
-      expect(request.url.path, endsWith('/admin/usuarios/7/chat-timeout'));
+      expect(request.url.path, endsWith('/moderacion/usuarios/7/chat-timeout'));
       expect(jsonDecode(request.body)['motivo'], 'Publicaciones repetidas');
       peticiones.add(request.method);
       if (request.method == 'POST') {

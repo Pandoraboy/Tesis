@@ -12,8 +12,9 @@ use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\Admin\DestacadoController as AdminDestacadoController;
 use App\Http\Controllers\Api\Admin\ForoController as AdminForoController;
 use App\Http\Controllers\Api\Admin\UsuarioController;
-use App\Http\Controllers\Api\Admin\ChatModeracionController;
+use App\Http\Controllers\Api\Moderacion\ChatModeracionController;
 use App\Http\Middleware\EnsureActiveAdmin;
+use App\Http\Middleware\EnsureActiveModerator;
 use App\Http\Middleware\EnsureActiveUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -108,6 +109,14 @@ Route::prefix('v1')->group(function () {
         );
     });
 
+    // Moderación: comparten permisos moderadores y administradores activos.
+    Route::middleware(['auth:sanctum', EnsureActiveModerator::class])->group(function () {
+        Route::post('moderacion/usuarios/{user}/chat-timeout', [ChatModeracionController::class, 'aplicar'])
+            ->middleware('throttle:10,1');
+        Route::delete('moderacion/usuarios/{user}/chat-timeout', [ChatModeracionController::class, 'levantar'])
+            ->middleware('throttle:10,1');
+    });
+
     // Administración: requiere una cuenta administradora activa.
     Route::middleware([
         'auth:sanctum',
@@ -137,6 +146,7 @@ Route::prefix('v1')->group(function () {
             'admin/usuarios/{usuario}',
             [UsuarioController::class, 'update']
         );
+        Route::patch('admin/usuarios/{usuario}/rol', [UsuarioController::class, 'cambiarRol']);
         // Revisión administrativa de destacados.
         Route::get(
             'admin/destacados',

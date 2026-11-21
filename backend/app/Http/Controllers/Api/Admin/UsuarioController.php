@@ -22,7 +22,7 @@ class UsuarioController extends Controller
         $filtros = $request->validate([
             'buscar' => ['sometimes', 'nullable', 'string', 'max:50'],
             'active' => ['sometimes', 'boolean'],
-            'role' => ['sometimes', Rule::in(['user', 'admin'])],
+            'role' => ['sometimes', Rule::in(['user', 'moderador', 'admin'])],
             'page' => ['sometimes', 'integer', 'min:1'],
             'per_page' => ['sometimes', 'integer', 'between:1,100'],
         ]);
@@ -84,6 +84,21 @@ class UsuarioController extends Controller
         return response()->json([
             'data' => $this->datosUsuario($usuario),
         ]);
+    }
+
+    public function cambiarRol(Request $request, User $usuario): JsonResponse
+    {
+        $datos = $request->validate([
+            'role' => ['required', Rule::in(['user', 'moderador'])],
+        ]);
+
+        $usuario = $this->usuarios->asignarRolModeracion(
+            $usuario,
+            $request->user(),
+            $datos['role']
+        );
+
+        return response()->json(['data' => $this->datosUsuario($usuario)]);
     }
 
     private function datosUsuario(User $user): array

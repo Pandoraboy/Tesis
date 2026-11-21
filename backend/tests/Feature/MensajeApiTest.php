@@ -290,6 +290,54 @@ class MensajeApiTest extends TestCase
         $this->travelBack();
     }
 
+    public function test_moderador_retira_mensaje_ajeno_y_no_puede_editarlo(): void
+    {
+        $foro = $this->foro();
+        $mensaje = $this->mensaje($foro, $this->usuario());
+        Sanctum::actingAs($this->usuario('moderador'));
+
+        $this->patchJson("/api/v1/mensajes/{$mensaje->id}", [
+            'contenido' => 'Edición ajena',
+        ])->assertForbidden();
+
+        $this->travel(4)->minutes();
+        $this->deleteJson("/api/v1/mensajes/{$mensaje->id}")->assertNoContent();
+        $this->travelBack();
+        $this->assertFalse($mensaje->fresh()->activo);
+    }
+
+    public function test_moderador_activo_aplica_timeout_pero_no_puede_sancionar_admin(): void
+    {
+        $usuario = $this->usuario();
+        $admin = $this->usuario('admin');
+        Sanctum::actingAs($this->usuario('moderador'));
+
+        $this->postJson("/api/v1/moderacion/usuarios/{$usuario->id}/chat-timeout", [
+            'minutos' => 10, 'motivo' => 'Contenido inapropiado',
+        ])->assertOk();
+        $this->assertNotNull($usuario->fresh()->chat_timeout_until);
+
+        $this->postJson("/api/v1/moderacion/usuarios/{$admin->id}/chat-timeout", [
+            'minutos' => 10, 'motivo' => 'No corresponde',
+        ])->assertForbidden();
+
+        $this->deleteJson("/api/v1/moderacion/usuarios/{$usuario->id}/chat-timeout", [
+            'motivo' => 'Revisión realizada',
+        ])->assertOk();
+        $this->assertNull($usuario->fresh()->chat_timeout_until);
+    }
+
+    public function test_usuario_e_inactivo_no_pueden_utilizar_moderacion(): void
+    {
+        $objetivo = $this->usuario();
+        foreach ([$this->usuario(), $this->usuario('moderador', false)] as $actor) {
+            Sanctum::actingAs($actor);
+            $this->postJson("/api/v1/moderacion/usuarios/{$objetivo->id}/chat-timeout", [
+                'minutos' => 10, 'motivo' => 'Sin permiso',
+            ])->assertForbidden();
+        }
+    }
+
     public function test_debe_esperar_cinco_segundos_entre_foros(): void
     {
         $foroUno = $this->foro();

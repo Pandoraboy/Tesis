@@ -66,7 +66,7 @@ class ForosRepository {
 
   Future<void> aplicarTimeout(int usuarioId, int minutos, String motivo, String token) async {
     await _api.postJson(
-      'admin/usuarios/$usuarioId/chat-timeout',
+      'moderacion/usuarios/$usuarioId/chat-timeout',
       body: {'minutos': minutos, 'motivo': motivo},
       token: token,
     );
@@ -74,7 +74,7 @@ class ForosRepository {
 
   Future<void> levantarTimeout(int usuarioId, String motivo, String token) async {
     await _api.deleteJson(
-      'admin/usuarios/$usuarioId/chat-timeout',
+      'moderacion/usuarios/$usuarioId/chat-timeout',
       body: {'motivo': motivo},
       token: token,
     );

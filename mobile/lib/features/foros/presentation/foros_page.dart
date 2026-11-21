@@ -12,12 +12,14 @@ class ForosPage extends StatefulWidget {
     required this.repository,
     this.sesionController,
     this.accionesCuenta = const [],
+    this.modoModeracion = false,
     super.key,
   });
 
   final ForosRepository repository;
   final SesionController? sesionController;
   final List<Widget> accionesCuenta;
+  final bool modoModeracion;
 
   @override
   State<ForosPage> createState() => _ForosPageState();
@@ -31,7 +33,7 @@ class _ForosPageState extends State<ForosPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Foros comunitarios'),
+      title: Text(widget.modoModeracion ? 'Moderación' : 'Foros comunitarios'),
       actions: [
         IconButton(
           onPressed: _recargar,
@@ -85,6 +87,7 @@ class _ForosPageState extends State<ForosPage> {
                         foro: foro,
                         repository: widget.repository,
                         sesionController: widget.sesionController,
+                        modoModeracion: widget.modoModeracion,
                       ),
                     ),
                   ),
@@ -103,10 +106,12 @@ class _ConversacionPage extends StatefulWidget {
     required this.foro,
     required this.repository,
     this.sesionController,
+    this.modoModeracion = false,
   });
   final Foro foro;
   final ForosRepository repository;
   final SesionController? sesionController;
+  final bool modoModeracion;
 
   @override
   State<_ConversacionPage> createState() => _ConversacionPageState();
@@ -599,7 +604,7 @@ class _ConversacionPageState extends State<_ConversacionPage> {
                       final esAutor = cuenta?.id == mensaje.autorId;
                       final puedeRetirar =
                           cuenta != null &&
-                          (cuenta.esAdmin ||
+                          (cuenta.puedeModerar ||
                               (esAutor && mensaje.puedeRetirarse));
                       return Card(
                         child: Padding(
@@ -661,7 +666,7 @@ class _ConversacionPageState extends State<_ConversacionPage> {
                                         value: 'copiar',
                                         child: Text('Copiar texto'),
                                       ),
-                                      if (esAutor)
+                                      if (esAutor && !widget.modoModeracion)
                                         const PopupMenuItem(
                                           value: 'editar',
                                           child: Text('Editar'),
@@ -671,7 +676,7 @@ class _ConversacionPageState extends State<_ConversacionPage> {
                                           value: 'retirar',
                                           child: Text('Retirar'),
                                         ),
-                                      if (cuenta?.esAdmin == true &&
+                                      if (cuenta?.puedeModerar == true &&
                                           !esAutor) ...const [
                                         PopupMenuItem(
                                           value: 'suspender',
@@ -702,7 +707,7 @@ class _ConversacionPageState extends State<_ConversacionPage> {
               },
             ),
           ),
-          if (puedePublicar)
+          if (puedePublicar && !widget.modoModeracion)
             SafeArea(
               top: false,
               child: Padding(
@@ -743,7 +748,7 @@ class _ConversacionPageState extends State<_ConversacionPage> {
                 ),
               ),
             )
-          else
+          else if (!widget.modoModeracion)
             const Padding(
               padding: EdgeInsets.all(16),
               child: Text(

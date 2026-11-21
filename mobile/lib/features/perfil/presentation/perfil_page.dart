@@ -117,7 +117,11 @@ class _PerfilPageState extends State<PerfilPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      cuenta.esAdmin ? 'Administrador' : 'Usuario',
+                      cuenta.esAdmin
+                          ? 'Administrador'
+                          : cuenta.puedeModerar
+                              ? 'Moderador'
+                              : 'Usuario',
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),

@@ -266,4 +266,37 @@ class AdminUsuarioApiTest extends TestCase
                 'per_page',
             ]);
     }
+
+    public function test_admin_asigna_y_revoca_rol_moderador_sin_promover_admin(): void
+    {
+        $cuenta = $this->usuario();
+        $cuenta->createToken('antes-de-cambio');
+        Sanctum::actingAs($this->usuario('admin'));
+
+        $this->patchJson("/api/v1/admin/usuarios/{$cuenta->id}/rol", [
+            'role' => 'moderador',
+        ])->assertOk()->assertJsonPath('data.role', 'moderador');
+        $this->assertSame(0, $cuenta->tokens()->count());
+
+        $this->patchJson("/api/v1/admin/usuarios/{$cuenta->id}/rol", [
+            'role' => 'admin',
+        ])->assertUnprocessable();
+
+        $this->patchJson("/api/v1/admin/usuarios/{$cuenta->id}/rol", [
+            'role' => 'user',
+        ])->assertOk()->assertJsonPath('data.role', 'user');
+    }
+
+    public function test_moderador_no_puede_administrar_usuarios(): void
+    {
+        $objetivo = $this->usuario();
+        Sanctum::actingAs($this->usuario('moderador'));
+
+        $this->getJson('/api/v1/admin/usuarios')->assertForbidden();
+        $this->patchJson("/api/v1/admin/usuarios/{$objetivo->id}/rol", [
+            'role' => 'moderador',
+        ])->assertForbidden();
+        $this->patchJson($this->url($objetivo), ['active' => false])
+            ->assertForbidden();
+    }
 }

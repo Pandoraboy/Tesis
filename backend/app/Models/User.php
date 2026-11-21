@@ -20,6 +20,11 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public function puedeModerar(): bool
+    {
+        return in_array($this->role, ['moderador', 'admin'], true);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

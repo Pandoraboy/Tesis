@@ -15,6 +15,7 @@ class Cuenta {
   final bool? googleLinked;
 
   bool get esAdmin => role == 'admin';
+  bool get puedeModerar => role == 'admin' || role == 'moderador';
 
   factory Cuenta.fromJson(Map<String, dynamic> json) {
     return Cuenta(

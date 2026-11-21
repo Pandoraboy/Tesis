@@ -11,6 +11,7 @@ import '../../features/lugares/presentation/lugares_page.dart';
 import '../../features/mapa/presentation/mapa_page.dart';
 import '../../features/foros/data/foros_repository.dart';
 import '../../features/foros/presentation/foros_page.dart';
+import '../../features/moderacion/presentation/moderacion_page.dart';
 
 class PrincipalPage extends StatefulWidget {
   const PrincipalPage({
@@ -146,7 +147,24 @@ class _PrincipalPageState extends State<PrincipalPage> {
                   widget.sesionController?.cuenta?.username ??
                       'Ahora Local · Visitante',
                 ),
-                actions: widget.accionesCuenta,
+                actions: [
+                  if (widget.forosRepository != null &&
+                      widget.sesionController?.cuenta?.puedeModerar == true &&
+                      widget.sesionController?.cuenta?.active == true)
+                    IconButton(
+                      tooltip: 'Moderación',
+                      icon: const Icon(Icons.shield_outlined),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => ModeracionPage(
+                            repository: widget.forosRepository!,
+                            sesionController: widget.sesionController!,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ...widget.accionesCuenta,
+                ],
               )
             : null,
         body: IndexedStack(

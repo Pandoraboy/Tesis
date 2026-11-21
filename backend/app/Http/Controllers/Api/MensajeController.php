@@ -107,11 +107,11 @@ class MensajeController extends Controller
     ): JsonResponse {
         $user = $request->user();
 
-        abort_unless($mensaje->user_id === $user->id || $user->role === 'admin', 403);
+        abort_unless($mensaje->user_id === $user->id || $user->puedeModerar(), 403);
 
         // Administración puede moderar en cualquier momento. El autor dispone
         // de tres minutos exactos desde la publicación original.
-        if ($user->role !== 'admin' && $mensaje->activo &&
+        if (! $user->puedeModerar() && $mensaje->activo &&
             $mensaje->created_at->addMinutes(3)->lessThanOrEqualTo(now())) {
             return response()->json([
                 'message' => 'El plazo de 3 minutos para retirar el mensaje terminó.',
