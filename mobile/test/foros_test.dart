@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:ahora_local/core/network/api_client.dart';
+import 'package:ahora_local/core/session/sesion_controller.dart';
+import 'package:ahora_local/core/session/sesion_storage.dart';
+import 'package:ahora_local/features/auth/data/auth_repository.dart';
 import 'package:ahora_local/features/foros/data/foros_repository.dart';
 import 'package:ahora_local/features/foros/presentation/foros_page.dart';
 import 'package:ahora_local/features/foros/models/foro.dart';
@@ -16,7 +19,82 @@ http.Response jsonRespuesta(Map<String, dynamic> json, [int status = 200]) =>
       headers: {'content-type': 'application/json'},
     );
 
+class _SesionForoPrueba extends SesionStorage {
+  @override
+  Future<CredencialGuardada?> leer() async => CredencialGuardada(
+    token: 'prueba',
+    expiresAt: DateTime.now().toUtc().add(const Duration(days: 1)),
+  );
+}
+
 void main() {
+  testWidgets('Atrás pide descartar borrador y permite continuar escribiendo', (
+    tester,
+  ) async {
+    final cliente = MockClient((request) async {
+      if (request.url.path.endsWith('/auth/me')) {
+        return jsonRespuesta({
+          'data': {
+            'id': 7,
+            'username': 'vecino',
+            'role': 'user',
+            'active': true,
+          },
+        });
+      }
+      if (request.url.path.endsWith('/foros')) {
+        return jsonRespuesta({
+          'data': [
+            {'id': 1, 'nombre': 'Plaza de Armas', 'descripcion': null},
+          ],
+        });
+      }
+      return jsonRespuesta({
+        'data': [],
+        'meta': {'current_page': 1, 'last_page': 1},
+      });
+    });
+    addTearDown(cliente.close);
+    final api = ApiClient(client: cliente);
+    final sesion = SesionController(
+      repository: AuthRepository(api),
+      storage: _SesionForoPrueba(),
+    );
+    addTearDown(sesion.dispose);
+    await sesion.recuperar();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ForosPage(
+          repository: ForosRepository(api),
+          sesionController: sesion,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Plaza de Armas'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'Mensaje sin publicar');
+    await tester.pumpAndSettle();
+    expect(find.text('Mensaje sin publicar'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('¿Descartar los cambios?'), findsOneWidget);
+    await tester.tap(find.text('Seguir editando'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mensaje sin publicar'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Descartar y salir'));
+    await tester.pumpAndSettle();
+    expect(find.text('Foros comunitarios'), findsOneWidget);
+    await tester.tap(find.text('Plaza de Armas'));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('¿Descartar los cambios?'), findsNothing);
+    expect(find.text('Foros comunitarios'), findsOneWidget);
+  });
+
   testWidgets(
     'error al refrescar conserva mensajes visibles y permite reintento',
     (tester) async {

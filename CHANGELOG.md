@@ -1,5 +1,12 @@
 # Calidad de vida ejecutada y corregida · 2026-11-04
 
+## [Sin publicar] · Foros: proteger borrador al salir — 2026-11-21
+
+- Flutter reutiliza la confirmación de descarte existente al pulsar Atrás con un mensaje sin publicar.
+- Sin borrador se puede salir directamente; el borrador permanece al elegir continuar escribiendo.
+- Prueba widget añadida, pendiente de ejecutar junto con la suite Flutter y recorrido Android.
+- Sin cambios de API, base de datos ni dependencias.
+
 ## [Sin publicar] · Foros: conservar lectura ante fallo de actualización — 2026-11-21
 
 - Flutter mantiene los mensajes visibles si falla el GET de actualización; informa el error y permite reintentar.

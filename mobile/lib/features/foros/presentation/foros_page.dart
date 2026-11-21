@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/session/sesion_controller.dart';
+import '../../../core/widgets/salida_con_cambios.dart';
 import '../data/foros_repository.dart';
 import '../models/foro.dart';
 
@@ -674,237 +675,242 @@ class _ConversacionPageState extends State<_ConversacionPage> {
     final puedePublicar =
         cuenta?.active == true &&
         widget.sesionController?.estado == EstadoSesion.autenticada;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.foro.nombre),
-        actions: [
-          IconButton(
-            onPressed: _actualizar,
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Actualizar mensajes',
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          if (_error != null)
-            MaterialBanner(
-              content: Text(_error!),
-              actions: [
-                TextButton(
-                  onPressed: () => setState(() => _error = null),
-                  child: const Text('Cerrar'),
-                ),
-              ],
+    return SalidaConCambios(
+      cambios: _texto,
+      ocupado: _ocupado,
+      tieneCambios: () => _texto.text.trim().isNotEmpty,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.foro.nombre),
+          actions: [
+            IconButton(
+              onPressed: _actualizar,
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Actualizar mensajes',
             ),
-          Expanded(
-            child: FutureBuilder<PaginaMensajes>(
-              future: _carga,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData &&
-                    snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return _EstadoForo(
-                    texto: '${snapshot.error}',
-                    reintentar: _actualizar,
-                  );
-                }
-                final paginaInicial = snapshot.data!;
-                final mensajes = [...paginaInicial.mensajes, ..._mensajes];
-                final hayMas = _paginaAdicional == null
-                    ? paginaInicial.hayMas
-                    : _hayMasAdicional;
-                return RefreshIndicator(
-                  onRefresh: _actualizar,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: mensajes.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == mensajes.length) {
-                        return Center(
-                          child: hayMas
-                              ? TextButton(
-                                  onPressed: _ocupado ? null : _mas,
-                                  child: const Text('Cargar anteriores'),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Text(
-                                    mensajes.isEmpty
-                                        ? 'Todavía no hay mensajes.'
-                                        : 'Estás al día.',
-                                  ),
-                                ),
-                        );
-                      }
-                      final mensaje = mensajes[index];
-                      final esAutor = cuenta?.id == mensaje.autorId;
-                      final puedeRetirar =
-                          cuenta != null &&
-                          (cuenta.puedeModerar ||
-                              (esAutor && mensaje.puedeRetirarse));
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
+          ],
+        ),
+        body: Column(
+          children: [
+            if (_error != null)
+              MaterialBanner(
+                content: Text(_error!),
+                actions: [
+                  TextButton(
+                    onPressed: () => setState(() => _error = null),
+                    child: const Text('Cerrar'),
+                  ),
+                ],
+              ),
+            Expanded(
+              child: FutureBuilder<PaginaMensajes>(
+                future: _carga,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData &&
+                      snapshot.connectionState != ConnectionState.done) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return _EstadoForo(
+                      texto: '${snapshot.error}',
+                      reintentar: _actualizar,
+                    );
+                  }
+                  final paginaInicial = snapshot.data!;
+                  final mensajes = [...paginaInicial.mensajes, ..._mensajes];
+                  final hayMas = _paginaAdicional == null
+                      ? paginaInicial.hayMas
+                      : _hayMasAdicional;
+                  return RefreshIndicator(
+                    onRefresh: _actualizar,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: mensajes.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == mensajes.length) {
+                          return Center(
+                            child: hayMas
+                                ? TextButton(
+                                    onPressed: _ocupado ? null : _mas,
+                                    child: const Text('Cargar anteriores'),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.all(20),
                                     child: Text(
-                                      mensaje.autor,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      mensajes.isEmpty
+                                          ? 'Todavía no hay mensajes.'
+                                          : 'Estás al día.',
                                     ),
                                   ),
-                                  if (mensaje.destacado)
-                                    const Icon(Icons.push_pin, size: 18),
-                                  PopupMenuButton<String>(
-                                    tooltip: 'Opciones del mensaje',
-                                    enabled: !_ocupado,
-                                    onSelected: (opcion) {
-                                      if (opcion == 'editar') {
-                                        _editar(mensaje);
-                                      }
-                                      if (opcion == 'retirar') {
-                                        _retirar(mensaje);
-                                      }
-                                      if (opcion == 'denunciar') {
-                                        _denunciar(mensaje);
-                                      }
-                                      if (opcion == 'suspender') {
-                                        _moderarUsuario(
-                                          mensaje,
-                                          levantar: false,
-                                        );
-                                      }
-                                      if (opcion == 'levantar') {
-                                        _moderarUsuario(
-                                          mensaje,
-                                          levantar: true,
-                                        );
-                                      }
-                                      if (opcion == 'copiar') {
-                                        Clipboard.setData(
-                                          ClipboardData(
-                                            text: mensaje.contenido,
-                                          ),
-                                        );
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Mensaje copiado'),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    itemBuilder: (_) => [
-                                      const PopupMenuItem(
-                                        value: 'copiar',
-                                        child: Text('Copiar texto'),
+                          );
+                        }
+                        final mensaje = mensajes[index];
+                        final esAutor = cuenta?.id == mensaje.autorId;
+                        final puedeRetirar =
+                            cuenta != null &&
+                            (cuenta.puedeModerar ||
+                                (esAutor && mensaje.puedeRetirarse));
+                        return Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        mensaje.autor,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                      if (esAutor && !widget.modoModeracion)
+                                    ),
+                                    if (mensaje.destacado)
+                                      const Icon(Icons.push_pin, size: 18),
+                                    PopupMenuButton<String>(
+                                      tooltip: 'Opciones del mensaje',
+                                      enabled: !_ocupado,
+                                      onSelected: (opcion) {
+                                        if (opcion == 'editar') {
+                                          _editar(mensaje);
+                                        }
+                                        if (opcion == 'retirar') {
+                                          _retirar(mensaje);
+                                        }
+                                        if (opcion == 'denunciar') {
+                                          _denunciar(mensaje);
+                                        }
+                                        if (opcion == 'suspender') {
+                                          _moderarUsuario(
+                                            mensaje,
+                                            levantar: false,
+                                          );
+                                        }
+                                        if (opcion == 'levantar') {
+                                          _moderarUsuario(
+                                            mensaje,
+                                            levantar: true,
+                                          );
+                                        }
+                                        if (opcion == 'copiar') {
+                                          Clipboard.setData(
+                                            ClipboardData(
+                                              text: mensaje.contenido,
+                                            ),
+                                          );
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Mensaje copiado'),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      itemBuilder: (_) => [
                                         const PopupMenuItem(
-                                          value: 'editar',
-                                          child: Text('Editar'),
+                                          value: 'copiar',
+                                          child: Text('Copiar texto'),
                                         ),
-                                      if (puedeRetirar)
-                                        const PopupMenuItem(
-                                          value: 'retirar',
-                                          child: Text('Retirar'),
-                                        ),
-                                      if (cuenta?.active == true &&
-                                          !esAutor &&
-                                          !widget.modoModeracion)
-                                        const PopupMenuItem(
-                                          value: 'denunciar',
-                                          child: Text('Denunciar'),
-                                        ),
-                                      if (cuenta?.puedeModerar == true &&
-                                          !esAutor) ...const [
-                                        PopupMenuItem(
-                                          value: 'suspender',
-                                          child: Text('Suspender del chat'),
-                                        ),
-                                        PopupMenuItem(
-                                          value: 'levantar',
-                                          child: Text('Levantar suspensión'),
-                                        ),
+                                        if (esAutor && !widget.modoModeracion)
+                                          const PopupMenuItem(
+                                            value: 'editar',
+                                            child: Text('Editar'),
+                                          ),
+                                        if (puedeRetirar)
+                                          const PopupMenuItem(
+                                            value: 'retirar',
+                                            child: Text('Retirar'),
+                                          ),
+                                        if (cuenta?.active == true &&
+                                            !esAutor &&
+                                            !widget.modoModeracion)
+                                          const PopupMenuItem(
+                                            value: 'denunciar',
+                                            child: Text('Denunciar'),
+                                          ),
+                                        if (cuenta?.puedeModerar == true &&
+                                            !esAutor) ...const [
+                                          PopupMenuItem(
+                                            value: 'suspender',
+                                            child: Text('Suspender del chat'),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'levantar',
+                                            child: Text('Levantar suspensión'),
+                                          ),
+                                        ],
                                       ],
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Text(mensaje.contenido),
-                              const SizedBox(height: 8),
-                              Text(
-                                '${mensaje.fecha.toLocal()}${mensaje.editado ? ' · editado' : ''}',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
+                                    ),
+                                  ],
+                                ),
+                                Text(mensaje.contenido),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${mensaje.fecha.toLocal()}${mensaje.editado ? ' · editado' : ''}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            if (puedePublicar && !widget.modoModeracion)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _texto,
+                          maxLength: 2000,
+                          minLines: 1,
+                          maxLines: 4,
+                          enabled: !_ocupado,
+                          decoration: const InputDecoration(
+                            hintText: 'Escribe un mensaje',
+                            border: OutlineInputBorder(),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-          if (puedePublicar && !widget.modoModeracion)
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _texto,
-                        maxLength: 2000,
-                        minLines: 1,
-                        maxLines: 4,
-                        enabled: !_ocupado,
-                        decoration: const InputDecoration(
-                          hintText: 'Escribe un mensaje',
-                          border: OutlineInputBorder(),
+                      ),
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _texto,
+                        builder: (context, valor, _) => IconButton(
+                          onPressed:
+                              _ocupado ||
+                                  valor.text.trim().isEmpty ||
+                                  _esperaRestante > 0
+                              ? null
+                              : _publicar,
+                          tooltip: _esperaRestante > 0
+                              ? 'Espera $_esperaRestante segundos'
+                              : 'Publicar',
+                          icon: _esperaRestante > 0
+                              ? Text('${_esperaRestante}s')
+                              : const Icon(Icons.send),
                         ),
                       ),
-                    ),
-                    ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _texto,
-                      builder: (context, valor, _) => IconButton(
-                        onPressed:
-                            _ocupado ||
-                                valor.text.trim().isEmpty ||
-                                _esperaRestante > 0
-                            ? null
-                            : _publicar,
-                        tooltip: _esperaRestante > 0
-                            ? 'Espera $_esperaRestante segundos'
-                            : 'Publicar',
-                        icon: _esperaRestante > 0
-                            ? Text('${_esperaRestante}s')
-                            : const Icon(Icons.send),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+              )
+            else if (!widget.modoModeracion)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'Puedes leer el foro como visitante. Inicia sesión para participar.',
                 ),
               ),
-            )
-          else if (!widget.modoModeracion)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Puedes leer el foro como visitante. Inicia sesión para participar.',
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
