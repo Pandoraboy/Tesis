@@ -12,26 +12,48 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 Map<String, dynamic> _lugar(int id) => {
-  'id': id, 'nombre': 'Lugar $id', 'categoria': {'id': 1, 'nombre': 'Comercio'},
-  'direccion': 'Dirección de prueba', 'latitud': id == 2 ? -36.420 : -36.424,
-  'longitud': -71.958, 'estado_horario': 'sin_horarios', 'horarios': [],
+  'id': id,
+  'nombre': 'Lugar $id',
+  'categoria': {'id': 1, 'nombre': 'Comercio'},
+  'direccion': 'Dirección de prueba',
+  'latitud': id == 2 ? -36.420 : -36.424,
+  'longitud': -71.958,
+  'estado_horario': 'sin_horarios',
+  'horarios': [],
 };
 
-http.Response _pagina(List<int> ids, {int actual = 1, int ultima = 1, int? total}) => http.Response(
-  jsonEncode({'data': ids.map(_lugar).toList(),
-    'meta': {'current_page': actual, 'last_page': ultima, 'total': total ?? ids.length}}),
-  200, headers: {'content-type': 'application/json; charset=utf-8'},
+http.Response _pagina(
+  List<int> ids, {
+  int actual = 1,
+  int ultima = 1,
+  int? total,
+}) => http.Response(
+  jsonEncode({
+    'data': ids.map(_lugar).toList(),
+    'meta': {
+      'current_page': actual,
+      'last_page': ultima,
+      'total': total ?? ids.length,
+    },
+  }),
+  200,
+  headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
 class _Teselas extends TileProvider {
-  final _imagen = MemoryImage(base64Decode(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=',
-  ));
+  final _imagen = MemoryImage(
+    base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=',
+    ),
+  );
   @override
-  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) => _imagen;
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
+      _imagen;
 }
 
-LugaresRepository _repositorio(Future<http.Response> Function(http.Request) responder) {
+LugaresRepository _repositorio(
+  Future<http.Response> Function(http.Request) responder,
+) {
   final client = MockClient((request) {
     expect(request.headers.containsKey('Authorization'), isFalse);
     return responder(request);
@@ -41,7 +63,11 @@ LugaresRepository _repositorio(Future<http.Response> Function(http.Request) resp
 }
 
 Future<void> _montar(WidgetTester tester, LugaresRepository repository) async {
-  await tester.pumpWidget(MaterialApp(home: MapaPage(repository: repository, tileProvider: _Teselas())));
+  await tester.pumpWidget(
+    MaterialApp(
+      home: MapaPage(repository: repository, tileProvider: _Teselas()),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -55,7 +81,12 @@ void main() {
       expect(request.method, 'GET');
       final inicio = (pagina - 1) * 100 + 1;
       final fin = pagina == 3 ? 205 : pagina * 100;
-      return _pagina([for (var i = inicio; i <= fin; i++) i], actual: pagina, ultima: 3, total: 205);
+      return _pagina(
+        [for (var i = inicio; i <= fin; i++) i],
+        actual: pagina,
+        ultima: 3,
+        total: 205,
+      );
     });
     final lugares = await repository.listarParaMapa();
     expect(consultas, [1, 2, 3]);
@@ -64,9 +95,15 @@ void main() {
   });
 
   test('error de segunda página rechaza la carga completa', () async {
-    final repository = _repositorio((request) async => request.url.queryParameters['page'] == '1'
-        ? _pagina([1], ultima: 2, total: 2) : http.Response('', 500));
-    await expectLater(repository.listarParaMapa(), throwsA(isA<ApiException>()));
+    final repository = _repositorio(
+      (request) async => request.url.queryParameters['page'] == '1'
+          ? _pagina([1], ultima: 2, total: 2)
+          : http.Response('', 500),
+    );
+    await expectLater(
+      repository.listarParaMapa(),
+      throwsA(isA<ApiException>()),
+    );
   });
 
   test('metadatos repetidos no producen un bucle', () async {
@@ -75,26 +112,42 @@ void main() {
       consultas++;
       return _pagina([1], ultima: 2, total: 2);
     });
-    await expectLater(repository.listarParaMapa(), throwsA(isA<ApiException>()));
+    await expectLater(
+      repository.listarParaMapa(),
+      throwsA(isA<ApiException>()),
+    );
     expect(consultas, 2);
   });
 
   test('cambio de total y duplicados se rechazan', () async {
     for (final cambioTotal in [true, false]) {
-      final repository = _repositorio((request) async => request.url.queryParameters['page'] == '1'
-          ? _pagina([1], ultima: 2, total: 2)
-          : _pagina(cambioTotal ? [2] : [1], actual: 2, ultima: 2, total: cambioTotal ? 3 : 2));
-      await expectLater(repository.listarParaMapa(), throwsA(isA<ApiException>()));
+      final repository = _repositorio(
+        (request) async => request.url.queryParameters['page'] == '1'
+            ? _pagina([1], ultima: 2, total: 2)
+            : _pagina(
+                cambioTotal ? [2] : [1],
+                actual: 2,
+                ultima: 2,
+                total: cambioTotal ? 3 : 2,
+              ),
+      );
+      await expectLater(
+        repository.listarParaMapa(),
+        throwsA(isA<ApiException>()),
+      );
     }
   });
 
-  testWidgets('marcador de segunda página abre tarjeta y detalle', (tester) async {
+  testWidgets('marcador de segunda página abre tarjeta y detalle', (
+    tester,
+  ) async {
     final repository = _repositorio((request) async {
       if (request.url.path.endsWith('/lugares/2')) {
         return http.Response(jsonEncode({'data': _lugar(2)}), 200);
       }
       return request.url.queryParameters['page'] == '1'
-          ? _pagina([1], ultima: 2, total: 2) : _pagina([2], actual: 2, ultima: 2, total: 2);
+          ? _pagina([1], ultima: 2, total: 2)
+          : _pagina([2], actual: 2, ultima: 2, total: 2);
     });
     await _montar(tester, repository);
     expect(find.text('2 lugares en el mapa'), findsOneWidget);
@@ -116,26 +169,36 @@ void main() {
     expect(find.byKey(const ValueKey('marcador-lugar-2')), findsOneWidget);
   });
 
-  testWidgets('fallo intermedio no publica marcadores parciales y permite reintentar', (tester) async {
-    var fallo = true;
-    final repository = _repositorio((request) async {
-      if (request.url.queryParameters['page'] == '1') {
-        return _pagina([1], ultima: 2, total: 2);
-      }
-      return fallo ? http.Response('', 500) : _pagina([2], actual: 2, ultima: 2, total: 2);
-    });
-    await _montar(tester, repository);
-    expect(tester.widget<MarkerLayer>(find.byType(MarkerLayer)).markers, isEmpty);
-    expect(find.text('Reintentar'), findsOneWidget);
-    fallo = false;
-    await tester.tap(find.text('Reintentar'));
-    await tester.pumpAndSettle();
-    expect(find.text('2 lugares en el mapa'), findsOneWidget);
-  });
+  testWidgets(
+    'fallo intermedio no publica marcadores parciales y permite reintentar',
+    (tester) async {
+      var fallo = true;
+      final repository = _repositorio((request) async {
+        if (request.url.queryParameters['page'] == '1') {
+          return _pagina([1], ultima: 2, total: 2);
+        }
+        return fallo
+            ? http.Response('', 500)
+            : _pagina([2], actual: 2, ultima: 2, total: 2);
+      });
+      await _montar(tester, repository);
+      expect(
+        tester.widget<MarkerLayer>(find.byType(MarkerLayer)).markers,
+        isEmpty,
+      );
+      expect(find.text('Reintentar'), findsOneWidget);
+      fallo = false;
+      await tester.tap(find.text('Reintentar'));
+      await tester.pumpAndSettle();
+      expect(find.text('2 lugares en el mapa'), findsOneWidget);
+    },
+  );
 
   testWidgets('actualización fallida conserva la última carga', (tester) async {
     var fallo = false;
-    final repository = _repositorio((_) async => fallo ? http.Response('', 500) : _pagina([1]));
+    final repository = _repositorio(
+      (_) async => fallo ? http.Response('', 500) : _pagina([1]),
+    );
     await _montar(tester, repository);
     fallo = true;
     await tester.tap(find.byTooltip('Actualizar mapa'));
@@ -146,7 +209,13 @@ void main() {
 
   testWidgets('catálogo vacío tiene mensaje y ningún marcador', (tester) async {
     await _montar(tester, _repositorio((_) async => _pagina([])));
-    expect(find.text('No hay lugares con ubicación disponibles.'), findsOneWidget);
-    expect(tester.widget<MarkerLayer>(find.byType(MarkerLayer)).markers, isEmpty);
+    expect(
+      find.text('No hay lugares con ubicación disponibles.'),
+      findsOneWidget,
+    );
+    expect(
+      tester.widget<MarkerLayer>(find.byType(MarkerLayer)).markers,
+      isEmpty,
+    );
   });
 }

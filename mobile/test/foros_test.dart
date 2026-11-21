@@ -10,35 +10,62 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 http.Response jsonRespuesta(Map<String, dynamic> json, [int status = 200]) =>
-    http.Response(jsonEncode(json), status, headers: {'content-type': 'application/json'});
+    http.Response(
+      jsonEncode(json),
+      status,
+      headers: {'content-type': 'application/json'},
+    );
 
 void main() {
-  testWidgets('un visitante lee los foros y mensajes sin publicar', (tester) async {
+  testWidgets('un visitante lee los foros y mensajes sin publicar', (
+    tester,
+  ) async {
     final cliente = MockClient((request) async {
       expect(request.method, 'GET');
       if (request.url.path.endsWith('/foros')) {
-        return jsonRespuesta({'data': [
-          {'id': 1, 'nombre': 'Plaza de Armas', 'descripcion': null, 'activo': true},
-        ]});
+        return jsonRespuesta({
+          'data': [
+            {
+              'id': 1,
+              'nombre': 'Plaza de Armas',
+              'descripcion': null,
+              'activo': true,
+            },
+          ],
+        });
       }
       expect(request.url.path, endsWith('/foros/1/mensajes'));
       return jsonRespuesta({
         'data': [
-          {'id': 5, 'contenido': 'Hola comunidad', 'autor': {'id': 7, 'username': 'vecino'},
-           'created_at': '2026-11-18T12:00:00Z', 'es_destacado': false},
+          {
+            'id': 5,
+            'contenido': 'Hola comunidad',
+            'autor': {'id': 7, 'username': 'vecino'},
+            'created_at': '2026-11-18T12:00:00Z',
+            'es_destacado': false,
+          },
         ],
         'meta': {'current_page': 1, 'last_page': 1},
       });
     });
     addTearDown(cliente.close);
-    await tester.pumpWidget(MaterialApp(home: ForosPage(repository: ForosRepository(ApiClient(client: cliente)))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ForosPage(
+          repository: ForosRepository(ApiClient(client: cliente)),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Plaza de Armas'), findsOneWidget);
     await tester.tap(find.text('Plaza de Armas'));
     await tester.pumpAndSettle();
     expect(find.text('Hola comunidad'), findsOneWidget);
     expect(find.text('vecino'), findsOneWidget);
-    expect(find.textContaining('Inicia sesión para participar'), findsOneWidget);
+    expect(
+      find.textContaining('Inicia sesión para participar'),
+      findsOneWidget,
+    );
     expect(find.byTooltip('Publicar'), findsNothing);
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -54,7 +81,10 @@ void main() {
     addTearDown(cliente.close);
     final repo = ForosRepository(ApiClient(client: cliente));
     expect((await repo.mensajes(1)).hayMas, isTrue);
-    await expectLater(repo.publicar(1, 'Hola', 'token'), throwsA(isA<ApiException>()));
+    await expectLater(
+      repo.publicar(1, 'Hola', 'token'),
+      throwsA(isA<ApiException>()),
+    );
   });
 
   test('mensaje distingue edición y plazo para retiro propio', () {
@@ -63,7 +93,9 @@ void main() {
       'id': 1,
       'contenido': 'Corregido',
       'autor': {'id': 5, 'username': 'vecino'},
-      'created_at': ahora.subtract(const Duration(minutes: 1)).toIso8601String(),
+      'created_at': ahora
+          .subtract(const Duration(minutes: 1))
+          .toIso8601String(),
       'updated_at': ahora.toIso8601String(),
     });
     expect(reciente.editado, isTrue);
@@ -73,7 +105,9 @@ void main() {
       'id': 2,
       'contenido': 'Viejo',
       'autor': {'id': 5, 'username': 'vecino'},
-      'created_at': ahora.subtract(const Duration(minutes: 4)).toIso8601String(),
+      'created_at': ahora
+          .subtract(const Duration(minutes: 4))
+          .toIso8601String(),
     });
     expect(antiguo.editado, isFalse);
     expect(antiguo.puedeRetirarse, isFalse);
@@ -112,7 +146,9 @@ void main() {
       if (request.method == 'POST') {
         expect(jsonDecode(request.body)['minutos'], 60);
       }
-      return jsonRespuesta({'data': {'hasta': null}});
+      return jsonRespuesta({
+        'data': {'hasta': null},
+      });
     });
     addTearDown(cliente.close);
     final repo = ForosRepository(ApiClient(client: cliente));
@@ -122,13 +158,21 @@ void main() {
   });
 
   test('servidor comunica espera entre publicaciones', () async {
-    final cliente = MockClient((request) async => jsonRespuesta({
-      'code': 'chat_espera',
-      'retry_after': 4,
-    }, 429));
+    final cliente = MockClient(
+      (request) async =>
+          jsonRespuesta({'code': 'chat_espera', 'retry_after': 4}, 429),
+    );
     addTearDown(cliente.close);
     final repo = ForosRepository(ApiClient(client: cliente));
-    await expectLater(repo.publicar(1, 'Otro texto', 'token'),
-        throwsA(isA<ApiException>().having((e) => e.message, 'mensaje', contains('4 segundos'))));
+    await expectLater(
+      repo.publicar(1, 'Otro texto', 'token'),
+      throwsA(
+        isA<ApiException>().having(
+          (e) => e.message,
+          'mensaje',
+          contains('4 segundos'),
+        ),
+      ),
+    );
   });
 }

@@ -30,8 +30,10 @@ class MensajeForo {
   final DateTime fecha;
   final DateTime actualizado;
   final bool destacado;
-  bool get editado => actualizado.isAfter(fecha.add(const Duration(seconds: 1)));
-  bool get puedeRetirarse => DateTime.now().isBefore(fecha.add(const Duration(minutes: 3)));
+  bool get editado =>
+      actualizado.isAfter(fecha.add(const Duration(seconds: 1)));
+  bool get puedeRetirarse =>
+      DateTime.now().isBefore(fecha.add(const Duration(minutes: 3)));
 
   factory MensajeForo.fromJson(Map<String, dynamic> json) {
     final autor = json['autor'] as Map<String, dynamic>;
@@ -41,7 +43,9 @@ class MensajeForo {
       autorId: autor['id'] as int,
       autor: autor['username'] as String,
       fecha: DateTime.parse(json['created_at'] as String),
-      actualizado: DateTime.parse((json['updated_at'] ?? json['created_at']) as String),
+      actualizado: DateTime.parse(
+        (json['updated_at'] ?? json['created_at']) as String,
+      ),
       destacado: json['es_destacado'] as bool? ?? false,
     );
   }

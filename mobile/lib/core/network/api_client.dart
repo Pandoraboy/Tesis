@@ -53,8 +53,11 @@ class ApiClient {
     required String token,
   }) => _request('PATCH', path, body: body, token: token);
 
-  Future<Map<String, dynamic>> deleteJson(String path, {required String token, Map<String, dynamic>? body}) =>
-      _request('DELETE', path, token: token, body: body);
+  Future<Map<String, dynamic>> deleteJson(
+    String path, {
+    required String token,
+    Map<String, dynamic>? body,
+  }) => _request('DELETE', path, token: token, body: body);
 
   Future<Map<String, dynamic>> _request(
     String method,
@@ -83,8 +86,11 @@ class ApiClient {
         final datos = _leerError(response);
         throw ApiException(
           switch (datos['code']) {
-            'chat_espera' => 'Espera ${datos['retry_after'] ?? 5} segundos antes de publicar otro mensaje.',
+            'chat_espera' =>
+              'Espera ${datos['retry_after'] ?? 5} segundos antes de publicar otro mensaje.',
             'chat_timeout' => 'Tu cuenta tiene una suspensión temporal para escribir en los foros.',
+            'denuncia_duplicada' =>
+              'Ya tienes una denuncia pendiente para este mensaje.',
             _ => _mensajeError(response.statusCode),
           },
           statusCode: response.statusCode,

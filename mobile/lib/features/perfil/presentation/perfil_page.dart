@@ -120,8 +120,8 @@ class _PerfilPageState extends State<PerfilPage> {
                       cuenta.esAdmin
                           ? 'Administrador'
                           : cuenta.puedeModerar
-                              ? 'Moderador'
-                              : 'Usuario',
+                          ? 'Moderador'
+                          : 'Usuario',
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),

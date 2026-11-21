@@ -17,12 +17,15 @@ import 'package:latlong2/latlong.dart';
 
 // Tesela PNG transparente local: las pruebas no hacen peticiones a OSM.
 class _TeselasLocales extends TileProvider {
-  final _imagen = MemoryImage(base64Decode(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=',
-  ));
+  final _imagen = MemoryImage(
+    base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=',
+    ),
+  );
 
   @override
-  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) => _imagen;
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
+      _imagen;
 }
 
 Map<String, dynamic> _datos(int id, {double? latitud}) => {
@@ -37,7 +40,8 @@ Map<String, dynamic> _datos(int id, {double? latitud}) => {
 };
 
 http.Response _json(Map<String, dynamic> datos) => http.Response(
-  jsonEncode(datos), 200,
+  jsonEncode(datos),
+  200,
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
@@ -61,11 +65,15 @@ Future<void> _abrirPrincipal(WidgetTester tester) async {
   });
   addTearDown(client.close);
   final api = ApiClient(client: client);
-  await tester.pumpWidget(MaterialApp(home: PrincipalPage(
-    lugaresRepository: LugaresRepository(api),
-    categoriasRepository: CategoriasRepository(api),
-    mapaTileProvider: _TeselasLocales(),
-  )));
+  await tester.pumpWidget(
+    MaterialApp(
+      home: PrincipalPage(
+        lugaresRepository: LugaresRepository(api),
+        categoriasRepository: CategoriasRepository(api),
+        mapaTileProvider: _TeselasLocales(),
+      ),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -86,31 +94,45 @@ void _comprobarEnfoque(WidgetTester tester, int id) {
   final datos = _datos(id);
   final camera = _controlador(tester).camera;
   expect(camera.center.latitude, closeTo(datos['latitud'] as double, 0.000001));
-  expect(camera.center.longitude, closeTo(datos['longitud'] as double, 0.000001));
+  expect(
+    camera.center.longitude,
+    closeTo(datos['longitud'] as double, 0.000001),
+  );
   expect(camera.zoom, MapaConfig.zoomLugar);
-  expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 1);
+  expect(
+    tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+    1,
+  );
   expect(find.byKey(const ValueKey('lugar-seleccionado')), findsOneWidget);
   expect(find.byType(LugarDetallePage), findsNothing);
 }
 
 void main() {
-  testWidgets('Búsqueda abre el mapa por primera vez y conserva búsqueda al volver', (tester) async {
-    await _abrirPrincipal(tester);
-    expect(find.byType(MapaPage), findsNothing);
-    await tester.tap(find.text('Búsqueda').last);
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Local');
-    await tester.tap(find.byTooltip('Buscar'));
-    await tester.pumpAndSettle();
-    await _seleccionarLugar(tester, 'Local Centro');
-    _comprobarEnfoque(tester, 1);
-    expect(find.text('Local Centro'), findsOneWidget);
-    await tester.tap(find.text('Búsqueda').last);
-    await tester.pumpAndSettle();
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'Local');
-  });
+  testWidgets(
+    'Búsqueda abre el mapa por primera vez y conserva búsqueda al volver',
+    (tester) async {
+      await _abrirPrincipal(tester);
+      expect(find.byType(MapaPage), findsNothing);
+      await tester.tap(find.text('Búsqueda').last);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Local');
+      await tester.tap(find.byTooltip('Buscar'));
+      await tester.pumpAndSettle();
+      await _seleccionarLugar(tester, 'Local Centro');
+      _comprobarEnfoque(tester, 1);
+      expect(find.text('Local Centro'), findsOneWidget);
+      await tester.tap(find.text('Búsqueda').last);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'Local',
+      );
+    },
+  );
 
-  testWidgets('mapa existente enfoca otro lugar y vuelve a enfocar el mismo', (tester) async {
+  testWidgets('mapa existente enfoca otro lugar y vuelve a enfocar el mismo', (
+    tester,
+  ) async {
     await _abrirPrincipal(tester);
     await tester.tap(find.text('Mapa').last);
     await tester.pumpAndSettle();
@@ -127,36 +149,60 @@ void main() {
     expect(identical(_controlador(tester), controlador), isTrue);
   });
 
-  testWidgets('botones de centrado permiten volver a San Carlos y al local', (tester) async {
+  testWidgets('botones de centrado permiten volver a San Carlos y al local', (
+    tester,
+  ) async {
     await _abrirPrincipal(tester);
     await _seleccionarLugar(tester, 'Local Rural');
     await tester.tap(find.byTooltip('Centrar en San Carlos'));
     await tester.pumpAndSettle();
     expect(_controlador(tester).camera.zoom, MapaConfig.zoomInicial);
-    expect(_controlador(tester).camera.center.latitude,
-        closeTo(MapaConfig.centroSanCarlos.latitude, 0.000001));
+    expect(
+      _controlador(tester).camera.center.latitude,
+      closeTo(MapaConfig.centroSanCarlos.latitude, 0.000001),
+    );
     await tester.tap(find.byTooltip('Centrar en el lugar'));
     await tester.pumpAndSettle();
     _comprobarEnfoque(tester, 2);
   });
 
-  testWidgets('detalle con coordenadas inválidas deshabilita la acción', (tester) async {
-    final client = MockClient((_) async => _json({'data': _datos(1, latitud: 95)}));
+  testWidgets('detalle con coordenadas inválidas deshabilita la acción', (
+    tester,
+  ) async {
+    final client = MockClient(
+      (_) async => _json({'data': _datos(1, latitud: 95)}),
+    );
     addTearDown(client.close);
-    await tester.pumpWidget(MaterialApp(home: LugarDetallePage(
-      lugarId: 1,
-      repository: LugaresRepository(ApiClient(client: client)),
-      permiteVerEnMapa: true,
-    )));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LugarDetallePage(
+          lugarId: 1,
+          repository: LugaresRepository(ApiClient(client: client)),
+          permiteVerEnMapa: true,
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
-    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Ver en el mapa')).onPressed, isNull);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Ver en el mapa'),
+          )
+          .onPressed,
+      isNull,
+    );
     expect(find.text('Ubicación no disponible.'), findsOneWidget);
   });
 
   test('ubicación rechaza valores no finitos', () {
     final lugar = Lugar(
-      id: 1, nombre: 'Prueba', categoriaNombre: 'Comercio', direccion: 'Prueba',
-      latitud: double.nan, longitud: -71.958, estadoHorario: EstadoHorario.sinHorarios,
+      id: 1,
+      nombre: 'Prueba',
+      categoriaNombre: 'Comercio',
+      direccion: 'Prueba',
+      latitud: double.nan,
+      longitud: -71.958,
+      estadoHorario: EstadoHorario.sinHorarios,
     );
     expect(lugar.tieneUbicacionValida, isFalse);
   });

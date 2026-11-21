@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\ForoController;
 use App\Http\Controllers\Api\HorarioLugarController;
 use App\Http\Controllers\Api\LugarController;
 use App\Http\Controllers\Api\MensajeController;
+use App\Http\Controllers\Api\DenunciaMensajeController;
+use App\Http\Controllers\Api\Moderacion\DenunciaController;
 use App\Http\Controllers\Api\DestacadoController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\Admin\DestacadoController as AdminDestacadoController;
@@ -97,6 +99,10 @@ Route::prefix('v1')->group(function () {
             [MensajeController::class, 'destroy']
         );
 
+        Route::post('mensajes/{mensaje}/denuncias', [DenunciaMensajeController::class, 'store'])
+            ->middleware('throttle:10,1');
+        Route::get('mis-denuncias', [DenunciaMensajeController::class, 'propias']);
+
         // Solicitud y consulta de destacados.
         Route::post(
             'mensajes/{mensaje}/destacado',
@@ -111,6 +117,9 @@ Route::prefix('v1')->group(function () {
 
     // Moderación: comparten permisos moderadores y administradores activos.
     Route::middleware(['auth:sanctum', EnsureActiveModerator::class])->group(function () {
+        Route::get('moderacion/denuncias', [DenunciaController::class, 'index']);
+        Route::patch('moderacion/denuncias/{denuncia}', [DenunciaController::class, 'resolver'])
+            ->middleware('throttle:20,1');
         Route::post('moderacion/usuarios/{user}/chat-timeout', [ChatModeracionController::class, 'aplicar'])
             ->middleware('throttle:10,1');
         Route::delete('moderacion/usuarios/{user}/chat-timeout', [ChatModeracionController::class, 'levantar'])

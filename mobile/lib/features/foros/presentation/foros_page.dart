@@ -293,6 +293,136 @@ class _ConversacionPageState extends State<_ConversacionPage> {
     }
   }
 
+  Future<void> _denunciar(MensajeForo mensaje) async {
+    final sesion = widget.sesionController;
+    if (sesion == null || _ocupado) {
+      return;
+    }
+    var motivo = 'spam';
+    var guardando = false;
+    String? error;
+    final comentario = TextEditingController();
+    try {
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogo) => StatefulBuilder(
+          builder: (dialogo, actualizar) => AlertDialog(
+            title: const Text('Denunciar mensaje'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'La denuncia será revisada por el equipo de moderación.',
+                  ),
+                  DropdownButtonFormField<String>(
+                    initialValue: motivo,
+                    decoration: const InputDecoration(labelText: 'Motivo'),
+                    items: const [
+                      DropdownMenuItem(value: 'spam', child: Text('Spam')),
+                      DropdownMenuItem(
+                        value: 'acoso',
+                        child: Text('Insultos o acoso'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'inapropiado',
+                        child: Text('Contenido inapropiado'),
+                      ),
+                      DropdownMenuItem(value: 'otro', child: Text('Otro')),
+                    ],
+                    onChanged: guardando
+                        ? null
+                        : (valor) {
+                            if (valor != null) {
+                              actualizar(() => motivo = valor);
+                            }
+                          },
+                  ),
+                  TextField(
+                    controller: comentario,
+                    enabled: !guardando,
+                    maxLines: 3,
+                    maxLength: 500,
+                    decoration: InputDecoration(
+                      labelText: motivo == 'otro'
+                          ? 'Explicación obligatoria'
+                          : 'Comentario opcional',
+                    ),
+                  ),
+                  if (error != null)
+                    Text(
+                      error!,
+                      style: TextStyle(
+                        color: Theme.of(dialogo).colorScheme.error,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: guardando ? null : () => Navigator.pop(dialogo),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: guardando
+                    ? null
+                    : () async {
+                        final detalle = comentario.text.trim();
+                        if (motivo == 'otro' && detalle.isEmpty) {
+                          actualizar(
+                            () => error = 'Explica el motivo de la denuncia.',
+                          );
+                          return;
+                        }
+                        actualizar(() {
+                          guardando = true;
+                          error = null;
+                        });
+                        try {
+                          await sesion.conSesion(
+                            (token) => widget.repository.denunciar(
+                              mensaje.id,
+                              motivo,
+                              detalle,
+                              token,
+                            ),
+                          );
+                          if (!dialogo.mounted) {
+                            return;
+                          }
+                          Navigator.pop(dialogo);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Denuncia recibida para revisión',
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (excepcion) {
+                          if (dialogo.mounted) {
+                            actualizar(() => error = '$excepcion');
+                          }
+                        } finally {
+                          if (dialogo.mounted) {
+                            actualizar(() => guardando = false);
+                          }
+                        }
+                      },
+                child: const Text('Enviar denuncia'),
+              ),
+            ],
+          ),
+        ),
+      );
+    } finally {
+      comentario.dispose();
+    }
+  }
+
   Future<void> _editar(MensajeForo mensaje) async {
     final sesion = widget.sesionController;
     if (_ocupado || sesion == null) {
@@ -634,6 +764,9 @@ class _ConversacionPageState extends State<_ConversacionPage> {
                                       if (opcion == 'retirar') {
                                         _retirar(mensaje);
                                       }
+                                      if (opcion == 'denunciar') {
+                                        _denunciar(mensaje);
+                                      }
                                       if (opcion == 'suspender') {
                                         _moderarUsuario(
                                           mensaje,
@@ -675,6 +808,13 @@ class _ConversacionPageState extends State<_ConversacionPage> {
                                         const PopupMenuItem(
                                           value: 'retirar',
                                           child: Text('Retirar'),
+                                        ),
+                                      if (cuenta?.active == true &&
+                                          !esAutor &&
+                                          !widget.modoModeracion)
+                                        const PopupMenuItem(
+                                          value: 'denunciar',
+                                          child: Text('Denunciar'),
                                         ),
                                       if (cuenta?.puedeModerar == true &&
                                           !esAutor) ...const [

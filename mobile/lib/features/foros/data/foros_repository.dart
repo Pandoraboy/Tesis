@@ -1,10 +1,58 @@
 import '../../../core/network/api_client.dart';
 import '../models/foro.dart';
+import '../../moderacion/models/denuncia.dart';
 
 class ForosRepository {
   const ForosRepository(this._api);
 
   final ApiClient _api;
+
+  Future<void> denunciar(
+    int mensajeId,
+    String motivo,
+    String? comentario,
+    String token,
+  ) async {
+    await _api.postJson(
+      'mensajes/$mensajeId/denuncias',
+      token: token,
+      body: {
+        'motivo': motivo,
+        if (comentario != null && comentario.isNotEmpty)
+          'comentario': comentario,
+      },
+    );
+  }
+
+  Future<PaginaDenuncias> denuncias(
+    String token, {
+    String estado = 'pendiente',
+    int pagina = 1,
+  }) async {
+    final json = await _api.getJson(
+      'moderacion/denuncias',
+      token: token,
+      queryParameters: {'estado': estado, 'page': '$pagina'},
+    );
+    try {
+      return PaginaDenuncias.fromJson(json);
+    } on Object catch (_) {
+      throw const ApiException('No se pudieron interpretar las denuncias.');
+    }
+  }
+
+  Future<void> resolverDenuncia(
+    int id,
+    String accion,
+    String resolucion,
+    String token,
+  ) async {
+    await _api.patchJson(
+      'moderacion/denuncias/$id',
+      token: token,
+      body: {'accion': accion, 'resolucion': resolucion},
+    );
+  }
 
   Future<List<Foro>> listar() async {
     final json = await _api.getJson('foros');
@@ -31,7 +79,11 @@ class ForosRepository {
     }
   }
 
-  Future<MensajeForo> publicar(int foroId, String contenido, String token) async {
+  Future<MensajeForo> publicar(
+    int foroId,
+    String contenido,
+    String token,
+  ) async {
     final json = await _api.postJson(
       'foros/$foroId/mensajes',
       body: {'contenido': contenido},
@@ -40,7 +92,9 @@ class ForosRepository {
     try {
       return MensajeForo.fromJson(json['data'] as Map<String, dynamic>);
     } on Object catch (_) {
-      throw const ApiException('El mensaje pudo publicarse. Actualiza antes de reenviar.');
+      throw const ApiException(
+        'El mensaje pudo publicarse. Actualiza antes de reenviar.',
+      );
     }
   }
 
@@ -49,22 +103,36 @@ class ForosRepository {
       await _api.deleteJson('mensajes/$id', token: token);
     } on ApiException catch (error) {
       if (error.code == 'mensaje_plazo_vencido') {
-        throw const ApiException('Ya pasaron los 3 minutos para retirar este mensaje.', statusCode: 409);
+        throw const ApiException(
+          'Ya pasaron los 3 minutos para retirar este mensaje.',
+          statusCode: 409,
+        );
       }
       rethrow;
     }
   }
 
   Future<MensajeForo> editar(int id, String contenido, String token) async {
-    final json = await _api.patchJson('mensajes/$id', body: {'contenido': contenido}, token: token);
+    final json = await _api.patchJson(
+      'mensajes/$id',
+      body: {'contenido': contenido},
+      token: token,
+    );
     try {
       return MensajeForo.fromJson(json['data'] as Map<String, dynamic>);
     } on Object catch (_) {
-      throw const ApiException('El cambio pudo guardarse. Actualiza el foro antes de volver a enviarlo.');
+      throw const ApiException(
+        'El cambio pudo guardarse. Actualiza el foro antes de volver a enviarlo.',
+      );
     }
   }
 
-  Future<void> aplicarTimeout(int usuarioId, int minutos, String motivo, String token) async {
+  Future<void> aplicarTimeout(
+    int usuarioId,
+    int minutos,
+    String motivo,
+    String token,
+  ) async {
     await _api.postJson(
       'moderacion/usuarios/$usuarioId/chat-timeout',
       body: {'minutos': minutos, 'motivo': motivo},
@@ -72,7 +140,11 @@ class ForosRepository {
     );
   }
 
-  Future<void> levantarTimeout(int usuarioId, String motivo, String token) async {
+  Future<void> levantarTimeout(
+    int usuarioId,
+    String motivo,
+    String token,
+  ) async {
     await _api.deleteJson(
       'moderacion/usuarios/$usuarioId/chat-timeout',
       body: {'motivo': motivo},

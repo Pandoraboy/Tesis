@@ -28,47 +28,83 @@ class _Storage extends SesionStorage {
   Future<void> guardar(CredencialGuardada valor) async {
     credencial = valor;
   }
+
   @override
   Future<void> borrar() async {
     credencial = null;
   }
 }
 
-http.Response _json(Map<String, dynamic> datos, {int estado = 200}) => http.Response(
-  jsonEncode(datos), estado, headers: {'content-type': 'application/json; charset=utf-8'},
-);
+http.Response _json(Map<String, dynamic> datos, {int estado = 200}) =>
+    http.Response(
+      jsonEncode(datos),
+      estado,
+      headers: {'content-type': 'application/json; charset=utf-8'},
+    );
 
 Map<String, dynamic> _lugar() => {
-  'id': 99, 'nombre': 'Local nuevo', 'categoria': {'id': 8, 'nombre': 'Comercio'},
-  'direccion': 'Prat 123', 'latitud': -36.424, 'longitud': -71.958,
-  'telefono': null, 'descripcion': null, 'estado_horario': 'sin_horarios', 'horarios': [],
+  'id': 99,
+  'nombre': 'Local nuevo',
+  'categoria': {'id': 8, 'nombre': 'Comercio'},
+  'direccion': 'Prat 123',
+  'latitud': -36.424,
+  'longitud': -71.958,
+  'telefono': null,
+  'descripcion': null,
+  'estado_horario': 'sin_horarios',
+  'horarios': [],
 };
 
 ({SesionController sesion, ApiClient api, _Storage storage}) _entorno(
-  Future<http.Response> Function(http.Request) responder, {String rol = 'admin'}
-) {
+  Future<http.Response> Function(http.Request) responder, {
+  String rol = 'admin',
+}) {
   final client = MockClient((request) async {
     if (request.url.path.endsWith('/auth/me')) {
-      return _json({'data': {'id': 1, 'username': 'cuenta_prueba', 'role': rol, 'active': true}});
+      return _json({
+        'data': {
+          'id': 1,
+          'username': 'cuenta_prueba',
+          'role': rol,
+          'active': true,
+        },
+      });
     }
     if (request.url.path.endsWith('/categorias')) {
-      return _json({'data': [{'id': 8, 'nombre': 'Comercio'}]});
+      return _json({
+        'data': [
+          {'id': 8, 'nombre': 'Comercio'},
+        ],
+      });
     }
     return responder(request);
   });
   final api = ApiClient(client: client);
   final storage = _Storage();
-  final sesion = SesionController(repository: AuthRepository(api), storage: storage);
+  final sesion = SesionController(
+    repository: AuthRepository(api),
+    storage: storage,
+  );
   addTearDown(client.close);
   addTearDown(sesion.dispose);
   return (sesion: sesion, api: api, storage: storage);
 }
 
-Future<void> _formulario(WidgetTester tester, ApiClient api, SesionController sesion) async {
-  await tester.pumpWidget(MaterialApp(home: LugarCrearPage(
-    repository: LugaresRepository(api), categoriasRepository: CategoriasRepository(api),
-    sesionController: sesion, categoriaInicialId: 8,
-  )));
+Future<void> _formulario(
+  WidgetTester tester,
+  ApiClient api,
+  SesionController sesion,
+) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: LugarCrearPage(
+        repository: LugaresRepository(api),
+        categoriasRepository: CategoriasRepository(api),
+        sesionController: sesion,
+        categoriaInicialId: 8,
+      ),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -95,32 +131,54 @@ Future<void> _guardar(WidgetTester tester) async {
 
 void main() {
   testWidgets('visitante no tiene botón de creación', (tester) async {
-    final e = _entorno((_) async => _json({
-      'data': [], 'meta': {'current_page': 1, 'last_page': 1, 'total': 0},
-    }));
-    await tester.pumpWidget(MaterialApp(home: LugaresPage(
-      repository: LugaresRepository(e.api), categoriasRepository: CategoriasRepository(e.api),
-    )));
+    final e = _entorno(
+      (_) async => _json({
+        'data': [],
+        'meta': {'current_page': 1, 'last_page': 1, 'total': 0},
+      }),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LugaresPage(
+          repository: LugaresRepository(e.api),
+          categoriasRepository: CategoriasRepository(e.api),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Agregar lugar'), findsNothing);
   });
 
   for (final rol in ['user', 'moderator', 'admin']) {
     testWidgets('botón de creación según rol $rol', (tester) async {
-      final e = _entorno((_) async => _json({
-        'data': [], 'meta': {'current_page': 1, 'last_page': 1, 'total': 0},
-      }), rol: rol);
+      final e = _entorno(
+        (_) async => _json({
+          'data': [],
+          'meta': {'current_page': 1, 'last_page': 1, 'total': 0},
+        }),
+        rol: rol,
+      );
       await e.sesion.recuperar();
-      await tester.pumpWidget(MaterialApp(home: LugaresPage(
-        repository: LugaresRepository(e.api), categoriasRepository: CategoriasRepository(e.api),
-        sesionController: e.sesion,
-      )));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LugaresPage(
+            repository: LugaresRepository(e.api),
+            categoriasRepository: CategoriasRepository(e.api),
+            sesionController: e.sesion,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
-      expect(find.text('Agregar lugar'), rol == 'admin' ? findsOneWidget : findsNothing);
+      expect(
+        find.text('Agregar lugar'),
+        rol == 'admin' ? findsOneWidget : findsNothing,
+      );
     });
   }
 
-  testWidgets('admin crea desde navegación real, refresca y abre detalle', (tester) async {
+  testWidgets('admin crea desde navegación real, refresca y abre detalle', (
+    tester,
+  ) async {
     var posts = 0;
     var listados = 0;
     final e = _entorno((request) async {
@@ -143,13 +201,22 @@ void main() {
       listados++;
       return _json({
         'data': posts == 0 ? [] : [_lugar()],
-        'meta': {'current_page': 1, 'last_page': 1, 'total': posts == 0 ? 0 : 1},
+        'meta': {
+          'current_page': 1,
+          'last_page': 1,
+          'total': posts == 0 ? 0 : 1,
+        },
       });
     });
-    await tester.pumpWidget(MaterialApp(home: SesionGate(
-      controller: e.sesion, lugaresRepository: LugaresRepository(e.api),
-      categoriasRepository: CategoriasRepository(e.api),
-    )));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SesionGate(
+          controller: e.sesion,
+          lugaresRepository: LugaresRepository(e.api),
+          categoriasRepository: CategoriasRepository(e.api),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Búsqueda').last);
     await tester.pumpAndSettle();
@@ -171,7 +238,10 @@ void main() {
 
   testWidgets('coordenadas inválidas impiden el POST', (tester) async {
     var posts = 0;
-    final e = _entorno((_) async { posts++; return _json({}, estado: 500); });
+    final e = _entorno((_) async {
+      posts++;
+      return _json({}, estado: 500);
+    });
     await e.sesion.recuperar();
     await _formulario(tester, e.api, e.sesion);
     await _completar(tester);
@@ -181,11 +251,17 @@ void main() {
     expect(find.text('Ingresa un número entre -90 y 90.'), findsOneWidget);
   });
 
-  testWidgets('error 422 conserva datos y permite corregir el campo', (tester) async {
+  testWidgets('error 422 conserva datos y permite corregir el campo', (
+    tester,
+  ) async {
     var posts = 0;
     final e = _entorno((_) async {
       posts++;
-      return _json({'errors': {'nombre': ['Nombre rechazado por el servidor.']}}, estado: 422);
+      return _json({
+        'errors': {
+          'nombre': ['Nombre rechazado por el servidor.'],
+        },
+      }, estado: 422);
     });
     await e.sesion.recuperar();
     await _formulario(tester, e.api, e.sesion);
@@ -194,7 +270,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(posts, 1);
     expect(find.text('Nombre rechazado por el servidor.'), findsOneWidget);
-    expect(tester.widget<TextFormField>(find.byKey(const ValueKey('direccion'))).controller!.text, 'Prat 123');
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const ValueKey('direccion')))
+          .controller!
+          .text,
+      'Prat 123',
+    );
     await _escribir(tester, 'nombre', 'Nombre corregido');
     await _guardar(tester);
     await tester.pumpAndSettle();
@@ -204,38 +286,53 @@ void main() {
   testWidgets('un envío pendiente bloquea doble pulsación', (tester) async {
     final respuesta = Completer<http.Response>();
     var posts = 0;
-    final e = _entorno((_) { posts++; return respuesta.future; });
+    final e = _entorno((_) {
+      posts++;
+      return respuesta.future;
+    });
     await e.sesion.recuperar();
     await _formulario(tester, e.api, e.sesion);
     await _completar(tester);
     await _guardar(tester);
     expect(posts, 1);
-    final boton = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Guardando…'));
+    final boton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Guardando…'),
+    );
     expect(boton.onPressed, isNull);
     expect(e.sesion.ocupado, isTrue);
     respuesta.complete(_json({}, estado: 403));
     await tester.pumpAndSettle();
     expect(posts, 1);
-    expect(find.text('No tienes permiso para realizar esta acción.'), findsOneWidget);
+    expect(
+      find.text('No tienes permiso para realizar esta acción.'),
+      findsOneWidget,
+    );
     expect(e.sesion.estado, EstadoSesion.autenticada);
   });
 
-  test('un 401 retira credencial y sesión; un 403 conserva la sesión', () async {
-    final e = _entorno((_) async => _json({}));
-    await e.sesion.recuperar();
-    await expectLater(
-      e.sesion.conSesion<void>((_) async { throw const ApiException('Prohibido', statusCode: 403); }),
-      throwsA(isA<ApiException>()),
-    );
-    expect(e.sesion.estado, EstadoSesion.autenticada);
-    await expectLater(
-      e.sesion.conSesion<void>((_) async { throw const ApiException('Sin sesión', statusCode: 401); }),
-      throwsA(isA<ApiException>()),
-    );
-    expect(e.sesion.estado, EstadoSesion.sinSesion);
-    expect(e.storage.credencial, isNull);
-    expect(e.sesion.ocupado, isFalse);
-  });
+  test(
+    'un 401 retira credencial y sesión; un 403 conserva la sesión',
+    () async {
+      final e = _entorno((_) async => _json({}));
+      await e.sesion.recuperar();
+      await expectLater(
+        e.sesion.conSesion<void>((_) async {
+          throw const ApiException('Prohibido', statusCode: 403);
+        }),
+        throwsA(isA<ApiException>()),
+      );
+      expect(e.sesion.estado, EstadoSesion.autenticada);
+      await expectLater(
+        e.sesion.conSesion<void>((_) async {
+          throw const ApiException('Sin sesión', statusCode: 401);
+        }),
+        throwsA(isA<ApiException>()),
+      );
+      expect(e.sesion.estado, EstadoSesion.sinSesion);
+      expect(e.storage.credencial, isNull);
+      expect(e.sesion.ocupado, isFalse);
+    },
+  );
 
   test('sin sesión no se ejecuta la operación privada', () async {
     final e = _entorno((_) async => _json({}));
@@ -243,7 +340,9 @@ void main() {
     await e.sesion.recuperar();
     var ejecutada = false;
     await expectLater(
-      e.sesion.conSesion<void>((_) async { ejecutada = true; }),
+      e.sesion.conSesion<void>((_) async {
+        ejecutada = true;
+      }),
       throwsA(isA<ApiException>()),
     );
     expect(ejecutada, isFalse);

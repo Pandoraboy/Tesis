@@ -103,13 +103,14 @@ class _PrincipalPageState extends State<PrincipalPage> {
         accionesCuenta: widget.accionesCuenta,
         activa: _seccion == 2,
       ),
-      3 => widget.forosRepository == null
-          ? const Center(child: Text('Foros no disponibles.'))
-          : ForosPage(
-              repository: widget.forosRepository!,
-              sesionController: widget.sesionController,
-              accionesCuenta: widget.accionesCuenta,
-            ),
+      3 =>
+        widget.forosRepository == null
+            ? const Center(child: Text('Foros no disponibles.'))
+            : ForosPage(
+                repository: widget.forosRepository!,
+                sesionController: widget.sesionController,
+                accionesCuenta: widget.accionesCuenta,
+              ),
       _ => throw ArgumentError.value(indice, 'indice'),
     };
   }
