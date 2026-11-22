@@ -1,5 +1,13 @@
 # Calidad de vida ejecutada y corregida · 2026-11-04
 
+## [Sin publicar] · Contacto voluntario desde foros — 2026-11-21
+
+- Endpoint autenticado `GET /api/v1/mensajes/{mensaje}/contacto`: Laravel consulta el consentimiento vigente, la cuenta del autor y la visibilidad del foro/mensaje antes de generar un enlace wa.me.
+- Flutter solicita el contacto al pulsar una opción del mensaje y pide confirmación antes de abrir una aplicación externa.
+- Android abre exclusivamente enlaces HTTPS de wa.me mediante canal nativo, sin paquetes nuevos.
+- Pruebas de privacidad, permisos, enlaces y canal preparadas, sin ejecutar en este entorno.
+- Sin migraciones, cambios de credenciales ni lockfiles.
+
 ## [Sin publicar] · Foros: proteger borrador al salir — 2026-11-21
 
 - Flutter reutiliza la confirmación de descarte existente al pulsar Atrás con un mensaje sin publicar.

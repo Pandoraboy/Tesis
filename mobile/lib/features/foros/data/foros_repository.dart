@@ -7,6 +7,28 @@ class ForosRepository {
 
   final ApiClient _api;
 
+  Future<Uri> consultarContacto(int mensajeId, String token) async {
+    final json = await _api.getJson(
+      'mensajes/$mensajeId/contacto',
+      token: token,
+    );
+    final url = (json['data'] as Map<String, dynamic>)['url'] as String;
+    final uri = Uri.tryParse(url);
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        uri.host != 'wa.me' ||
+        uri.hasPort ||
+        uri.userInfo.isNotEmpty ||
+        !RegExp(r'^/[1-9][0-9]{7,14}$').hasMatch(uri.path) ||
+        uri.hasQuery ||
+        uri.hasFragment) {
+      throw const ApiException(
+        'El servidor devolvió un enlace de contacto inválido.',
+      );
+    }
+    return uri;
+  }
+
   Future<void> denunciar(
     int mensajeId,
     String motivo,

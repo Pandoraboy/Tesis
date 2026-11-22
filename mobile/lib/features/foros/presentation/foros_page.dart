@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/network/api_client.dart';
 import '../../../core/session/sesion_controller.dart';
+import '../../../core/platform/abrir_enlace_android.dart';
 import '../../../core/widgets/salida_con_cambios.dart';
 import '../data/foros_repository.dart';
 import '../models/foro.dart';
@@ -433,6 +435,60 @@ class _ConversacionPageState extends State<_ConversacionPage> {
     }
   }
 
+  Future<void> _contactar(MensajeForo mensaje) async {
+    final sesion = widget.sesionController;
+    if (_ocupado || sesion == null) {
+      return;
+    }
+    setState(() {
+      _ocupado = true;
+      _error = null;
+    });
+    try {
+      // El backend comprueba el consentimiento actual antes de revelar el enlace.
+      final enlace = await sesion.conSesion(
+        (token) => widget.repository.consultarContacto(mensaje.id, token),
+      );
+      if (!mounted) {
+        return;
+      }
+      final confirmado = await showDialog<bool>(
+        context: context,
+        builder: (dialogo) => AlertDialog(
+          title: const Text('Abrir WhatsApp'),
+          content: Text(
+            '¿Quieres contactar a ${mensaje.autor}? Se abrirá una aplicación externa.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogo, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogo, true),
+              child: const Text('Continuar'),
+            ),
+          ],
+        ),
+      );
+      if (confirmado == true && mounted) {
+        await const AbrirEnlaceAndroid().abrir(enlace);
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = error is ApiException && error.statusCode == 404
+              ? 'Este usuario no tiene contacto por WhatsApp habilitado.'
+              : 'No se pudo abrir el contacto. $error',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _ocupado = false);
+      }
+    }
+  }
+
   Future<void> _editar(MensajeForo mensaje) async {
     final sesion = widget.sesionController;
     if (_ocupado || sesion == null) {
@@ -781,6 +837,9 @@ class _ConversacionPageState extends State<_ConversacionPage> {
                                         if (opcion == 'denunciar') {
                                           _denunciar(mensaje);
                                         }
+                                        if (opcion == 'contactar') {
+                                          _contactar(mensaje);
+                                        }
                                         if (opcion == 'suspender') {
                                           _moderarUsuario(
                                             mensaje,
@@ -829,6 +888,13 @@ class _ConversacionPageState extends State<_ConversacionPage> {
                                           const PopupMenuItem(
                                             value: 'denunciar',
                                             child: Text('Denunciar'),
+                                          ),
+                                        if (cuenta?.active == true &&
+                                            !esAutor &&
+                                            !widget.modoModeracion)
+                                          const PopupMenuItem(
+                                            value: 'contactar',
+                                            child: Text('Consultar WhatsApp'),
                                           ),
                                         if (cuenta?.puedeModerar == true &&
                                             !esAutor) ...const [

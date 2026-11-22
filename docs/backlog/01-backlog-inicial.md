@@ -1,5 +1,7 @@
 ## Continuidad de foros · 2026-11-21
 
+- [x] Preparado contacto externo wa.me desde mensajes, con consentimiento consultado en servidor y confirmación de apertura.
+- [ ] Validar tests `MensajeApiTest`, `foros_test.dart`, `abrir_enlace_android_test.dart`, suite y apertura efectiva en Android.
 - [x] Preparada protección del borrador de publicación al salir del foro; reutiliza `SalidaConCambios` y confirma descarte solo cuando hay texto.
 - [ ] Ejecutar el test widget de navegación con borrador y confirmar en Android al cerrar el próximo hito.
 - [x] `main` revisado (`2cda7df`): los cuatro foros ya disponen de lectura, publicación, edición y retiro en Flutter; existen también denuncias y moderación básica.

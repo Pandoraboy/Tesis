@@ -8,6 +8,7 @@ import 'package:ahora_local/features/foros/data/foros_repository.dart';
 import 'package:ahora_local/features/foros/presentation/foros_page.dart';
 import 'package:ahora_local/features/foros/models/foro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -28,6 +29,85 @@ class _SesionForoPrueba extends SesionStorage {
 }
 
 void main() {
+  testWidgets(
+    'contacto de mensaje requiere confirmación antes de abrir WhatsApp',
+    (tester) async {
+      const canal = MethodChannel('ahora_local/enlace_externo');
+      String? abierto;
+      final messenger = tester.binding.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(canal, (llamada) async {
+        abierto = (llamada.arguments as Map)['url'] as String;
+        return null;
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(canal, null));
+
+      final cliente = MockClient((request) async {
+        if (request.url.path.endsWith('/auth/me')) {
+          return jsonRespuesta({
+            'data': {
+              'id': 7,
+              'username': 'vecino',
+              'role': 'user',
+              'active': true,
+            },
+          });
+        }
+        if (request.url.path.endsWith('/foros')) {
+          return jsonRespuesta({
+            'data': [
+              {'id': 1, 'nombre': 'Plaza de Armas', 'descripcion': null},
+            ],
+          });
+        }
+        if (request.url.path.endsWith('/mensajes/9/contacto')) {
+          expect(request.headers['authorization'], 'Bearer prueba');
+          return jsonRespuesta({
+            'data': {'url': 'https://wa.me/56912345678'},
+          });
+        }
+        return jsonRespuesta({
+          'data': [
+            {
+              'id': 9,
+              'contenido': 'Hola vecindario',
+              'autor': {'id': 8, 'username': 'otra_persona'},
+              'created_at': '2026-11-18T12:00:00Z',
+            },
+          ],
+          'meta': {'current_page': 1, 'last_page': 1},
+        });
+      });
+      addTearDown(cliente.close);
+      final api = ApiClient(client: cliente);
+      final sesion = SesionController(
+        repository: AuthRepository(api),
+        storage: _SesionForoPrueba(),
+      );
+      addTearDown(sesion.dispose);
+      await sesion.recuperar();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ForosPage(
+            repository: ForosRepository(api),
+            sesionController: sesion,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Plaza de Armas'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Opciones del mensaje'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Consultar WhatsApp'));
+      await tester.pumpAndSettle();
+      expect(find.text('Abrir WhatsApp'), findsOneWidget);
+      expect(abierto, isNull);
+      await tester.tap(find.text('Continuar'));
+      await tester.pumpAndSettle();
+      expect(abierto, 'https://wa.me/56912345678');
+    },
+  );
+
   testWidgets('Atrás pide descartar borrador y permite continuar escribiendo', (
     tester,
   ) async {
@@ -220,6 +300,35 @@ void main() {
     expect((await repo.mensajes(1)).hayMas, isTrue);
     await expectLater(
       repo.publicar(1, 'Hola', 'token'),
+      throwsA(isA<ApiException>()),
+    );
+  });
+
+  test('consulta contacto autorizado sin publicarlo en la lista', () async {
+    final cliente = MockClient((request) async {
+      expect(request.method, 'GET');
+      expect(request.url.path, '/api/v1/mensajes/9/contacto');
+      expect(request.headers['authorization'], 'Bearer sesion');
+      return jsonRespuesta({
+        'data': {'url': 'https://wa.me/56912345678'},
+      });
+    });
+    addTearDown(cliente.close);
+    final enlace = await ForosRepository(ApiClient(client: cliente))
+        .consultarContacto(9, 'sesion');
+    expect(enlace.toString(), 'https://wa.me/56912345678');
+  });
+
+  test('rechaza enlaces de contacto externos distintos de WhatsApp', () async {
+    final cliente = MockClient(
+      (_) async => jsonRespuesta({
+        'data': {'url': 'https://sitio-inseguro.example/contacto'},
+      }),
+    );
+    addTearDown(cliente.close);
+    await expectLater(
+      ForosRepository(ApiClient(client: cliente))
+          .consultarContacto(9, 'sesion'),
       throwsA(isA<ApiException>()),
     );
   });

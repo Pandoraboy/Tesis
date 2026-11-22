@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ForoController;
 use App\Http\Controllers\Api\HorarioLugarController;
 use App\Http\Controllers\Api\LugarController;
 use App\Http\Controllers\Api\MensajeController;
+use App\Http\Controllers\Api\ContactoMensajeController;
 use App\Http\Controllers\Api\DenunciaMensajeController;
 use App\Http\Controllers\Api\Moderacion\DenunciaController;
 use App\Http\Controllers\Api\DestacadoController;
@@ -92,6 +93,11 @@ Route::prefix('v1')->group(function () {
             'mensajes/{mensaje}',
             [MensajeController::class, 'update']
         )->middleware('throttle:10,1');
+
+        Route::get(
+            'mensajes/{mensaje}/contacto',
+            [ContactoMensajeController::class, 'show']
+        )->middleware('throttle:20,1');
 
         // El controlador permite retirar al autor o al administrador.
         Route::delete(

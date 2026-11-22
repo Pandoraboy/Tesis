@@ -63,6 +63,55 @@ class MensajeApiTest extends TestCase
         return "/api/v1/foros/{$foro->id}/mensajes";
     }
 
+    public function test_contacto_externo_solo_para_sesion_y_autor_con_consentimiento(): void
+    {
+        $autor = $this->usuario();
+        $autor->whatsapp_phone = '+56912345678';
+        $autor->whatsapp_enabled = true;
+        $autor->save();
+        $mensaje = $this->mensaje($this->foro(), $autor);
+        $ruta = "/api/v1/mensajes/{$mensaje->id}/contacto";
+
+        $this->getJson($ruta)->assertUnauthorized();
+
+        Sanctum::actingAs($this->usuario());
+        $this->getJson($ruta)->assertOk()->assertExactJson([
+            'data' => ['url' => 'https://wa.me/56912345678'],
+        ]);
+
+        Sanctum::actingAs($this->usuario(active: false));
+        $this->getJson($ruta)->assertForbidden();
+        Sanctum::actingAs($this->usuario());
+
+        $autor->whatsapp_enabled = false;
+        $autor->save();
+        $this->getJson($ruta)->assertNotFound();
+
+        $autor->whatsapp_enabled = true;
+        $autor->active = false;
+        $autor->save();
+        $this->getJson($ruta)->assertNotFound();
+    }
+
+    public function test_contacto_externo_oculta_mensajes_retirados_y_foro_inactivo(): void
+    {
+        $autor = $this->usuario();
+        $autor->whatsapp_phone = '+56912345678';
+        $autor->whatsapp_enabled = true;
+        $autor->save();
+        $foro = $this->foro();
+        $mensaje = $this->mensaje($foro, $autor, false);
+        Sanctum::actingAs($this->usuario());
+        $ruta = "/api/v1/mensajes/{$mensaje->id}/contacto";
+        $this->getJson($ruta)->assertNotFound();
+
+        $mensaje->activo = true;
+        $mensaje->save();
+        $foro->activo = false;
+        $foro->save();
+        $this->getJson($ruta)->assertNotFound();
+    }
+
     public function test_usuario_activo_publica_con_su_identidad(): void
     {
         $foro = $this->foro();
