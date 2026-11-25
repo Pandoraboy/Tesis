@@ -1,5 +1,11 @@
 ## Continuidad de foros · 2026-11-21
 
+- [x] Filtro de categorías del mapa preparado sobre el catálogo ya cargado (2026-11-22).
+- [x] Ubicación opcional preparada: solicitud de permiso desde Android, marcador y centrado sin seguimiento continuo.
+- [x] Acciones de mapa preparadas: lugares cercanos por GPS, distancia visible, copiar dirección y recentrar tarjeta.
+- [ ] Validar lista de cercanos, selección y tarjeta en emulador con coordenadas simuladas.
+- [ ] Validar GPS en emulador, rechazo de permiso y ubicación desactivada; repetir en dispositivo físico antes del piloto.
+- [ ] Ejecutar `mapa_filtro_categorias_test.dart`, suite Flutter y validación en emulador.
 - [x] Preparado contacto externo wa.me desde mensajes, con consentimiento consultado en servidor y confirmación de apertura.
 - [ ] Validar tests `MensajeApiTest`, `foros_test.dart`, `abrir_enlace_android_test.dart`, suite y apertura efectiva en Android.
 - [x] Preparada protección del borrador de publicación al salir del foro; reutiliza `SalidaConCambios` y confirma descarte solo cuando hay texto.

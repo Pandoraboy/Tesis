@@ -1,5 +1,17 @@
 # Calidad de vida ejecutada y corregida · 2026-11-04
 
+## [Sin publicar] · Filtros por categoría en mapa — 2026-11-22
+
+- Calidad de vida del mapa: lista «Lugares cercanos» ordenada por distancia desde el GPS y selección directa para centrar un local.
+- Tarjeta de marcador con distancia aproximada, dirección, botón de copiar y acción de recentrar.
+- Pruebas nuevas de cálculo de proximidad y acceso al listado preparadas; falta recorrido real.
+- Ubicación puntual opcional mediante Android: permiso solicitado al pulsar «Mi ubicación», marcador y centrado; rechazo sin bloquear el mapa.
+- Sin historial GPS, seguimiento continuo ni paquetes nuevos; pruebas del canal de ubicación y del centrado preparadas.
+- Flutter muestra un selector de categorías dentro del mapa reutilizando el repositorio existente.
+- Filtrado local de marcadores, sin cambiar la paginación ni crear endpoints; la selección desde Búsqueda se mantiene visible.
+- Prueba widget preparada para alternar categorías y confirmar ausencia de nuevas peticiones al catálogo.
+- Pendiente de ejecutar `flutter analyze`, suite Flutter y recorrido Android. Sin migraciones ni dependencias nuevas.
+
 ## [Sin publicar] · Contacto voluntario desde foros — 2026-11-21
 
 - Endpoint autenticado `GET /api/v1/mensajes/{mensaje}/contacto`: Laravel consulta el consentimiento vigente, la cuenta del autor y la visibilidad del foro/mensaje antes de generar un enlace wa.me.

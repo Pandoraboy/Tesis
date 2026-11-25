@@ -7,12 +7,18 @@ class LugarMapaTarjeta extends StatelessWidget {
     required this.lugar,
     required this.onCerrar,
     this.onDetalle,
+    this.onCopiarDireccion,
+    this.onCentrar,
+    this.distancia,
     super.key,
   });
 
   final Lugar lugar;
   final VoidCallback onCerrar;
   final VoidCallback? onDetalle;
+  final VoidCallback? onCopiarDireccion;
+  final VoidCallback? onCentrar;
+  final String? distancia;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +52,36 @@ class LugarMapaTarjeta extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             Text(lugar.estadoHorario.etiqueta),
+            if (distancia != null)
+              Text(
+                'A $distancia de ti',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            if (lugar.direccionInformada)
+              Text(
+                lugar.direccionVisible,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            Wrap(
+              spacing: 6,
+              runSpacing: 0,
+              children: [
+                if (onCentrar != null)
+                  IconButton(
+                    tooltip: 'Centrar este lugar',
+                    onPressed: onCentrar,
+                    icon: const Icon(Icons.center_focus_strong),
+                  ),
+                if (onCopiarDireccion != null && lugar.direccionInformada)
+                  IconButton(
+                    tooltip: 'Copiar dirección del lugar',
+                    onPressed: onCopiarDireccion,
+                    icon: const Icon(Icons.copy_outlined),
+                  ),
+              ],
+            ),
             if (onDetalle != null)
               TextButton.icon(
                 onPressed: onDetalle,
